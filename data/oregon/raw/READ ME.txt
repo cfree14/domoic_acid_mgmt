@@ -1,0 +1,11 @@
+READ ME
+
+Datasets shared by Alex Manderson from Oregon Department of Agriculture (ODA)
+
+1. clams.xlsx - 2000-2015 clam data
+2. mussels.xlsx - 2000-2015 mussel data
+3. OR.DA.xlsx - 2010-2021 all species data (v1)
+4. domain.ODA.xlsx - 2010-2021 all species data (v2) - shared in response to questions
+5. BiotoxSamplingGPS.xlsx
+
+Alex also provided a map of the Dungeness crab harvest areas which includes the GPS coordinates for Dungeness crab sampling sites, at least in October 2017

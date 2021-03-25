@@ -12,7 +12,7 @@ library(tidyverse)
 
 # Directories
 indir <- "data/oregon/raw"
-outdir <- "data/oregon/processed"
+workdir <- "data/oregon/intermediate"
 plotdir <- "data/oregon/figures"
 
 # Read data
@@ -21,40 +21,36 @@ clams_orig <- readxl::read_excel(file.path(indir, "clams.xlsx"))
 mussels_orig <- readxl::read_excel(file.path(indir, "mussels.xlsx"))
 
 # Read product key
-product_key <- readxl::read_excel(file.path(outdir, "product_key.xlsx")) %>%
+product_key <- readxl::read_excel(file.path(workdir, "product_key.xlsx")) %>%
   rename(location2=location)
 
-# Read site key
-site_key <- readxl::read_excel(file.path(outdir, "OR_da_sampling_site_key.xlsx"))
 
-# Questions for Alex Manderson
-# Scientific names
-# Figure out site locations
-# Ask about "Crab Viscera- General History"
 
-# Format clams/mussels data
+# 1) Format clams/mussels data
 ################################################################################
 
 # Format data
 clams <- clams_orig %>%
   # Rename
   janitor::clean_names("snake") %>%
-  rename(sample_date=sampled_date, location=collection_site,
+  rename(date=sampled_date, location=collection_site,
          da_oper=vari_for_da, da_ppm=domoic_acid, psp_oper=vari_for_psp, psp_ppm=psp_toxins) %>%
-  mutate(species="Clams")
+  mutate(comm_name="Razor clam",
+         species="Siliqua patula")
 
 # Format data
 mussels <- mussels_orig %>%
   # Rename
   janitor::clean_names("snake") %>%
-  rename(sample_date=sampled_date, location=collection_site,
+  rename(date=sampled_date, location=collection_site,
          da_oper=vari_for_da, da_ppm=domoic_acid, psp_oper=vari_for_psp, psp_ppm=psp_toxins) %>%
-  mutate(species="Mussels")
+  mutate(comm_name="California mussel",
+         species="Mytilus californianus")
 
 # Merge shellfish
 shellfish <- bind_rows(clams, mussels) %>%
   # Format date
-  mutate(sample_date=ymd(sample_date)) %>%
+  mutate(date=ymd(date)) %>%
   # Format location
   rename(location_orig=location) %>%
   mutate(location=stringr::str_to_title(location_orig),
@@ -114,25 +110,22 @@ shellfish <- bind_rows(clams, mussels) %>%
                          # "Yaquina Bay"=""
                          )) %>%
   # Arrange
-  select(species, sample_date, location, everything()) %>%
-  arrange(species, sample_date, location)
+  select(-location_orig) %>%
+  select(comm_name, species, date, location, everything()) %>%
+  arrange(comm_name, species, date, location)
 
 # Inspect data
 str(shellfish)
 freeR::complete(shellfish)
-range(shellfish$sample_date)
+
+# Inspect more
+range(shellfish$date)
 table(shellfish$da_oper)
 table(shellfish$psp_oper)
 table(shellfish$location)
 
-# Export
-saveRDS(shellfish, file=file.path(outdir, "ODA_1999_2015_da_sampling_data_clams_mussels.Rds"))
-
 # Plot data
-################################################################################
-
-# Plot data
-g <- ggplot(shellfish, aes(x=sample_date, y=location, color=species, size=da_ppm)) +
+g <- ggplot(shellfish, aes(x=date, y=location, color=comm_name, size=da_ppm)) +
   geom_point() +
   # Label
   labs(x="Sample date", y="", title="ODA 2000-2015 shellfish biotoxin sampling") +
@@ -155,25 +148,32 @@ g <- ggplot(shellfish, aes(x=sample_date, y=location, color=species, size=da_ppm
         legend.position = "right")
 g
 
+# Export plot
 ggsave(g, filename=file.path(plotdir, "OR_2010_2015_shellfish_da_samples.png"),
        width=6.5, height=4.5, units="in", dpi=600)
 
-# Format data
+# Export
+saveRDS(shellfish, file=file.path(workdir, "ODA_1999_2015_da_sampling_data_clams_mussels.Rds"))
+
+
+# 2) Format all species data
 ################################################################################
 
 # Format data
 data <- data_orig %>%
   # Rename
   janitor::clean_names("snake") %>%
-  rename(sample_id=lab_id, toxin=analyte_name,
+  rename(sample_id=lab_id,
+         date=sample_date, time=sample_time,
+         toxin=analyte_name,
          quantity_operator=quantitative_operator, quantity_units=quantitative_unit,
          quantity_comments=z_analyte_comment_ct) %>%
   # Format date
-  mutate(sample_date=as.character(sample_date),
-         sample_date=recode(sample_date, "2027-02-23"="2017-02-23", "2000-07-06"="2011-07-06"),
-         sample_date=lubridate::ymd(sample_date)) %>%
-  # Fix a few date mistakes
-  mutate() %>%
+  mutate(date=as.character(date),
+         date=recode(date, "2027-02-23"="2017-02-23", "2000-07-06"="2011-07-06"),
+         date=lubridate::ymd(date),
+         year=year(date),
+         month=month(date)) %>%
   # Format product
   mutate(product=tolower(product),
          product=recode(product,
@@ -269,170 +269,110 @@ data <- data_orig %>%
                        "unknown product description"="Unknown",
                        "varnish clams"="Varnish clams")) %>%
   # Format quantity
-  mutate(quantity=as.numeric(quantity)) %>%
-  # mutate(
-  #        # Fix missing values for <5.5
-  #        # quantity_operator=ifelse(grepl("<5.5|< 5.5", quantity_comments), "<", quantity_operator),
-  #        # quantity=ifelse(grepl("<5.5|< 5.5", quantity_comments), 5.5, quantity),
-  #        # # Fix missing values for <5.5
-  #        # quantity_operator=ifelse(grepl("<1.0|< 1.0", quantity_comments), "<", quantity_operator),
-  #        # quantity=ifelse(grepl("<1.0|< 1.0", quantity_comments), 1, quantity),
-  #        # # Fix missing values for <2.0
-  #        # quantity_operator=ifelse(grepl("<2.0", quantity_comments), "<", quantity_operator),
-  #        # quantity=ifelse(grepl("<2.0", quantity_comments), 2, quantity),
-  #        # Convert to numeric
-  #        quantity=as.numeric(quantity)) %>%
+  mutate(quantity1=as.numeric(quantity)) %>%
+  # Extract quantity from quantity comments
+  mutate(quantity2=gsub("PPM|/PPM|MRL = 1.0|PL=5.5|PL = 5.5|PL+5.5|P=5.5|MRL=5.5|NO TESTING PER J DOWELL|NO TESTING OER J DOWELL|MRL=2.0|MRL=1.0|<|. ",
+                        "",
+                        toupper(quantity_comments)),
+         quantity2=stringr::str_trim(quantity2),
+         quantity2=recode(quantity2, "PL+5. 5.5"="5.5"),
+         quantity3=as.numeric(quantity2),
+         quantity_diff=quantity3-quantity1,
+         quantity=ifelse(!is.na(quantity1), quantity1, quantity3)) %>%
+  select(-c(quantity1, quantity2, quantity3, quantity_diff)) %>%
+  # Extract quantity operator from comments
+  mutate(quantity_operator=ifelse(is.na(quantity_operator) & grepl("<", quantity_comments), "<", quantity_comments),
+         quantity_operator=ifelse(is.na(quantity_operator), "", quantity_operator)) %>%
   # Add product info
   left_join(product_key, by="product") %>%
   # Format location
   mutate(location=ifelse(location=="Crab Viscera- General History" & !is.na(location2), location2, location)) %>%
   select(-location2) %>%
-  # Add location info
-  rename(location_orig=location) %>%
-  left_join(site_key %>% select(location_orig, location, lat_dd, long_dd), by="location_orig") %>%
   # Arrange
   select(product, comm_name_orig, comm_name, sci_name, type,
-         sample_date, sample_time,
-         location_orig, location, lat_dd, long_dd,
+         year, date, month, time,
+         location,
          toxin, sample_id,
          quantity_operator, quantity, quantity_units, quantity_comments, everything()) %>%
-  arrange(product, sample_date, sample_time, location, toxin, sample_id)
+  arrange(product, date, time, location, toxin, sample_id)
 
 # Inspect data
 str(data)
-freeR::complete(data) # NAs in the following are okay: sci name, sample time, operator, quantity (maybe), lat/long (1 only)
+freeR::complete(data) # NAs in the following are okay: sci name, sample time, quantity (n=6), lat/long (n=1)
+
+# Confirm no duplicated sample ids
+anyDuplicated(data$sample_id)
 
 # Inspect values
+table(data$type)
 table(data$location)
 table(data$product)
 sort(unique(data$product))
-range(data$sample_date)
+range(data$date)
 table(data$toxin)
 table(data$quantity_operator)
 table(data$quantity_units)
 
-# Inspect missing quantities
-comments <- data %>%
-  filter(is.na(quantity)) %>%
-  select(quantity_comments) %>%
-  unique() %>%
-  mutate(quantity_comments=gsub("  ", " ", quantity_comments)) %>%
-  unique() %>%
-  mutate(quantity_comments=gsub("  ", " ", quantity_comments)) %>%
-  unique() %>%
-  mutate(quantity_comments=gsub("  ", " ", quantity_comments)) %>%
-  unique() %>%
-  mutate(quantity_comments=gsub("  ", " ", quantity_comments)) %>%
-  mutate(quantity_comments=stringr::str_trim(quantity_comments)) %>%
-  unique() %>%
-  arrange(quantity_comments)
-
 # Common name harmonization
 species_key <- data %>%
   group_by(comm_name, sci_name) %>%
-  summarize(comm_name_orig=paste(sort(unique(comm_name_orig)), collapse=", ")) %>%
-  ungroup()
+  summarize(comm_name_orig=paste(sort(unique(comm_name_orig)), collapse=", "),
+            n=n()) %>%
+  ungroup() %>%
+  arrange(desc(n))
 
 # Export
-write.csv(species_key, file=file.path(outdir, "species_key.csv"), row.names=F)
-write.csv(comments, file=file.path(outdir, "comments_for_missing_quantities.csv"), row.names=F)
+write.csv(species_key, file=file.path(workdir, "species_key.csv"), row.names=F)
 
-
-# Build site key
-################################################################################
-
-# Build site key
-site_key_messy <- data %>%
-  group_by(location_orig) %>%
-  summarize(species=paste(sort(unique(product)), collapse=", "))
-
-# Export site key
-write.csv(site_key_messy, file=file.path(outdir, "OR_da_sampling_site_key_incomplete.csv"), row.names=F)
-
-
-
-# Export data
-################################################################################
-
-# Export data
-saveRDS(data, file=file.path(outdir, "ODA_2010_2020_da_sampling_data.Rds"))
-
-
+# # Inspect missing quantities
+# comments <- data %>%
+#   filter(is.na(quantity)) %>%
+#   select(quantity_comments) %>%
+#   unique() %>%
+#   mutate(quantity_comments=gsub("  ", " ", quantity_comments)) %>%
+#   unique() %>%
+#   mutate(quantity_comments=gsub("  ", " ", quantity_comments)) %>%
+#   unique() %>%
+#   mutate(quantity_comments=gsub("  ", " ", quantity_comments)) %>%
+#   unique() %>%
+#   mutate(quantity_comments=gsub("  ", " ", quantity_comments)) %>%
+#   mutate(quantity_comments=stringr::str_trim(quantity_comments)) %>%
+#   unique() %>%
+#   arrange(quantity_comments)
+# write.csv(comments, file=file.path(workdir, "comments_for_missing_quantities.csv"), row.names=F)
 
 # Plot data
-################################################################################
-
-# Read data
-zones <- readxl::read_excel(file.path(outdir, "dcrab_da_mgmt_zones.xlsx"))
-zone_lats <- c(zones$lat_dd_north[1], zones$lat_dd_south)
-
-# Theme
-base_theme <- theme(axis.text=element_text(size=7),
-                    axis.title=element_text(size=8),
-                    legend.text=element_text(size=8),
-                    legend.title=element_text(size=9),
-                    plot.title=element_text(size=10),
-                    # Gridlines
-                    panel.grid.major = element_blank(),
-                    panel.grid.minor = element_blank(),
-                    panel.background = element_blank(),
-                    axis.line = element_line(colour = "black"),
-                    axis.text.y = element_text(angle = 90, hjust = 0.5))
-
-
-# Plot data coverage
-g <- ggplot(data, mapping=aes(x=sample_date, y=lat_dd)) +
-  facet_wrap(~comm_name, ncol=2) +
+g <- ggplot(data, aes(x=date, y=location, color=comm_name, size=quantity)) +
+  # facet_grid(comm_name~., scales="free_y", space="free_y") +
+  # facet_wrap(~comm_name, ncol=1, scales="free_y", strip.position="top", shrink=T) +
+  ggforce::facet_col(vars(comm_name), scales = "free_y", space = "free") +
   geom_point() +
-  labs(x="Sample data", y="Latitude (°N)") +
-  theme_bw() + base_theme
+  # Label
+  labs(x="Sample date", y="", title="ODA 2000-2015 biotoxin sampling") +
+  scale_x_date(breaks=seq(ymd("2000-01-01"), ymd("2021-01-01"), by="1 year"),
+               labels=2000:2021) +
+  scale_color_discrete(name="Species", guide=F) +
+  scale_size_continuous(name="Domoic acid\ncontamination (ppm)", range = c(0.3,3)) +
+  # Theme
+  theme_bw() +
+  theme(axis.text=element_text(size=5),
+        axis.title=element_text(size=6),
+        legend.text=element_text(size=6),
+        legend.title=element_text(size=7),
+        plot.title=element_text(size=9),
+        strip.text=element_text(size=6),
+        # Gridlines
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        legend.position = "right")
 g
 
+# Export plot
+ggsave(g, filename=file.path(plotdir, "OR_2010_2015_shellfish_da_samples.png"),
+       width=6.5, height=11, units="in", dpi=600)
 
-# Dungeness crab data
-################################################################################
-
-# Oregon Dungeness crab season
-# December 1st to August 14
-openers <- paste0(2010:2020, "-12-01") %>% ymd()
-closers <- paste0(2011:2021, "-08-14") %>% ymd()
-season_key <- tibble(year=paste(2010:2020, 2011:2021, sep="-"),
-                     open=openers,
-                     close=closers)
-
-# Dungeness crab
-dcrab <- data %>%
-  filter(comm_name=="Dungeness crab")
-dcrab_na <- dcrab %>%
-  filter(is.na(quantity))
-
-# Plot data coverage
-g1 <- ggplot(dcrab, mapping=aes(x=sample_date, y=lat_dd, color=type, size=quantity)) +
-  # Seasons
-  geom_rect(data=season_key, inherit.aes=F, mapping=aes(xmin=open, xmax=close), ymin=42, ymax=47, fill="grey90") +
-  # Zones
-  geom_hline(yintercept=zone_lats, linetype="dotted") +
-  # geom_rect(data=dcrab_season, inherit.aes=F,
-  #         mapping=aes(xmin=open, xmax=close), ymin=0, ymax=1, fill="grey90") +
-  # Sampling events
-  geom_point() +
-  geom_point(data=dcrab_na, mapping=aes(x=sample_date, y=lat_dd), shape="x", inherit.aes=F) +
-  # Labels
-  labs(x="Sample date", y="Latitude (°N)", title="Oregon Dungeness crab biotoxin sampling") +
-  scale_x_date(breaks=seq(ymd("2010-01-01"), ymd("2021-12-31"), by="1 year"), labels=2010:2021) +
-  # Legends
-  scale_color_discrete(name="Sample type") +
-  scale_size_continuous(name="Domoic acid\ncontamintion (ppm)") +
-  # Theme
-  theme_bw() + base_theme
-g1
-
-# Export
-ggsave(g1, filename=file.path(plotdir, "OR_dcrab_da_samples.png"),
-       width=6.5, height=3.5, units="in", dpi=600)
-
-
-
-
-
+# Export data
+saveRDS(data, file=file.path(workdir, "ODA_2010_2020_da_sampling_data.Rds"))
 

@@ -13,20 +13,44 @@ library(tidyverse)
 # Directories
 plotdir <- "figures"
 
-# Read data
-or_zones <- readxl::read_excel(file.path("data/oregon/dcrab_da_mgmt_zones.xlsx"))
-ca_zones <- readxl::read_excel("data/california/proposed_expansion/CDFW_2020_proposed_biotoxin_zones_sites.xlsx", sheet = 2)
-# wa_zones <- readxl::read_excel(file.path("data/washington/dcrab_da_mgmt_zones_wa.xlsx"))
-wa_zones <- sf::st_read(dsn="data/washington/gis_data", layer="WDFW_closure_zones") %>%
-  sf::st_transform("+proj=longlat +datum=WGS84")
-sample_sites <- readxl::read_excel(file.path("data/tri_state/sampling_sites/2018may_dcrab_da_sampling_sites.xlsx"))
+# Read/ data
+zones <- readxl::read_excel("data/merged/processed/WC_dcrab_da_mgmt_zones.xlsx")
+sample_sites <- readxl::read_excel("data/tri_state/sampling_sites/2018may_dcrab_da_sampling_sites.xlsx")
 
 # Get land
 usa <- rnaturalearth::ne_states(country="United States of America", returnclass = "sf")
 foreign <- rnaturalearth::ne_countries(country=c("Canada", "Mexico"), returnclass = "sf")
 
+# Dcrab landing data
+pacfin_orig  <- wcfish::pacfin_all6
+
+dcrab_orig <- readRDS("/Users/cfree/Dropbox/Chris/UCSB/projects/wc_cc_synthesis/data/landings/pacfin/processed/PACFIN_1980_2020_dungeness_crab_landings_by_port_month.Rds")
+
+
+# Format data
+################################################################################
+
+# Dungeness crab
+dcrab <- pacfin_orig %>%
+  filter(comm_name=="Dungeness crab" & year>=2010) %>%
+  group_by(state, port_code, port_name) %>%
+  summarize(landings_mt=mean(landings_mt, na.rm=T)) %>%
+  ungroup() %>%
+  filter(landings_mt>0)
+
 # Plot data
 ################################################################################
+
+# Add average lat
+zones <- zones %>%
+  mutate(lat_dd_avg=(lat_dd_north+lat_dd_south)/2)
+
+
+# Borders
+border_n <- zones %>% arrange(desc(lat_dd_north)) %>% slice(1) %>% pull(lat_dd_north)
+borders_s <- zones %>%
+  filter(grepl("border", landmark_south)) %>% pull(lat_dd_south)
+borders <- c(border_n, borders_s)
 
 # Theme
 base_theme <- theme(axis.text=element_text(size=7),
@@ -45,25 +69,25 @@ base_theme <- theme(axis.text=element_text(size=7),
 # Plot data
 g <- ggplot() +
   # Plot management zones
-  geom_sf(data=wa_zones, fill=NA, color="grey30", lwd=0.1) +
-  # geom_hline(data=wa_zones, mapping=aes(yintercept=lat_dd)) +
-  geom_hline(data=or_zones, mapping=aes(yintercept=lat_dd_south)) +
-  geom_hline(data=ca_zones, mapping=aes(yintercept=lat_dd), linetype="dotted") +
+  geom_hline(data=zones, mapping=aes(yintercept=lat_dd_north, color=type), linetype="dotted", size=0.2) +
+  geom_text(data=zones, mapping=aes(y=lat_dd_avg, color=type, label=zone_id), x=-126.5, hjust=0, size=2, show.legend = F) +
+  geom_hline(yintercept=borders, linetype="solid", color="black", size=0.2) +
   # Plot land
   geom_sf(data=foreign, fill="grey80", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey80", color="white", lwd=0.3) +
   # Plot sampling sites
-  geom_point(data=sample_sites, mapping=aes(x=long_dd*-1, y=lat_dd, color=state)) +
+  geom_point(data=sample_sites, mapping=aes(x=long_dd*-1, y=lat_dd), size=0.6) +
   # Labels
   labs(x="", y="") +
-  scale_color_discrete(name="") +
+  # Legends
+  scale_color_manual(name="Zone type", values=c("grey10", "grey60")) +
   # Crop
   coord_sf(xlim = c(-127, -116.6), ylim = c(33, 48)) +
   # Theme
   theme_bw() + base_theme +
-  theme(legend.position = c(0.2, 0.15))
+  theme(legend.position = "right")
 g
 
 # Export plot
 ggsave(g, filename=file.path(plotdir, "da_sampling_mgmt_zone_map.png"),
-       width=3.5, height=6.5, units="in", dpi=600)
+       width=4.5, height=6.5, units="in", dpi=600)

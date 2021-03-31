@@ -40,12 +40,15 @@ data_ca_crab <- data_ca_crab_orig %>%
   # Add columns
   mutate(state="California",
          month=month(date),
-         year=year(date)) %>%
+         year=year(date),
+         type="wild",
+         tissue="viscera") %>%
   # Rename columns
   rename(location=area, sci_name=species, lat_dd=lat_dd_use, long_dd=long_dd_use, da_oper=da_ppm_prefix) %>%
   # Arrange
   select(comm_name, sci_name, state, location, lat_dd, long_dd,
-         year, month, date, sampleid, da_oper, da_ppm, everything())
+         year, month, date, sampleid, type, tissue, da_oper, da_ppm, everything()) %>%
+  select(-region)
 
 # Format CA bivalve data
 data_ca_biv <- data_ca_biv_orig %>%
@@ -57,20 +60,27 @@ data_ca_biv <- data_ca_biv_orig %>%
   rename(sci_name=species, da_oper=da_ppm_prefix) %>%
   # Arrange
   select(comm_name, sci_name, state, location, lat_dd, long_dd,
-         year, month, date, sampleid, da_oper, da_ppm, everything())
+         year, month, date, sampleid, type, tissue, da_oper, da_ppm, everything()) %>%
+  select(-c(county, type_orig, notes))
 
 # Format OR data
 data_or <- data_or_orig %>%
-  # Add columns
-  mutate(state="Oregon") %>%
   # Rename
-  rename(sampleid=sample_id) %>%
+  rename(sampleid=sample_id, tissue=type) %>%
+  # Add columns
+  mutate(state="Oregon",
+         type=ifelse(comm_name=="Dungeness crab", "wild", "unknown")) %>%
   # Arrange
   select(comm_name, sci_name, state, location, lat_dd, long_dd,
-         year, month, date, sampleid, da_oper, da_ppm, everything())
+         year, month, date, sampleid, type, tissue, da_oper, da_ppm, everything()) %>%
+  select(-c(source, type_orig, time))
 
 # Merge data
 data <- bind_rows(data_ca_crab, data_ca_biv, data_or)
+
+# Inspect data
+str(data)
+freeR::complete(data)
 
 
 # Export data

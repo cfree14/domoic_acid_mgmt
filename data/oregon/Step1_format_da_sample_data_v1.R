@@ -25,7 +25,6 @@ product_key <- readxl::read_excel(file.path(workdir, "product_key.xlsx")) %>%
   rename(location2=location)
 
 
-
 # 1) Format clams/mussels data
 ################################################################################
 
@@ -109,9 +108,12 @@ shellfish <- bind_rows(clams, mussels) %>%
                          # "Yachats River"="",
                          # "Yaquina Bay"=""
                          )) %>%
+  # Add information on type
+  mutate(type_orig="not specified",
+         type="meat") %>%
   # Arrange
   select(-location_orig) %>%
-  select(comm_name, species, date, location, everything()) %>%
+  select(comm_name, species, date, location, type_orig, type, everything()) %>%
   arrange(comm_name, species, date, location)
 
 # Inspect data
@@ -288,8 +290,13 @@ data <- data_orig %>%
   # Format location
   mutate(location=ifelse(location=="Crab Viscera- General History" & !is.na(location2), location2, location)) %>%
   select(-location2) %>%
+  # Format type
+  rename(type_orig=type) %>%
+  mutate(type=recode(type_orig, "legs"="meat", "viscera/legs"="viscera/meat", "yearlings"="meat", "viscera (cooked)"="viscera"),
+         type=ifelse(type=="not specified" & comm_name=="Dungeness crab", "viscera", type),
+         type=ifelse(type=="not specified" & comm_name!="Dungeness crab", "meat", type)) %>%
   # Arrange
-  select(product, comm_name_orig, comm_name, sci_name, type,
+  select(product, comm_name_orig, comm_name, sci_name, type_orig,
          year, date, month, time,
          location,
          toxin, sample_id,
@@ -305,6 +312,7 @@ anyDuplicated(data$sample_id)
 
 # Inspect values
 table(data$type)
+table(data$type_orig)
 table(data$location)
 table(data$product)
 sort(unique(data$product))

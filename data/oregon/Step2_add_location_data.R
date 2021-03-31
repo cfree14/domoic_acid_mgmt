@@ -65,7 +65,6 @@ data1_xy <- data1 %>%
 # Inspect
 freeR::complete(data1_xy)
 
-
 # Add location info
 data2_xy <- data2 %>%
   # Add location information

@@ -23,36 +23,48 @@ data2_orig <- readRDS(file=file.path(outdir, "ODA_2010_2020_all_species_data.Rds
 # Format data
 ################################################################################
 
+# Format shellfish data
 data1 <- data1_orig %>%
   # Rename
-  rename(sci_name=species, ) %>%
+  rename(sci_name=species) %>%
   # Add columns
   mutate(source="Clams/mussels only",
          year=year(date),
          month=month(date),
-         type="not specified",
          time=NA) %>%
   # Add sampleid
   group_by(date, comm_name) %>%
   mutate(sample_id=ifelse(comm_name=="Razor clam", paste0(date, "-RC-", 1:n()), paste0(date, "-CM-", 1:n()))) %>%
   ungroup() %>%
   # Select
-  select(source, comm_name, sci_name, type, year, month, date, time, location, lat_dd, long_dd, sample_id, type, da_oper, da_ppm)
+  select(source, comm_name, sci_name,
+         type_orig, type,
+         year, month, date, time,
+         location, lat_dd, long_dd,
+         sample_id, type, da_oper, da_ppm)
 
+# Check sample ids
 anyDuplicated(data1$sample_id)
 
-# Format
+# Format all species data
 data2 <- data2_orig %>%
+  # Rename
+  rename(da_ppm=quantity, da_oper=quantity_operator) %>%
   # Mutate
   mutate(source="All species") %>%
   # Select
-  select(source, comm_name, sci_name, type, year, month, date, time, location, lat_dd, long_dd, sample_id, type, quantity_operator, quantity) %>%
-  # Rename
-  rename(da_ppm=quantity, da_oper=quantity_operator)
-
+  select(source, comm_name, sci_name,
+         type_orig, type,
+         year, month, date, time,
+         location, lat_dd, long_dd,
+         sample_id, type, da_oper, da_ppm)
 
 # Merge
 data_full <- bind_rows(data1, data2)
+
+# Inspect
+str(data_full)
+freeR::complete(data_full)
 
 
 # Inspect overlap

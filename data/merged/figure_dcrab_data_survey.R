@@ -28,13 +28,33 @@ zone_lats_or_df <- tibble(x1=as.Date("2017-11-01"),
 # Build data
 ################################################################################
 
+# Theshold
+da_ppm_thresh <- 30
+
 # Data
 data <- data_orig %>%
-  filter(comm_name=="Dungeness crab" & date >= ymd("2000-01-01") &
-           !is.na(date) & !is.na(lat_dd) & !is.na(da_ppm))
+  # Reduce to Dungness crab
+  filter(comm_name=="Dungeness crab" & tissue=="viscera" & date >= ymd("2000-01-01")) %>%
+  # Add survey id
+  mutate(surveyid=paste(date, location, sep="-")) %>%
+  # Summarize results by surveyid
+  group_by(state, year, month, date, location, surveyid) %>%
+  summarize(lat_dd=mean(lat_dd),
+            long_dd=mean(long_dd),
+            n=n(),
+            nover=sum(da_ppm>=da_ppm_thresh),
+            pover=nover/n,
+            da_ppm_avg=mean(da_ppm),
+            type=cut(pover, breaks = c(-Inf, 0.00000001, 0.5, Inf),
+                     labels=c("Clean (0% over)", "Intermediate (<50% over)", "Closed (≥50% over)"), right = F, ordered_result = T)) %>%
+  ungroup()
+
+
+# Season info
+################################################################################
 
 # Seasons
-seasons_do <- 2010:2020
+seasons_do <- 2014:2020
 
 # Washington season
 # December 1st to September 15th
@@ -86,41 +106,46 @@ my_theme <-  theme(axis.text=element_text(size=7),
                    panel.background = element_blank(),
                    axis.line = element_line(colour = "black"))
 
+# Starting date
+date_min_do <- ymd(paste0(min(seasons_do), "-01-01"))
+date_max_do <- ymd(paste0(max(seasons_do)+1, "-01-01"))
+
+
 # Plot data
-g <- ggplot(data, aes(x=date, y=lat_dd, size=da_ppm, color=da_ppm)) +
+g <- ggplot(data %>% filter(date>=date_min_do),
+            aes(x=date, y=lat_dd, size=da_ppm_avg, fill=type)) +
   # Season shading
   geom_rect(data=seasons_wa, inherit.aes=F, mapping=aes(xmin=open, xmax=close), ymin=46.15, ymax=48.48, fill="grey90") +
   geom_rect(data=seasons_or, inherit.aes=F, mapping=aes(xmin=open, xmax=close), ymin=41.9981226, ymax=46.15, fill="grey90") +
   geom_rect(data=seasons_ca_n, inherit.aes=F, mapping=aes(xmin=open, xmax=close), ymin=38.143562, ymax=41.9981226, fill="grey90") +
   geom_rect(data=seasons_ca_n, inherit.aes=F, mapping=aes(xmin=open, xmax=close), ymin=35, ymax=38.143562, fill="grey90") +
   # Sampling points
-  geom_point(alpha=0.8) +
+  geom_point(alpha=0.8, pch=21) +
   # State/region lines
   geom_hline(yintercept=c(48.48, 46.15, 41.9981226), size=0.5) +
   geom_hline(yintercept = 38.143562, linetype="dashed", size=0.5) + # Sonoma/Mendocino
   # Label state lines
-  annotate(geom="text", x=ymd("2010-01-01"), y=48.48, hjust=0, vjust=1.5, label="Washington", color="grey30", size=2.5) +
-  annotate(geom="text", x=ymd("2010-01-01"), y=46.15, hjust=0, vjust=1.5, label="Oregon", color="grey30", size=2.5) +
-  annotate(geom="text", x=ymd("2010-01-01"), y=41.9981226, hjust=0, vjust=1.5, label="N. California", color="grey30", size=2.5) +
-  annotate(geom="text", x=ymd("2010-01-01"), y=38.143562, hjust=0, vjust=1.5, label="C. California", color="grey30", size=2.5) +
+  annotate(geom="text", x=date_min_do, y=48.48, hjust=0, vjust=1.5, label="Washington", color="grey30", size=2.5) +
+  annotate(geom="text", x=date_min_do, y=46.15, hjust=0, vjust=1.5, label="Oregon", color="grey30", size=2.5) +
+  annotate(geom="text", x=date_min_do, y=41.9981226, hjust=0, vjust=1.5, label="N. California", color="grey30", size=2.5) +
+  annotate(geom="text", x=date_min_do, y=38.143562, hjust=0, vjust=1.5, label="C. California", color="grey30", size=2.5) +
   # Management zone lines
   geom_segment(data=zone_lats_or_df, mapping=aes(x=x1, xend=x2, y=y, yend=y),
                inherit.aes = F, color="grey40", size=0.35) +
   # Limits
   scale_y_continuous(limits=c(35, 48.5), breaks=seq(34, 48, 2)) +
-  scale_x_date(breaks=seq(ymd("2010-01-01"), ymd("2021-01-01"), by="1 year"), labels=2010:2021) +
+  scale_x_date(breaks=seq(date_min_do, date_max_do, by="1 year"), labels=year(date_min_do):year(date_max_do)) +
   # Labels
   labs(x="Sample date", y="Latitude (°N)") +
   # Legends
-  scale_size_continuous(name="Domoic acid (ppm)") +
-  scale_color_gradientn(name="Domoic acid (ppm)", colors=RColorBrewer::brewer.pal(9, "Reds")[4:9]) +
-  guides(color = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
+  scale_size_continuous(name="Mean survey\ndomoic acid (ppm)", range = c(0.01, 4)) +
+  scale_fill_ordinal(name="Survey results") +
   # Theme
   theme_bw() + my_theme
 g
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "figure_dcrab_da.png"),
+ggsave(g, filename=file.path(plotdir, "figure_dcrab_da_survey.png"),
        width=6.5, height=4, units="in", dpi=600)
 
 

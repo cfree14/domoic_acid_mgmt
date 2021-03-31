@@ -1,6 +1,4 @@
 
-
-
 # Clear workspace
 rm(list = ls())
 
@@ -265,8 +263,4 @@ g <- ggplot() +
 # Export plot
 ggsave(g, filename=file.path(plotdir, "FigX_da_sampling_sites.png"),
        width=6.5, height=8, units="in", dpi=300)
-
-
-
-
 

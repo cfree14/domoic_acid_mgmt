@@ -18,14 +18,15 @@ datadir <- "data/merged/processed"
 samples_orig <- readRDS(file.path(datadir, "CA_OR_WA_da_sampling_data.Rds"))
 
 # Read landings data
-landings_orig <- readRDS("/Users/cfree/Dropbox/Chris/UCSB/projects/wc_cc_synthesis/data/landings/pacfin/processed/PACFIN_1980_2020_dungeness_crab_landings_by_port_month.Rds")
+dcrab_orig <- wcfish::pacfin_crab2
+pacfin_ports <- wcfish::pacfin_ports
 
 
 # Landings per season
 ################################################################################
 
 # Calculate samples per season
-samples <- samples_orig %>%
+samples <- dcrab_orig %>%
   # Reduce to Dungeness crab
   filter(comm_name=="Dungeness crab" & date>=ymd("2000-01-01")) %>%
   # Add season marker
@@ -36,11 +37,19 @@ samples <- samples_orig %>%
   ungroup()
 
 # Calculate landings per season
-landings <- landings_orig %>%
+dcrab <- dcrab_orig %>%
   # Summarize by state and season
-  group_by(state, season) %>%
+  group_by(season, state, port_code, port_complex) %>%
   summarize(landings_mt=sum(landings_mt)) %>%
-  ungroup()
+  ungroup() %>%
+  # Calculate 10 year mean
+  mutate(year1=substr(season,1,4) %>% as.numeric) %>%
+  filter(year1>=2010) %>%
+  group_by(state, port_code, port_complex) %>%
+  summarize(landings_mt=mean(landings_mt)) %>%
+  ungroup() %>%
+  # Add lat/long
+  left_join(wcfish::pacfin_ports %>% select(port_code, lat_dd, long_dd, port_yn))
 
 # Build dataset
 data <- samples %>%

@@ -19,12 +19,38 @@ plotdir <- "data/washington/da_sampling/figures"
 # Read grid codes
 grid_codes_orig <- readxl::read_excel(file.path(indir, "Grid Codes.xls"))
 
-# Read data
-data1_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=1) # Pacific County
+# Read other counties
 data2_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=2) # Clallam County
 data3_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=3) # Jefferson County
 data4_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=4) # Grays Harbor
 
+# Read Pacific county
+# Reading Pacific county data as Excel sheet produced errors
+# So I saved the sheet as a CSV and read it in as a CSV
+# This mostly works but I have to handle the date (MM/DD/YY to YYYY-MM-DD) before merge
+# data1_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=1)
+data1_orig <- read.csv(file.path(indir, "Coast Biotoxin Records 2000_2020_sheet1.csv"), as.is=T) %>%
+  # Convert dates
+  mutate(CollectDate=mdy(CollectDate) %>% as.character(),
+         SubmitDate=mdy(SubmitDate) %>% as.character(),
+         ReceiveDate=mdy(ReceiveDate) %>% as.character(),
+         PSP.Date=mdy(PSP.Date) %>% as.character(),
+         Domoic.Date=mdy(Domoic.Date) %>% as.character(),
+         DSP.Date=mdy(DSP.Date) %>% as.character()) %>%
+  # Make column names match others
+  rename('DSP#'='DSP.',
+         "PSP#"="PSP.",
+         "DA#"="DA.",
+         "Cert#"="Cert.",
+         "PSP Result"="PSP.Result",
+         "PSP Date"="PSP.Date",
+         "Domoic Result"="Domoic.Result",
+         "Domoic Date"="Domoic.Date",
+         "DSP Result"="DSP.Result",
+         "DSP Date"="DSP.Date")
+
+# Check names
+colnames(data1_orig)[!colnames(data1_orig)%in%colnames(data2_orig)]
 
 # Grid codes
 ################################################################################
@@ -34,7 +60,7 @@ usa <- rnaturalearth::ne_states(country="United States of America", returnclass 
 foreign <- rnaturalearth::ne_countries(country="Canada", scale="large", returnclass = "sf")
 
 # Counties
-wa <- tigris::counties(state="Washington", resolution = "500k", class="sf")
+# wa <- tigris::counties(state="Washington", resolution = "500k", class="sf")
 
 # Format data
 site_key_xy <- grid_codes_orig %>%
@@ -58,7 +84,12 @@ site_key_xy <- grid_codes_orig %>%
                        "34"="Thurston",
                        "27"="Pierce")) %>%
   # Arrange
-  select(county_id, county, waterbody, site, lat_dd, long_dd, everything())
+  select(county_id, county, waterbody, site, lat_dd, long_dd, everything()) %>%
+  # Reduce to unique
+  unique()
+
+# Which duplicated
+freeR::which_duplicated(site_key_xy$site)
 
 # Plot data
 g <- ggplot() +
@@ -77,7 +108,8 @@ g <- ggplot() +
   theme_bw()
 g
 
-# Export plot
+# Export data
+write.csv(site_key_xy, file=file.path(outdir, "WA_DOH_biotoxin_sampling_site_key.csv"))
 
 # Interact with plot
 #ggplotly(g)
@@ -96,7 +128,7 @@ data <- data_full %>%
   # Rename
   janitor::clean_names("snake") %>%
   rename(organization=org, organization_id=cert_number,
-         comm_name_orig=species, site=site_name,
+         comm_name=species, site=site_name,
          sample_date=collect_date,
          domoic_id=da_number, domoic_ppm=domoic_result,
          psp_id=psp_number, psp_ug100g=psp_result,
@@ -106,16 +138,14 @@ data <- data_full %>%
                              "Coast Seafood Company"="Coast Seafoods Company",
                              "Bay Center Mariculture Co"="Bay Center Mariculture Co.")) %>%
   # Format common name
-  mutate(comm_name_orig=stringr::str_to_sentence(comm_name_orig),
-         comm_name=recode(comm_name_orig,
-                          "Cockle"="Cockle clam")) %>%
+  mutate(comm_name=stringr::str_to_sentence(comm_name)) %>%
   # Add scientific name
   mutate(sci_name=recode(comm_name,
                          "Barnacle"="Barnacle spp.", # Balanus glandula??? Acorn barnacle???
                          "Blue mussel"="Mytilus trossulus", # Pacific blue mussel
                          "Butter clam"="Saxidomus gigantea",
                          "California mussel"="Mytilus californianus",
-                         "Cockle clam"="Clinocardium nuttallii",
+                         "Cockle"="Clinocardium nuttallii",
                          "Dungeness crab"="Metacarcinus magister",
                          "Horse clam"="Tresus capax", # Gaper clam
                          "Littleneck clam"="Leukoma staminea", # Native littleneck clam
@@ -124,6 +154,8 @@ data <- data_full %>%
                          "Other"="Unknown",
                          "Pacific oyster"="Crassostrea gigas",
                          "Razor clam"="Siliqua patula")) %>%
+  # Recode incorrect SUBMIT dates
+  mutate(submit_date=ifelse(submit_date=="1900-01-01", NA, submit_date)) %>%
   # Format dates
   mutate(sample_date=ymd(sample_date),
          submit_date=ymd(submit_date),
@@ -148,21 +180,30 @@ data <- data_full %>%
                            "NTD"="0",
                            "UNSAT"=""),
          psp_ug100g=as.numeric(psp_ug100g)) %>%
-  # Format DSP values (<1, No Test, NTD, TRUE)
+  # Format DSP values (<1, No Test, NTD)
   mutate(dsp_ug100g=recode(dsp_ug100g,
                            "<1"="0",
                            "No Test"="",
-                           "NTD"="0",
-                           "TRUE"=""),
+                           "NTD"="0"),
          dsp_ug100g=as.numeric(dsp_ug100g)) %>%
+  # Format tissue types
+  mutate(domoic_tissue=ifelse((domoic_tissue=="" | is.na(domoic_tissue)) & !is.na(domoic_ppm), "Unknown", domoic_tissue)) %>%
+  mutate(psp_tissue=ifelse((psp_tissue=="" | is.na(psp_tissue)) & !is.na(psp_ug100g), "Unknown", psp_tissue)) %>%
+  mutate(dsp_tissue=ifelse((dsp_tissue=="" | is.na(dsp_tissue)) & !is.na(dsp_ug100g), "Unknown", dsp_tissue)) %>%
+  # Format monitoring type
+  mutate(monitoring_type=ifelse(is.na(monitoring_type), "Unknown", monitoring_type)) %>%
   # Add location info
-  left_join(site_key_xy %>% select(site, lat_dd, long_dd)) %>%
+  # Merge based on county, waterbody, and site
+  left_join(site_key_xy %>% select(county, waterbody, site, lat_dd, long_dd), by=c("county", "waterbody", "site")) %>%
+  # Add sample id
+  # Use PSP id as overall id because it is complete and unique
+  mutate(sample_id=psp_id) %>%
   # Arrange columns
-  select(sample_year, sample_month, sample_date,
+  select(sample_id, sample_year, sample_month, sample_date,
          submit_date, receive_date,
          county, waterbody, site_id, site, subsite, lat_dd, long_dd,
          organization_id, organization,
-         comm_name_orig, comm_name, sci_name,
+         comm_name, sci_name,
          monitoring_type, sample_type, shell_shucked, fresh_frozen,
          domoic_id, domoic_date, domoic_tissue, domoic_ppm,
          psp_id, psp_date, psp_tissue, psp_ug100g,
@@ -173,16 +214,27 @@ data <- data_full %>%
 str(data)
 freeR::complete(data)
 
+# Are ids unique?
+# Yes, they are all unique
+freeR::which_duplicated(data$sample_id)
+freeR::which_duplicated(data$domoic_id)
+freeR::which_duplicated(data$psp_id)
+freeR::which_duplicated(data$dsp_id)
+
 # Location info
 table(data$county)
-table(data$waterbody) # needs work
+table(data$waterbody)
 table(data$site)
 table(data$site_id)
 table(data$subsite)
 
 # Are all sites in the grid codes?
 sites <- sort(unique(data$site))
-sites[!sites %in% grid_codes$site]
+sites[!sites %in% site_key_xy$site] # No, 10 sites do not have XY data!
+sites_missing <- data %>%
+  filter(!is.na(lat_dd) | !is.na(long_dd)) %>%
+  select(county, waterbody, site, site_id) %>%
+  unique()
 
 # Collector info
 table(data$organization)
@@ -195,27 +247,28 @@ table(data$shell_shucked)
 table(data$fresh_frozen)
 
 # Species
-sort(unique(data$comm_name_orig))
+sort(unique(data$comm_name))
 table(data$comm_name)
 table(data$sci_name)
 
 # Tissues
-table(data$psp_tissue)
 table(data$domoic_tissue)
+table(data$psp_tissue)
 table(data$dsp_tissue)
 
 # Results
-range(data$psp_ug100g, na.rm=T)
 range(data$domoic_ppm, na.rm=T)
+range(data$psp_ug100g, na.rm=T)
 range(data$dsp_ug100g, na.rm=T)
 
 # Dates
-range(data$collect_date, na.rm=T)
-range(data$submit_date, na.rm=T) # early year
+range(data$sample_date, na.rm=T)
+range(data$submit_date, na.rm=T) # a bunch of missing values
 range(data$receive_date, na.rm=T)
-range(data$psp_date, na.rm=T)
 range(data$domoic_date, na.rm=T)
+range(data$psp_date, na.rm=T)
 range(data$dsp_date, na.rm=T)
+
 
 
 # Build keys
@@ -233,7 +286,7 @@ freeR::which_duplicated(org_key$organization_id)
 
 # Site key
 site_key <- data %>%
-  select(county, waterbody, site, site_id) %>%
+  select(county, waterbody, site, site_id, lat_dd, long_dd) %>%
   unique()
 
 # Check for duplicates

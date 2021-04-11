@@ -1,0 +1,118 @@
+"basin","region","growing_area","growing_area_id","total_acres"
+"Admiralty Inlet","North Sound","South West Whidbey",95,8596.85468842
+"Admiralty Inlet","South Sound","Foulweather Bluff East",133,387.54586645
+"Admiralty Inlet","Straits","Kilisut Harbor",46,1845.49075826
+"Admiralty Inlet","Straits","Mystery Bay",55,94.92011259
+"Admiralty Inlet","Straits","Oak Bay",65,1705.40092658
+"Admiralty Inlet","Straits","Port Townsend",78,2011.63842326
+"Central Basin","South Sound","Sinclair Inlet",0,2946.8923571
+"Central Basin","South Sound","Blake Island",6,615.40396113
+"Central Basin","South Sound","Colvos Passage",13,2229.9010529
+"Central Basin","South Sound","Dyes Inlet",19,3738.76441288
+"Central Basin","South Sound","East Passage",20,1874.35197463
+"Central Basin","South Sound","Kingston",47,2592.88961852
+"Central Basin","South Sound","Miller Bay",53,272.32508331
+"Central Basin","South Sound","Port Blakely",74,1522.31676417
+"Central Basin","South Sound","Port Madison",76,3472.41835798
+"Central Basin","South Sound","Port Orchard Passage",77,5403.22577702
+"Central Basin","South Sound","Quartermaster Harbor",82,3226.24551982
+"Central Basin","South Sound","Tacoma Narrows",101,428.01814906
+"Central Basin","South Sound","Yukon Harbor",110,1553.47439622
+"Central Basin","South Sound","Bainbridge South",118,812.02196207
+"Central Basin","South Sound","Poverty Bay",120,1350.88355381
+"Central Basin","South Sound","Three Tree Point",123,930.86763911
+"Central Basin","South Sound","Liberty Bay",128,1729.52654066
+"Central Basin","South Sound","Gig Harbor",9999,317.76811863
+"Grays Harbor","Pacific Coast","Grays Harbor",29,55006.35395255
+"Hood Canal","Hood Canal","Annas Bay",2,2079.37732004
+"Hood Canal","Hood Canal","Dabob Bay",14,2125.84013521
+"Hood Canal","Hood Canal","Hood Canal #1",35,7634.77679504
+"Hood Canal","Hood Canal","Hood Canal #2",36,3026.73507976
+"Hood Canal","Hood Canal","Hood Canal #3",37,2189.19440919
+"Hood Canal","Hood Canal","Hood Canal #4",38,1600.86776202
+"Hood Canal","Hood Canal","Hood Canal #5",39,2291.26656555
+"Hood Canal","Hood Canal","Hood Canal #6",40,1243.88125179
+"Hood Canal","Hood Canal","Hood Canal #7",41,454.58498936
+"Hood Canal","Hood Canal","Hood Canal #8",42,2799.65729982
+"Hood Canal","Hood Canal","Hood Canal #9",43,1706.65553971
+"Hood Canal","Hood Canal","Mats Mats Bay",52,122.07193119
+"Hood Canal","Hood Canal","Port Gamble",75,1628.65676847
+"Hood Canal","Hood Canal","Quilcene Bay",83,1635.64147872
+"Pacific Coast","Pacific Coast","Pacific Coast",69,12030.24287076
+"Pacific Coast","Pacific Coast","Kalaloch",135,1777.88840712
+"Pacific Coast","Straits","Makah Bay",127,461.27616374
+"San Juan Islands and Strait of Georgia","North Sound","Alden Bank",1,36971.55448558
+"San Juan Islands and Strait of Georgia","North Sound","Birch Bay",5,4134.98047397
+"San Juan Islands and Strait of Georgia","North Sound","Drayton Harbor",16,3728.87226961
+"San Juan Islands and Strait of Georgia","North Sound","Lummi Bay",49,4730.56503927
+"San Juan Islands and Strait of Georgia","North Sound","Lummi Island",50,763.5967256
+"San Juan Islands and Strait of Georgia","North Sound","Point Partridge",73,2747.01127782
+"San Juan Islands and Strait of Georgia","North Sound","Portage Bay",79,1542.39625291
+"San Juan Islands and Strait of Georgia","North Sound","Samish Bay",88,7107.86441758
+"San Juan Islands and Strait of Georgia","North Sound","Padilla Bay",111,722.37952165
+"San Juan Islands and Strait of Georgia","North Sound","Eliza Island",129,100.46536711
+"San Juan Islands and Strait of Georgia","North Sound","Rosario Strait",136,18542.89768712
+"San Juan Islands and Strait of Georgia","North Sound","Burrows Bay",137,2053.76663034
+"San Juan Islands and Strait of Georgia","San Juan","Buck Bay",9,99.00308048
+"San Juan Islands and Strait of Georgia","San Juan","East Sound",22,354.46749595
+"San Juan Islands and Strait of Georgia","San Juan","Hunter Bay",44,140.21334535
+"San Juan Islands and Strait of Georgia","San Juan","Mackaye Harbor",51,682.1987548
+"San Juan Islands and Strait of Georgia","San Juan","Mud Bay",54,558.66710298
+"San Juan Islands and Strait of Georgia","San Juan","Shoal Bay",91,221.99365748
+"San Juan Islands and Strait of Georgia","San Juan","Upright Channel",104,511.14190695
+"San Juan Islands and Strait of Georgia","San Juan","Westcott Bay",107,454.65426842
+"San Juan Islands and Strait of Georgia","San Juan","Lopez Island Southeast",139,9920.74448276
+"South Basin","South Sound","Budd Inlet",10,5137.97996752
+"South Basin","South Sound","Burley Lagoon",11,410.8440219
+"South Basin","South Sound","Drayton Passage",17,1274.80285213
+"South Basin","South Sound","Eld Inlet",24,4351.43797151
+"South Basin","South Sound","Filucy Bay",25,103.78498249
+"South Basin","South Sound","Fox Island",27,517.66546819
+"South Basin","South Sound","Hammersley Inlet",31,970.11139539
+"South Basin","South Sound","Henderson Bay",32,4133.4897802
+"South Basin","South Sound","Henderson Inlet",33,2186.98223656
+"South Basin","South Sound","Nisqually Reach",60,3628.25487348
+"South Basin","South Sound","North Bay",61,1337.1525285
+"South Basin","South Sound","Oakland Bay",66,2142.67714987
+"South Basin","South Sound","Oro Bay",68,490.63047489
+"South Basin","South Sound","Peale Passage",70,1893.66500978
+"South Basin","South Sound","Pickering Passage",72,4156.56976882
+"South Basin","South Sound","Reach Island",85,374.22859818
+"South Basin","South Sound","Rocky Bay",87,384.82917327
+"South Basin","South Sound","Skookum Inlet",93,555.44166074
+"South Basin","South Sound","Stretch Island",98,413.22298109
+"South Basin","South Sound","Totten Inlet",102,5376.63161357
+"South Basin","South Sound","Vaughn Bay",105,192.89050855
+"South Basin","South Sound","Wyckoff Shoal",109,1719.25276134
+"South Basin","South Sound","Anderson Island",114,1195.81413871
+"South Basin","South Sound","Penrose Point",115,978.83720774
+"South Basin","South Sound","Dana Passage",116,152.9599921
+"South Basin","South Sound","West Key Peninsula",117,2045.99236977
+"South Basin","South Sound","Harstine East",122,1492.17021288
+"South Basin","South Sound","Ketron Island",125,1751.12866954
+"South Basin","South Sound","McNeil Island SE",126,361.96526896
+"South Basin","South Sound","Wollochet Bay",134,231.36991264
+"Strait of Juan de Fuca","Straits","Discovery Bay",15,2427.97513609
+"Strait of Juan de Fuca","Straits","Dungeness Bay",18,2727.23639519
+"Strait of Juan de Fuca","Straits","East Straits",23,17062.62487257
+"Strait of Juan de Fuca","Straits","Jamestown",45,4951.10448511
+"Strait of Juan de Fuca","Straits","Neah Bay",58,819.11054997
+"Strait of Juan de Fuca","Straits","Protection Island",81,8970.69070499
+"Strait of Juan de Fuca","Straits","Sequim Bay",90,4195.02033004
+"Strait of Juan de Fuca","Straits","West Straits",106,1933.2933755
+"Whidbey Basin","North Sound","Holmes Harbor",34,1709.78654137
+"Whidbey Basin","North Sound","Penn Cove",71,2469.21429757
+"Whidbey Basin","North Sound","Possession Sound",80,5939.43728272
+"Whidbey Basin","North Sound","Saratoga Pass",89,7036.15557158
+"Whidbey Basin","North Sound","Similk Bay",92,606.58371647
+"Whidbey Basin","North Sound","Skagit Bay South",94,2400.99599374
+"Whidbey Basin","North Sound","Swinomish",100,1710.03305665
+"Whidbey Basin","North Sound","Port Susan",113,1965.24344397
+"Willipa Bay","Pacific Coast","Bay Center",4,6213.59655706
+"Willipa Bay","Pacific Coast","Bruceport",8,4382.92934351
+"Willipa Bay","Pacific Coast","Cedar River",12,10718.18275439
+"Willipa Bay","Pacific Coast","Nahcotta",56,25486.57008803
+"Willipa Bay","Pacific Coast","Naselle River",57,7976.72679695
+"Willipa Bay","Pacific Coast","Nemah River",59,6936.14569898
+"Willipa Bay","Pacific Coast","North River",62,3766.73565222
+"Willipa Bay","Pacific Coast","Stony Point",97,3528.31310607

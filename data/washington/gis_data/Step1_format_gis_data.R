@@ -50,22 +50,35 @@ my_theme <-   theme(axis.text=element_text(size=6),
 zone_key <- readxl::read_excel(file.path(outdir, "WDFW_closure_zone_key.xlsx")) %>%
   mutate(zone_id=as.character(zone_id))
 
+# Derive centroids
+zone_centroids <- closure_zones_orig %>%
+  sf::st_transform(crs=wgs84) %>%
+  sf::st_centroid() %>%
+  sf::st_coordinates() %>%
+  as.data.frame() %>%
+  rename(lat_dd=Y, long_dd=X) %>%
+  mutate(zone_id=closure_zones_orig$ZONEID)
+
 # Format
 closure_zones <- closure_zones_orig %>%
   # sf::st_drop_geometry() %>%
+  # Project
+  sf::st_transform(crs=wgs84) %>%
   # Arrange
-  select(ZONEID, C_ZNAME) %>%
+  select(ZONEID, C_ZNAME, COUNTY) %>%
   # Rename
-  rename(zone_id=ZONEID, zone=C_ZNAME) %>%
+  rename(zone_id=ZONEID, zone=C_ZNAME, county=COUNTY) %>%
   # Add zone meta data
   mutate(zone_id_lg=sub("\\..*", "", zone_id) %>% as.numeric) %>%
   # Arrange
   select(zone_id_lg, zone_id, zone, everything()) %>%
   # Add key
   left_join(zone_key %>% select(zone_id, basin, area), by="zone_id") %>%
+  # Add coordinates
+  left_join(zone_centroids, by="zone_id") %>%
   # Arrange
-  select(basin, area, zone_id_lg, zone_id, zone, everything()) %>%
-  arrange(basin, area, zone_id)
+  select(basin, county, area, zone_id_lg, zone_id, zone, lat_dd, long_dd, everything()) %>%
+  arrange(basin, county, area, zone_id)
 
 # If working
 if(F){
@@ -132,6 +145,8 @@ plot(basins)
 
 # Format beaches
 beaches <- beaches_orig %>%
+  # Project
+  sf::st_transform(crs=wgs84) %>%
   # Simplify
   select(COUNTYNAME, WATERBODYN,
          BEACHID, BIDN, BEACHNAME, ORGANIZATI, GROWINGARE) %>%
@@ -188,6 +203,8 @@ saveRDS(beaches, file=file.path(outdir, "WDFW_beaches.Rds"))
 
 # Format data
 harvest_sites <- harvest_sites_orig %>%
+  # Project
+  sf::st_transform(crs=wgs84) %>%
   # Rename
   janitor::clean_names("snake") %>%
   select(applicatio, stationnum, growingare, locationde,
@@ -260,6 +277,8 @@ saveRDS(harvest_sites, file=file.path(outdir, "WDFW_harvest_sites.Rds"))
 # Format growing areas
 growing_areas <- growing_areas_orig %>%
   # sf::st_drop_geometry() %>%
+  # Project
+  sf::st_transform(crs=wgs84) %>%
   # Rename
   janitor::clean_names("snake") %>%
   select(region, name, growing_are, acres, everything()) %>%

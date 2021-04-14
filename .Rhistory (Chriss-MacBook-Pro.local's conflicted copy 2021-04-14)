@@ -1,0 +1,512 @@
+reason=closure_reason,
+reason_desc=reason_descr,
+species=closed_for_species,
+geoduck_tract=geoduck_tract_number) %>%
+# Convert dates
+mutate(date1=date1 %>% substr(.,1, 10) %>% ymd(),
+date2=date2 %>% substr(.,1, 10) %>% ymd())
+# Format data
+data <- data_orig %>%
+# Rename
+janitor::clean_names("snake") %>%
+rename(zone_type=parent_entity,
+zone=parent_entity_name,
+date1=status_begin_date,
+date2=status_end_date,
+action=event_type,
+reason=closure_reason,
+reason_desc=reason_descr,
+species=closed_for_species,
+geoduck_tract=geoduck_tract_number) %>%
+# Convert dates
+mutate(date1=date1 %>% substr(.,1, 10) %>% ymd(),
+date2=date2 %>% substr(.,1, 10) %>% ymd()) %>%
+select(date1, date2,
+zone_type, zone, geoduck_tract,
+species,
+reason, reason_desc, comment,
+everything()) %>%
+# Remove empty columns -- CHECK WITH DOH
+select(-c(parcel_number, other_closed_species))
+# Inspect data
+str(data)
+# Format data
+data <- data_orig %>%
+# Rename
+janitor::clean_names("snake") %>%
+rename(zone_type=parent_entity,
+zone=parent_entity_name,
+date1=status_begin_date,
+date2=status_end_date,
+action=event_type,
+reason=closure_reason,
+reason_desc=reason_descr,
+species=closed_for_species,
+geoduck_tract=geoduck_tract_number) %>%
+# Convert dates
+mutate(date1=date1 %>% substr(.,1, 10) %>% ymd(),
+date2=date2 %>% substr(.,1, 10) %>% ymd(),
+year=year(data1)) %>%
+select(year, date1, date2,
+zone_type, zone, geoduck_tract,
+species,
+reason, reason_desc, comment,
+everything()) %>%
+# Remove empty columns -- CHECK WITH DOH
+select(-c(parcel_number, other_closed_species))
+# Format data
+data <- data_orig %>%
+# Rename
+janitor::clean_names("snake") %>%
+rename(zone_type=parent_entity,
+zone=parent_entity_name,
+date1=status_begin_date,
+date2=status_end_date,
+action=event_type,
+reason=closure_reason,
+reason_desc=reason_descr,
+species=closed_for_species,
+geoduck_tract=geoduck_tract_number) %>%
+# Convert dates
+mutate(date1=date1 %>% substr(.,1, 10) %>% ymd(),
+date2=date2 %>% substr(.,1, 10) %>% ymd(),
+year=year(date1)) %>%
+select(year, date1, date2,
+zone_type, zone, geoduck_tract,
+species,
+reason, reason_desc, comment,
+everything()) %>%
+# Remove empty columns -- CHECK WITH DOH
+select(-c(parcel_number, other_closed_species))
+# Inspect data
+str(data)
+table(data$geoduck_tract)
+table(data$species)
+table(data$reason)
+# Format data
+data <- data_orig %>%
+# Rename
+janitor::clean_names("snake") %>%
+rename(zone_type=parent_entity,
+zone=parent_entity_name,
+date1=status_begin_date,
+date2=status_end_date,
+action=event_type,
+reason=closure_reason,
+reason_desc=reason_descr,
+species=closed_for_species,
+geoduck_tract=geoduck_tract_number) %>%
+# Convert dates
+mutate(date1=date1 %>% substr(.,1, 10) %>% ymd(),
+date2=date2 %>% substr(.,1, 10) %>% ymd(),
+year=year(date1)) %>%
+select(year, date1, date2,
+zone_type, zone, geoduck_tract,
+species,
+action, reason, reason_desc, comment,
+everything()) %>%
+# Remove empty columns -- CHECK WITH DOH
+select(-c(parcel_number, other_closed_species))
+table(data$action)
+# Format data
+data <- data_orig %>%
+# Rename
+janitor::clean_names("snake") %>%
+rename(zone_type=parent_entity,
+zone=parent_entity_name,
+date1=status_begin_date,
+date2=status_end_date,
+action=event_type,
+reason=closure_reason,
+reason_desc=reason_descr,
+species=closed_for_species,
+geoduck_tract=geoduck_tract_number) %>%
+# Convert dates
+mutate(date1=date1 %>% substr(.,1, 10) %>% ymd(),
+date2=date2 %>% substr(.,1, 10) %>% ymd(),
+year=year(date1)) %>%
+select(year, date1, date2,
+zone_type, zone, geoduck_tract,
+species,
+action, status, reason, reason_desc, comment,
+everything()) %>%
+# Remove empty columns -- CHECK WITH DOH
+select(-c(parcel_number, other_closed_species))
+table(data$status)
+table(data$status)
+table(data$reason)
+table(data$reason_desc)
+table(data$comment)
+freeR::complete(data)
+View(data)
+table(data$species) # fix up
+# Format data
+data <- data_orig %>%
+# Rename
+janitor::clean_names("snake") %>%
+rename(zone_type=parent_entity,
+zone=parent_entity_name,
+date1=status_begin_date,
+date2=status_end_date,
+action=event_type,
+reason=closure_reason,
+reason_desc=reason_descr,
+species=closed_for_species,
+geoduck_tract=geoduck_tract_number) %>%
+# Convert dates
+mutate(date1=date1 %>% substr(.,1, 10) %>% ymd(),
+date2=date2 %>% substr(.,1, 10) %>% ymd(),
+year=year(date1)) %>%
+select(year, date1, date2,
+zone_type, zone, geoduck_tract,
+species,
+action, status, reason, reason_desc, comment,
+everything()) %>%
+# Format species
+mutate(species=stringr::str_to_sentence(species) %>% gsub(",", ", ", .))
+# Format data
+data <- data_orig %>%
+# Rename
+janitor::clean_names("snake") %>%
+rename(zone_type=parent_entity,
+zone=parent_entity_name,
+date1=status_begin_date,
+date2=status_end_date,
+action=event_type,
+reason=closure_reason,
+reason_desc=reason_descr,
+species=closed_for_species,
+geoduck_tract=geoduck_tract_number) %>%
+# Convert dates
+mutate(date1=date1 %>% substr(.,1, 10) %>% ymd(),
+date2=date2 %>% substr(.,1, 10) %>% ymd(),
+year=year(date1)) %>%
+select(year, date1, date2,
+zone_type, zone, geoduck_tract,
+species,
+action, status, reason, reason_desc, comment,
+everything()) %>%
+# Format species
+mutate(species=stringr::str_to_sentence(species) %>% gsub(",", ", ", .)) %>%
+# Remove empty columns -- CHECK WITH DOH
+select(-c(parcel_number, other_closed_species))
+table(data$species) # fix up
+# Format data
+data <- data_orig %>%
+# Rename
+janitor::clean_names("snake") %>%
+rename(zone_type=parent_entity,
+zone=parent_entity_name,
+date1=status_begin_date,
+date2=status_end_date,
+action=event_type,
+reason=closure_reason,
+reason_desc=reason_descr,
+species=closed_for_species,
+geoduck_tract=geoduck_tract_number) %>%
+# Convert dates
+mutate(date1=date1 %>% substr(.,1, 10) %>% ymd(),
+date2=date2 %>% substr(.,1, 10) %>% ymd(),
+year=year(date1)) %>%
+select(year, date1, date2,
+zone_type, zone, geoduck_tract,
+species,
+action, status, reason, reason_desc, comment,
+everything()) %>%
+# Format species
+mutate(species=stringr::str_to_sentence(species) %>% gsub(",", ", ", .),
+species=recode(species,
+"Scallop"="Scallops",
+"Manila clams, cockles"="Manila clams, cockle clams")) %>%
+# Remove empty columns -- CHECK WITH DOH
+select(-c(parcel_number, other_closed_species))
+# Inspect data
+str(data)
+freeR::complete(data)
+table(data$zone)
+table(data$geoduck_tract)
+table(data$species) # fix up
+table(data$action)
+table(data$status)
+# Clear workspace
+rm(list = ls())
+# Setup
+################################################################################
+# Packages
+library(plotly)
+library(lubridate)
+library(tidyverse)
+# Directories
+indir <- "data/washington/da_sampling/raw/Files for Chris Free"
+outdir <- "data/washington/da_sampling/processed"
+plotdir <- "data/washington/da_sampling/figures"
+#
+ntot <- data %>%
+group_by(comm_name, sci_nam) %>%
+summarize(n_da=sum(!is.na(domoic_ppm)),
+n_psp=sum(!is.na(psp_ug100g)),
+n_dsp=sum(!is.na(psp_ug100g)))
+# Clear workspace
+rm(list = ls())
+# Setup
+################################################################################
+# Packages
+library(plotly)
+library(lubridate)
+library(tidyverse)
+# Directories
+indir <- "data/washington/da_sampling/raw/Files for Chris Free"
+outdir <- "data/washington/da_sampling/processed"
+plotdir <- "data/washington/da_sampling/figures"
+# Read data
+data <- readRDS(file=file.path(outdir, "WA_DOH_2000_2020_biotoxin_sampling_data.Rds"))
+# Total sample
+################################################################################
+#
+ntot <- data %>%
+group_by(comm_name, sci_nam) %>%
+summarize(n_da=sum(!is.na(domoic_ppm)),
+n_psp=sum(!is.na(psp_ug100g)),
+n_dsp=sum(!is.na(psp_ug100g)))
+# Total sample size
+ntot <- data %>%
+group_by(comm_name, sci_name) %>%
+summarize(n_da=sum(!is.na(domoic_ppm)),
+n_psp=sum(!is.na(psp_ug100g)),
+n_dsp=sum(!is.na(psp_ug100g)))
+View(ntot)
+mutate(n_tot=n_da+n_dsp+n_psp) %>%
+arrange(desc(n_tot))
+mutate(n_tot=n_da+n_dsp+n_psp) %>%
+arrange(desc(n_tot))
+# Total sample size
+ntot <- data %>%
+group_by(comm_name, sci_name) %>%
+summarize(n_da=sum(!is.na(domoic_ppm)),
+n_psp=sum(!is.na(psp_ug100g)),
+n_dsp=sum(!is.na(psp_ug100g))) %>%
+ungroup() %>%
+mutate(n_tot=n_da+n_dsp+n_psp) %>%
+arrange(desc(n_tot))
+# Total sample size
+ntot <- data %>%
+group_by(comm_name, sci_name) %>%
+summarize(n_da=sum(!is.na(domoic_ppm)),
+n_psp=sum(!is.na(psp_ug100g)),
+n_dsp=sum(!is.na(psp_ug100g))) %>%
+ungroup() %>%
+mutate(n_tot=n_da+n_dsp+n_psp,
+species_label=paste0(comm_name, " (", sci_name, ")")) %>%
+arrange(desc(n_tot)) %>%
+select(species_label, n_tot, n_da, n_psp, n_dsp)
+# Clear workspace
+rm(list = ls())
+# Setup
+################################################################################
+# Packages
+library(plotly)
+library(lubridate)
+library(tidyverse)
+# Directories
+indir <- "data/washington/da_sampling/raw/Files for Chris Free"
+outdir <- "data/washington/da_sampling/processed"
+plotdir <- "data/washington/da_sampling/figures"
+# Read grid codes
+grid_codes_orig <- readxl::read_excel(file.path(indir, "Grid Codes.xls"))
+# Read data
+data1_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=1) # Pacific County
+data2_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=2) # Clallam County
+data3_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=3) # Jefferson County
+data4_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=4) # Grays Harbor
+# Grid codes
+################################################################################
+# Land
+usa <- rnaturalearth::ne_states(country="United States of America", returnclass = "sf")
+foreign <- rnaturalearth::ne_countries(country="Canada", scale="large", returnclass = "sf")
+# Counties
+wa <- tigris::counties(state="Washington", resolution = "500k", class="sf")
+# Format data
+site_key_xy <- grid_codes_orig %>%
+# Rename
+janitor::clean_names("snake") %>%
+rename(site=sampling_site, lat_dd=lat, long_dd=long, county_id=county_code) %>%
+# Add county
+mutate(county=recode(county_id,
+"25"="Pacific",
+"14"="Grays Harbor",
+"16"="Jefferson",
+"05"="Clallam",
+"37"="Whatcom",
+"28"="San Juan",
+"29"="Skagit",
+"15"="Island",
+"31"="Snohomish",
+"17"="King",
+"18"="Kitsap",
+"23"="Mason",
+"34"="Thurston",
+"27"="Pierce")) %>%
+# Arrange
+select(county_id, county, waterbody, site, lat_dd, long_dd, everything())
+# Plot data
+g <- ggplot() +
+# Plot land
+geom_sf(data=foreign, fill="grey80", color="white", lwd=0.3) +
+geom_sf(data=usa, fill="grey80", color="white", lwd=0.3) +
+# geom_sf(data=wa, fill="grey80", color="white", lwd=0.3) +
+# geom_sf_text(data=wa, mapping=aes(label=NAME), color="white") +
+# Plot sampling sites
+geom_point(data=site_key_xy, mapping=aes(x=long_dd, y=lat_dd, color=county)) +
+# Crop
+coord_sf(xlim=c(-125.5,-122), ylim=c(46, 49.2)) +
+# Labels
+labs(x="", y="") +
+# Theme
+theme_bw()
+g
+# Export plot
+# Interact with plot
+#ggplotly(g)
+# Build data
+################################################################################
+# Merge data
+data_full <- bind_rows(data1_orig %>% mutate_all(as.character),
+data2_orig %>% mutate_all(as.character),
+data3_orig %>% mutate_all(as.character),
+data4_orig %>% mutate_all(as.character))
+# Format data
+data <- data_full %>%
+# Rename
+janitor::clean_names("snake") %>%
+rename(organization=org, organization_id=cert_number,
+comm_name_orig=species, site=site_name,
+sample_date=collect_date,
+domoic_id=da_number, domoic_ppm=domoic_result,
+psp_id=psp_number, psp_ug100g=psp_result,
+dsp_id=dsp_number, dsp_ug100g=dsp_result) %>%
+# Format organization
+mutate(organization=recode(organization,
+"Coast Seafood Company"="Coast Seafoods Company",
+"Bay Center Mariculture Co"="Bay Center Mariculture Co.")) %>%
+# Format common name
+mutate(comm_name_orig=stringr::str_to_sentence(comm_name_orig))) %>%
+# Add scientific name
+mutate(sci_name=recode(comm_name,
+"Barnacle"="Barnacle spp.", # Balanus glandula??? Acorn barnacle???
+"Blue mussel"="Mytilus trossulus", # Pacific blue mussel
+"Butter clam"="Saxidomus gigantea",
+"California mussel"="Mytilus californianus",
+"Cockle"="Clinocardium nuttallii",
+"Dungeness crab"="Metacarcinus magister",
+"Horse clam"="Tresus capax", # Gaper clam
+"Littleneck clam"="Leukoma staminea", # Native littleneck clam
+"Manila clam"="Ruditapes philippinarum", # Manila (littleneck) clam
+"Olympia oyster"="Ostrea lurida",
+"Other"="Unknown",
+"Pacific oyster"="Crassostrea gigas",
+"Razor clam"="Siliqua patula")) %>%
+# Format dates
+mutate(sample_date=ymd(sample_date),
+submit_date=ymd(submit_date),
+receive_date=ymd(receive_date),
+domoic_date=ymd(domoic_date),
+psp_date=ymd(psp_date),
+psp_date=ymd(psp_date)) %>%
+# Add more date info
+mutate(sample_year=year(sample_date),
+sample_month=month(sample_date)) %>%
+# Format domoic values (<0, NoTest, NTD, UNSAT)
+mutate(domoic_ppm=recode(domoic_ppm,
+"<1"="0",
+"NoTest"="",
+"NTD"="0",
+"UNSAT"=""),
+domoic_ppm=as.numeric(domoic_ppm)) %>%
+# Format PSP value (<38, NoTest, NTD, UNSAT)
+mutate(psp_ug100g=recode(psp_ug100g,
+"<38"="0",
+"NoTest"="",
+"NTD"="0",
+"UNSAT"=""),
+psp_ug100g=as.numeric(psp_ug100g)) %>%
+# Format DSP values (<1, No Test, NTD, TRUE)
+mutate(dsp_ug100g=recode(dsp_ug100g,
+"<1"="0",
+"No Test"="",
+"NTD"="0",
+"TRUE"=""),
+dsp_ug100g=as.numeric(dsp_ug100g)) %>%
+# Add location info
+left_join(site_key_xy %>% select(site, lat_dd, long_dd)) %>%
+# Arrange columns
+select(sample_year, sample_month, sample_date,
+submit_date, receive_date,
+county, waterbody, site_id, site, subsite, lat_dd, long_dd,
+organization_id, organization,
+comm_name_orig, comm_name, sci_name,
+monitoring_type, sample_type, shell_shucked, fresh_frozen,
+domoic_id, domoic_date, domoic_tissue, domoic_ppm,
+psp_id, psp_date, psp_tissue, psp_ug100g,
+dsp_id, dsp_date, dsp_tissue, dsp_ug100g,
+everything())
+# Inspect data
+str(data)
+freeR::complete(data)
+# Location info
+table(data$county)
+table(data$waterbody) # needs work
+table(data$site)
+table(data$site_id)
+table(data$subsite)
+# Are all sites in the grid codes?
+sites <- sort(unique(data$site))
+sites[!sites %in% grid_codes$site]
+# Collector info
+table(data$organization)
+table(data$organization_id)
+# Sample info
+table(data$monitoring_type)
+table(data$sample_type)
+table(data$shell_shucked)
+table(data$fresh_frozen)
+# Species
+sort(unique(data$comm_name_orig))
+table(data$comm_name)
+table(data$sci_name)
+# Tissues
+table(data$psp_tissue)
+table(data$domoic_tissue)
+table(data$dsp_tissue)
+# Results
+range(data$psp_ug100g, na.rm=T)
+range(data$domoic_ppm, na.rm=T)
+range(data$dsp_ug100g, na.rm=T)
+# Dates
+range(data$collect_date, na.rm=T)
+range(data$submit_date, na.rm=T) # early year
+range(data$receive_date, na.rm=T)
+range(data$psp_date, na.rm=T)
+range(data$domoic_date, na.rm=T)
+range(data$dsp_date, na.rm=T)
+# Build keys
+################################################################################
+# Organization key
+org_key <- data %>%
+select(organization, organization_id) %>%
+unique() %>%
+arrange(organization)
+# Check for duplicates
+freeR::which_duplicated(org_key$organization) # duplicates
+freeR::which_duplicated(org_key$organization_id)
+# Site key
+site_key <- data %>%
+select(county, waterbody, site, site_id) %>%
+unique()
+# Check for duplicates
+freeR::which_duplicated(site_key$site_id)
+freeR::which_duplicated(site_key$site) # Westport duplicated
+# Export data
+################################################################################
+# Export data
+saveRDS(data, file=file.path(outdir, "WA_DOH_2000_2020_biotoxin_sampling_data.Rds"))
+R.version

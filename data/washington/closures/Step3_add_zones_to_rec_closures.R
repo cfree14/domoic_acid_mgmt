@@ -12,10 +12,10 @@ library(lubridate)
 library(tidyverse)
 
 # Directories
-indir <- "data/washington/da_sampling/raw/Files for Chris Free/Rec Closure Logs"
-outdir <- "data/washington/da_sampling/processed"
-plotdir <- "data/washington/da_sampling/figures"
-tabledir <- "data/washington/da_sampling/tables"
+indir <- "data/washington/raw_data/Files for Chris Free/Rec Closure Logs"
+outdir <- "data/washington/closures/data"
+plotdir <- "data/washington/closures/figures/temp"
+tabledir <- "data/washington/closures/tables"
 gisdir <- "data/washington/gis_data/processed"
 
 # Read data

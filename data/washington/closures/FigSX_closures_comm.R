@@ -12,11 +12,10 @@ library(lubridate)
 library(tidyverse)
 
 # Directories
-indir <- "data/washington/da_sampling/raw/Files for Chris Free"
-outdir <- "data/washington/da_sampling/processed"
-plotdir <- "data/washington/da_sampling/figures/closures"
+indir <- "data/washington/raw_data/Files for Chris Free"
+outdir <- "data/washington/closures/data"
+plotdir <- "data/washington/closures/figures/temp"
 gisdir <- "data/washington/gis_data/processed"
-
 
 # Read data
 data_orig <- readRDS(file=file.path(outdir, "WA_DOH_2014_2020_biotoxin_closures.Rds"))

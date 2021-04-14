@@ -12,10 +12,11 @@ library(lubridate)
 library(tidyverse)
 
 # Directories
-indir <- "data/washington/da_sampling/raw/Files for Chris Free/Rec Closure Logs"
-outdir <- "data/washington/da_sampling/processed"
-plotdir <- "data/washington/da_sampling/figures"
-tabledir <- "data/washington/da_sampling/tables"
+indir <- "data/washington/raw_data/Files for Chris Free/Rec Closure Logs"
+outdir <- "data/washington/closures/data"
+plotdir <- "data/washington/closures/figures/temp"
+tabledir <- "data/washington/closures/tables"
+gisdir <- "data/washington/gis_data/processed"
 
 
 # Format 2002-2011 data
@@ -80,6 +81,7 @@ table(data0211$toxin)
 ################################################################################
 
 # Read
+# This is a file that I created manually
 data1220_orig <- readxl::read_excel(file.path(indir, "2012_2020_rec_closures_raw.xlsx"))
 
 # Format data
@@ -187,7 +189,6 @@ table(data$action)
 table(data$sample_county)
 table(data$sample_species)
 sort(unique(data$action_species))
-
 
 # Export
 saveRDS(data, file.path(outdir, "WA_DOH_2002_2020_biotoxin_closures_rec.Rds"))

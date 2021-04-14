@@ -12,8 +12,8 @@ library(lubridate)
 library(tidyverse)
 
 # Directories
-indir <- "data/washington/da_sampling/raw/Files for Chris Free"
-outdir <- "data/washington/da_sampling/processed"
+indir <- "data/washington/raw_data/Files for Chris Free"
+outdir <- "data/washington/da_sampling/data"
 plotdir <- "data/washington/da_sampling/figures"
 
 # Read grid codes

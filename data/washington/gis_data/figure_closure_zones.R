@@ -73,6 +73,36 @@ ggsave(g, filename=file.path(plotdir, "WDFW_closure_zones.pdf"),
        width=8.5, height=11, units="in", dpi=300)
 
 
+
+# Pacific / SJF
+################################################################################
+
+# Plot data
+g <- ggplot() +
+  # Plot land
+  geom_sf(data=foreign, fill="grey80", color="white", lwd=0.3) +
+  geom_sf(data=usa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf(data=counties_wa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf_text(data=counties_wa, mapping=aes(label=NAME), color="white") +
+  # Plot closure zones
+  geom_sf(data=data %>% filter(basin %in% c("Pacific Coast", "Strait of Juan de Fuca")), mapping=aes(fill=county), lwd=0.2, color="grey30", show.legend = F) +
+  geom_sf_text(data=data %>% filter(basin %in% c("Pacific Coast", "Strait of Juan de Fuca")), mapping=aes(label=zone_label), size=2) +
+  # Crop
+  coord_sf(xlim=c(-124.9,-122.7), ylim=c(46.4, 48.5)) +
+  # Labels
+  labs(x="", y="", title="Washington's biotoxin closure zones") +
+  # Legend
+  # Theme
+  theme_bw() + my_theme +
+  theme(legend.position = c(0.16, 0.13),
+        legend.background = element_rect(fill=alpha('blue', 0)))
+g
+
+# Export plots
+ggsave(g, filename=file.path(plotdir, "WDFW_closure_zones_pacific.pdf"),
+       width=8.5, height=11, units="in", dpi=300)
+
+
 # Puget Sound
 ################################################################################
 
@@ -101,6 +131,34 @@ g
 ggsave(g, filename=file.path(plotdir, "WDFW_closure_zones_puget.pdf"),
        width=8.5, height=11, units="in", dpi=300)
 
+
+# South Basin
+################################################################################
+
+# Plot data
+g <- ggplot() +
+  # Plot land
+  geom_sf(data=foreign, fill="grey80", color="white", lwd=0.3) +
+  geom_sf(data=usa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf(data=counties_wa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf_text(data=counties_wa, mapping=aes(label=NAME), color="white") +
+  # Plot closure zones
+  geom_sf(data=data, mapping=aes(fill=county), lwd=0.2, color="grey30", show.legend=F) +
+  geom_sf_text(data=data, mapping=aes(label=zone_label), size=2) +
+  # Crop
+  coord_sf(xlim=c(-123.2,-122.25), ylim=c(47.05, 47.4)) +
+  # Labels
+  labs(x="", y="", title="Washington's biotoxin closure zones") +
+  # Legend
+  # Theme
+  theme_bw() + my_theme +
+  theme(legend.position = c(0.16, 0.13),
+        legend.background = element_rect(fill=alpha('blue', 0)))
+g
+
+# Export plots
+ggsave(g, filename=file.path(plotdir, "WDFW_closure_zones_puget_south.pdf"),
+       width=11, height=8.5, units="in", dpi=300)
 
 # Willipa Bay
 ################################################################################

@@ -18,6 +18,8 @@ plotdir <- "data/washington/closures/figures/temp"
 tabledir <- "data/washington/closures/tables"
 gisdir <- "data/washington/gis_data/processed"
 
+# TO DO
+# Change "Point Roberts" county to "Whatcom"?
 
 # Format 2002-2011 data
 ################################################################################
@@ -48,7 +50,8 @@ data0211 <- data0211_orig %>%
   mutate(action_orig=gsub(" to ", " for ", action_orig),
          action_orig=recode(action_orig,
                                 "Open for all species besides butter clams"="Open for all species except butter clams",
-                                "Open for all species except for butter clams"="Open for all species except butter clams")) %>%
+                                "Open for all species except for butter clams"="Open for all species except butter clams",
+                                "Open for all species except butter and varnish clams"="All species except butter/varnish clams")) %>%
   # Add action
   mutate(action=ifelse(grepl("OPEN", toupper(action_orig)), "Open", NA),
          action=ifelse(grepl("CLOSE", toupper(action_orig)) & is.na(action), "Closed", action)) %>%
@@ -95,7 +98,10 @@ data1220 <- data1220_orig %>%
   filter(n_empty!=(ncol(.)-4)) %>%
   select(-n_empty) %>%
   # Format county (confirmed both fixes)
-  mutate(sample_county=recode(sample_county, "Grays HarborT"="Grays Harbor", "P"="Pacific")) %>%
+  mutate(sample_county=recode(sample_county,
+                              "Grays HarborT"="Grays Harbor",
+                              "P"="Pacific",
+                              "Point Roberts"="Whatcom")) %>%
   # Format species
   mutate(sample_species=stringr::str_to_sentence(sample_species) %>% stringr::str_trim(),
          sample_species=gsub("(.*)s$", '', sample_species),
@@ -142,16 +148,20 @@ data1220 <- data1220_orig %>%
                                    "Closed to all species on"="Closed to all species",
                                    "Closed to crab"="Closed to all crab species",
                                    "Closed to crab and razor clams"="Closed to all crab species and razor clams",
-                                   "Open to all specieexcept butter and varnish clams"="Open to all species except butter and varnish clams",
-                                   "Open to all species except butter and varnish"="Open to all species except butter and varnish clams",
+                                   "Closed to butter and varnish clams"="Closed to butter/varnish clams",
+                                   "Open to all specieexcept butter and varnish clams"="Open to all species except butter/varnish clams",
+                                   "Open to all species except butter and varnish"="Open to all species except butter/varnish clams",
                                    "Open to all species except buttervarnish and geoducks"="Open to all species except butter/varnish clams and geoducks",
+                                   "Open to all species except butter and varnish and geoduck clams"="Open to all species except butter/varnish clams and geoducks",
                                    "Open to all species except east sound is closed to butter and varnish clams"="Open to all species",
                                    "Open to all crab species closed to razor clams"="Open to all crab species",
                                    "Open to crab closed all other species"="Open to all crab species",
-                                   "Open to crab closed to all other species"="Open to all crab species")) %>%
+                                   "Open to crab closed to all other species"="Open to all crab species",
+                                   "Open to all species except varnish and butter clams"="Open to all species except butter/varnish clams",
+                                   "Open to all species except butter and varnish clams"="Open to all species except butter/varnish clams")) %>%
   # Get action and species
   mutate(action=ifelse(action_orig_simple=="", "Unknown",
-                       ifelse(grepl("Open", action_orig_simple), "Open", "Close"))) %>%
+                       ifelse(grepl("Open", action_orig_simple), "Open", "Closed"))) %>%
   mutate(action_species=gsub("Closed to |Open to ", "", action_orig_simple) %>% stringr::str_to_sentence()) %>%
   # Arrange
   select(year, filename, sheetname,
@@ -159,7 +169,6 @@ data1220 <- data1220_orig %>%
          sample_date, sample_county, sample_site,
          sample_species, toxin, toxin_level, everything()) %>%
   select(-c(action_orig_simple, action_zones, notes))
-
 
 # Inspect
 str(data1220)
@@ -177,6 +186,7 @@ table(data1220$sample_county)
 table(data1220$sample_species)
 table(data1220$toxin)
 
+
 # Merge and export
 ################################################################################
 
@@ -191,7 +201,7 @@ table(data$sample_species)
 sort(unique(data$action_species))
 
 # Export
-saveRDS(data, file.path(outdir, "WA_DOH_2002_2020_biotoxin_closures_rec.Rds"))
+saveRDS(data, file.path(outdir, "WA_DOH_2002_2020_biotoxin_closures_rec_w_sample_data.Rds"))
 
 
 # Build keys

@@ -18,8 +18,6 @@ plotdir <- "data/washington/closures/figures/temp"
 tabledir <- "data/washington/closures/tables"
 gisdir <- "data/washington/gis_data/processed"
 
-# TO DO
-# Change "Point Roberts" county to "Whatcom"?
 
 # Format 2002-2011 data
 ################################################################################

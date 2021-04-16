@@ -76,6 +76,8 @@ closure_zones <- closure_zones_orig %>%
   left_join(zone_key %>% select(zone_id, basin, area), by="zone_id") %>%
   # Add coordinates
   left_join(zone_centroids, by="zone_id") %>%
+  # Format zone id
+  mutate(zone_id=recode(zone_id, "20.1"="20.10")) %>%
   # Arrange
   select(basin, county, area, zone_id_lg, zone_id, zone, lat_dd, long_dd, everything()) %>%
   arrange(basin, county, area, zone_id)

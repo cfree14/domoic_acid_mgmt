@@ -33,6 +33,18 @@ foreign <- rnaturalearth::ne_countries(country="Canada", scale="large", returncl
 # Plot full map
 ################################################################################
 
+# County-zone key
+county_key <- data %>%
+  sf::st_drop_geometry() %>%
+  group_by(county) %>%
+  summarize(zone_ids=paste(sort(unique(zone_id)), collapse=", "))
+
+# Export
+write.csv(county_key, file=file.path(outdir, "WA_county_zone_key.csv"), row.names=F)
+
+# Plot full map
+################################################################################
+
 # Theme
 my_theme <-   theme(axis.text=element_text(size=8),
                     axis.title=element_blank(),

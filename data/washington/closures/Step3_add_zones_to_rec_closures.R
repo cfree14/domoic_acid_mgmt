@@ -67,7 +67,6 @@ sort(unique(data1$species))
 # Step 2. Break into constituent species
 ################################################################################
 
-
 # One row per species
 data2 <- purrr::map_df(1:nrow(data1), function(x) {
 
@@ -134,7 +133,9 @@ area_key <- readxl::read_excel(file.path(outdir, "WA_DOC_rec_closure_area_key.xl
                          "64.010000000000005"="64.01",
                          "16.010000000000002"="16.01",
                          "2.0099999999999998"="2.01",
-                         "78.010000000000005"="78.01"))
+                         "78.010000000000005"="78.01",
+                         "70.010000000000005"="70.01",
+                         "65.010000000000005"="65.01"))
 
 # Inspect key zones
 area_key_zones <- area_key %>%
@@ -208,7 +209,7 @@ for(i in 1:length(spp)){
 
   # Plot data
   g <- ggplot(sdata, aes(x=date, y=zone_id, shape=action, color=action)) +
-    facet_grid(basin~., space="free", scales="free_y", labeller = label_wrap_gen(width=12)) +
+    facet_grid(county~., space="free", scales="free_y", labeller = label_wrap_gen(width=12)) +
     geom_point() +
     # Labels
     labs(x="Date", y="Zone", title=spp[i]) +

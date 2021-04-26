@@ -84,7 +84,9 @@ g
 ggsave(g, filename=file.path(plotdir, "WDFW_closure_zones.pdf"),
        width=8.5, height=11, units="in", dpi=300)
 
-
+# Export plots
+ggsave(g, filename=file.path(plotdir, "WDFW_closure_zones.png"),
+       width=8.5, height=11, units="in", dpi=300)
 
 # Pacific / SJF
 ################################################################################

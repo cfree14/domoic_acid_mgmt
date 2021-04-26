@@ -13,15 +13,15 @@ library(tidyverse)
 
 # Directories
 indir <- "data/washington/da_sampling/raw/Files for Chris Free"
-outdir <- "data/washington/da_sampling/processed"
+outdir <- "data/washington/da_sampling/data"
 plotdir <- "data/washington/da_sampling/figures"
-gisdir <- "data/washington/gis_data"
+gisdir <- "data/washington/gis_data/processed"
 
 # Read data
 sites <- read.csv(file.path(outdir, "WA_DOH_biotoxin_sampling_site_key.csv"), as.is=T)
 
-# Read WA counties
-counties <- sf::st_read(file.path(gisdir, "tl_2016_53_cousub/tl_2016_53_cousub.shp"))
+# Read counties
+counties_wa <- readRDS(file=file.path(gisdir, "WA_counties_rnaturalearth_friendly.Rds"))
 
 
 # Plot data
@@ -30,26 +30,14 @@ counties <- sf::st_read(file.path(gisdir, "tl_2016_53_cousub/tl_2016_53_cousub.s
 # Land
 usa <- rnaturalearth::ne_states(country="United States of America", returnclass = "sf")
 foreign <- rnaturalearth::ne_countries(country="Canada", scale="large", returnclass = "sf")
-wa <- usa %>%
-  filter(name=="Washington") %>%
-  select(geometry)
-
-# WA counties
-counties_wa <- tigris::counties(state="Washington", class="sf") %>%
-  sf::st_transform(sf::st_crs(wa))
-
-# Crop counties
-# plot(counties_wa[5])
-counties_wa_clip <- sf::st_intersection(counties_wa, wa)
-# plot(wa_clip[5])
 
 # Plot data
 g <- ggplot() +
   # Plot land
   geom_sf(data=foreign, fill="grey80", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey80", color="white", lwd=0.3) +
-  geom_sf(data=counties_wa_clip, fill="grey80", color="white", lwd=0.3) +
-  geom_sf_text(data=counties_wa_clip, mapping=aes(label=NAME), color="white", size=3) +
+  geom_sf(data=counties_wa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf_text(data=counties_wa, mapping=aes(label=NAME), color="white", size=3) +
   # Plot sampling sites
   geom_point(data=sites, mapping=aes(x=long_dd, y=lat_dd, color=county), show.legend = F) +
   # Crop

@@ -19,16 +19,12 @@ plotdir <- "data/washington/da_sampling/figures"
 # Read grid codes
 grid_codes_orig <- readxl::read_excel(file.path(indir, "Grid Codes.xls"))
 
-# Read other counties
-data2_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=2) # Clallam County
-data3_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=3) # Jefferson County
-data4_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=4) # Grays Harbor
+# Read lat/long for sites missing from grid_codes
+grid_codes_missing <- readxl::read_excel(file.path(outdir, "missing_site_latlongs.xlsx"))
+grid_codes_missing$site %in% grid_codes_orig$SAMPLING_SITE
 
 # Read Pacific county
-# Reading Pacific county data as Excel sheet produced errors
-# So I saved the sheet as a CSV and read it in as a CSV
-# This mostly works but I have to handle the date (MM/DD/YY to YYYY-MM-DD) before merge
-# data1_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=1)
+# Reading this data as an Excel sheet produced errors so I saved and read the sheet as a CSV
 data1_orig <- read.csv(file.path(indir, "Coast Biotoxin Records 2000_2020_sheet1.csv"), as.is=T) %>%
   # Convert dates
   mutate(CollectDate=mdy(CollectDate) %>% as.character(),
@@ -48,6 +44,11 @@ data1_orig <- read.csv(file.path(indir, "Coast Biotoxin Records 2000_2020_sheet1
          "Domoic Date"="Domoic.Date",
          "DSP Result"="DSP.Result",
          "DSP Date"="DSP.Date")
+
+# Read other counties
+data2_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=2) # Clallam County
+data3_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=3) # Jefferson County
+data4_orig <- readxl::read_excel(file.path(indir, "Coast Biotoxin Records 2000_2020.xls.xlsx"), sheet=4) # Grays Harbor
 
 # Check names
 colnames(data1_orig)[!colnames(data1_orig)%in%colnames(data2_orig)]
@@ -86,9 +87,11 @@ site_key_xy <- grid_codes_orig %>%
   # Arrange
   select(county_id, county, waterbody, site, lat_dd, long_dd, everything()) %>%
   # Reduce to unique
-  unique()
+  unique() %>%
+  # Add missing sites
+  bind_rows(grid_codes_missing)
 
-# Which duplicated
+# BE CAREFUL-Many site names are duplicated
 freeR::which_duplicated(site_key_xy$site)
 
 # Plot data
@@ -113,6 +116,7 @@ write.csv(site_key_xy, file=file.path(outdir, "WA_DOH_biotoxin_sampling_site_key
 
 # Interact with plot
 #ggplotly(g)
+
 
 # Build data
 ################################################################################
@@ -156,7 +160,7 @@ data <- data_full %>%
                          "Razor clam"="Siliqua patula")) %>%
   # Recode incorrect SUBMIT dates
   mutate(submit_date=ifelse(submit_date=="1900-01-01", NA, submit_date)) %>%
-  # Format dates
+  # Format all dates
   mutate(sample_date=ymd(sample_date),
          submit_date=ymd(submit_date),
          receive_date=ymd(receive_date),
@@ -232,7 +236,7 @@ table(data$subsite)
 sites <- sort(unique(data$site))
 sites[!sites %in% site_key_xy$site] # No, 10 sites do not have XY data!
 sites_missing <- data %>%
-  filter(!is.na(lat_dd) | !is.na(long_dd)) %>%
+  filter(is.na(lat_dd) | is.na(long_dd)) %>%
   select(county, waterbody, site, site_id) %>%
   unique()
 

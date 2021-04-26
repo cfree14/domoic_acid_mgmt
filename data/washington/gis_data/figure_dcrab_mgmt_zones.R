@@ -15,11 +15,13 @@ indir <- "data/washington/gis_data/raw/"
 outdir <- "data/washington/gis_data/processed"
 plotdir <- "data/washington/gis_data/figures"
 
-
 # Read data
 zones <- readxl::read_excel("data/merged/processed/WC_dcrab_da_mgmt_zones.xlsx")
 sample_sites <- readxl::read_excel("data/tri_state/sampling_sites/2018may_dcrab_da_sampling_sites.xlsx")
 sma_coords <- readxl::read_excel(file.path(outdir, "SMA_coordinates.xlsx"))
+
+# Read counties
+counties_wa <- readRDS(file=file.path(outdir, "WA_counties_rnaturalearth_friendly.Rds"))
 
 
 # Plot data
@@ -28,7 +30,6 @@ sma_coords <- readxl::read_excel(file.path(outdir, "SMA_coordinates.xlsx"))
 # Add average lat
 zones <- zones %>%
   mutate(lat_dd_avg=(lat_dd_north+lat_dd_south)/2)
-
 
 # Borders
 border_n <- zones %>% arrange(desc(lat_dd_north)) %>% slice(1) %>% pull(lat_dd_north)
@@ -63,6 +64,8 @@ g <- ggplot() +
   # Plot land
   geom_sf(data=foreign, fill="grey80", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf(data=counties_wa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf_text(data=counties_wa, mapping=aes(label=NAME), color="white", size=2) +
   # Plot SMAs
   geom_path(data=sma_coords, mapping=aes(x=long_dd, y=lat_dd, group=subunit, color=sma)) +
   # geom_point(data=sma_coords, mapping=aes(x=long_dd, y=lat_dd, color=sma)) +

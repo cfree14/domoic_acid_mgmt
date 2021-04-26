@@ -118,5 +118,12 @@ data1_use <- data1 %>%
 data <- bind_rows(data1_use, data2) %>%
   arrange(comm_name, date, location, sample_id)
 
+# Inspect
+str(data)
+freeR::complete(data)
+table(data$source)
+table(data$comm_name)
+table(data$sci_name)
+
 # Export data
 saveRDS(data, file.path(outdir, "ODA_2000_2020_da_sampling_data_final.Rds"))

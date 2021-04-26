@@ -16,9 +16,14 @@ indir <- "data/washington/raw_data/Files for Chris Free"
 outdir <- "data/washington/da_sampling/data"
 plotdir <- "data/washington/da_sampling/figures"
 tabledir <- "data/washington/da_sampling/tables"
+gisdir <- "data/washington/gis_data/processed"
 
 # Read data
 data <- readRDS(file=file.path(outdir, "WA_DOH_2000_2020_biotoxin_sampling_data.Rds"))
+
+# Read counties
+counties_wa <- readRDS(file=file.path(gisdir, "WA_counties_rnaturalearth_friendly.Rds"))
+
 
 
 # Total sample
@@ -209,6 +214,8 @@ g <- ggplot() +
   # Plot land
   geom_sf(data=foreign, fill="grey80", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf(data=counties_wa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf_text(data=counties_wa, mapping=aes(label=NAME), color="white", size=3) +
   # Plot points
   geom_point(data_da, mapping=aes(x=long_dd, y=lat_dd, color=comm_name, size=domoic_ppm)) +
   # Labels

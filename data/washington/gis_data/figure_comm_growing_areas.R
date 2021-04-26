@@ -26,6 +26,9 @@ wgs84 <- "+proj=longlat +datum=WGS84"
 usa <- rnaturalearth::ne_states(country="United States of America", returnclass = "sf")
 foreign <- rnaturalearth::ne_countries(country="Canada", scale="large", returnclass = "sf")
 
+# Read counties
+counties_wa <- readRDS(file=file.path(outdir, "WA_counties_rnaturalearth_friendly.Rds"))
+
 # Theme
 my_theme <-   theme(axis.text=element_text(size=6),
                     axis.title=element_blank(),
@@ -48,6 +51,8 @@ g <- ggplot() +
   # Plot land
   geom_sf(data=foreign, fill="grey80", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf(data=counties_wa, fill="grey80", color="white", lwd=0.3) +
+  geom_sf_text(data=counties_wa, mapping=aes(label=NAME), color="white", size=2) +
   # Plot growing areas
   geom_sf(data=data, mapping=aes(color=region), fill=NA) +
   # Crop

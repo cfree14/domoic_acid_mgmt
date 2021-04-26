@@ -12,9 +12,13 @@ library(lubridate)
 library(tidyverse)
 
 # Directories
+wadir <- "data/washington/da_sampling/data"
 ordir <- "data/oregon/processed"
 outdir <- "data/merged/processed"
 plotdir <- "data/merged/figures"
+
+# Read WA data
+data_wa_orig <- readRDS(file.path(wadir, "WA_DOH_2000_2020_biotoxin_sampling_data.Rds"))
 
 # Read OR data
 data_or_orig <- readRDS(file.path(ordir, "ODA_2000_2020_da_sampling_data_final.Rds"))
@@ -75,12 +79,64 @@ data_or <- data_or_orig %>%
          year, month, date, sampleid, type, tissue, da_oper, da_ppm, everything()) %>%
   select(-c(source, type_orig, time))
 
+# Format WA data
+data_wa <- data_wa_orig %>%
+  # Rename
+  rename(sampleid=sample_id,
+         year=sample_year, month=sample_month, date=sample_date,
+         location=site, tissue=domoic_tissue, da_ppm=domoic_ppm) %>%
+  # Add columns
+  mutate(state="Washington",
+         da_oper="") %>%
+  # Arrange
+  select(comm_name, sci_name, state, location, lat_dd, long_dd,
+         year, month, date, sampleid,  tissue, da_oper, da_ppm, everything()) %>%
+  select(-c(submit_date:dsp_ug100g))
+
+
 # Merge data
-data <- bind_rows(data_ca_crab, data_ca_biv, data_or)
+data <- bind_rows(data_ca_crab, data_ca_biv, data_or, data_wa) %>%
+  # Format common names
+  mutate(comm_name=recode(comm_name,
+                          "Cockle clam"="Cockle",
+                          "Basket cockle"="Cockle",
+                          "Native littleneck clam"="Littleneck clam",
+                          "Sea mussel"="California mussel",
+                          "Washington clam"="Butter clam")) %>%
+  # Format scientific names
+  mutate(sci_name=recode(sci_name, "unknown"="Unknown"),
+         sci_name=ifelse(is.na(sci_name), "Unknown", sci_name),
+         sci_name=recode(sci_name,
+                         "Saxidomus giganteus"="Saxidomus gigantea",
+                         "Saxidomus spp."="Saxidomus gigantea")) %>%
+  # Format type
+  mutate(type=ifelse(is.na(type), "unknown", type)) %>%
+  # Format tissue
+  mutate(tissue=tolower(tissue),
+         tissue=recode(tissue, "gut"="viscera", "in shell"="whole"),
+         tissue=ifelse(tissue=="" | is.na(tissue), "unknown", tissue)) %>%
+  # Format operator
+  mutate(da_oper=ifelse(is.na(da_oper), "", da_oper)) %>%
+  # Reduce to rows with DA
+  filter(!is.na(da_ppm))
 
 # Inspect data
 str(data)
 freeR::complete(data)
+
+# Inspect attributes
+table(data$state)
+table(data$type)
+table(data$tissue)
+table(data$da_oper)
+
+# Inspect species -------- VERY IMPERFECT
+table(data$comm_name)
+table(data$sci_name)
+spp_key <- data %>%
+  group_by(sci_name, comm_name) %>%
+  summarise(n=n()) %>%
+  arrange(sci_name)
 
 
 # Export data

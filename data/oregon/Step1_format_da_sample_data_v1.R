@@ -111,6 +111,11 @@ shellfish <- bind_rows(clams, mussels) %>%
   # Add information on type
   mutate(type_orig="not specified",
          type="meat") %>%
+  # Format operators
+  mutate(da_oper=ifelse(is.na(da_oper) & !is.na(da_ppm), "", da_oper),
+         da_oper=ifelse(is.na(da_ppm), NA, da_oper),
+         psp_oper=ifelse(is.na(psp_oper) & !is.na(psp_ppm), "", psp_oper),
+         psp_oper=ifelse(is.na(psp_ppm), NA, psp_oper)) %>%
   # Arrange
   select(-location_orig) %>%
   select(comm_name, species, date, location, type_orig, type, everything()) %>%
@@ -168,7 +173,8 @@ data <- data_orig %>%
   rename(sample_id=lab_id,
          date=sample_date, time=sample_time,
          toxin=analyte_name,
-         quantity_operator=quantitative_operator, quantity_units=quantitative_unit,
+         quantity_operator=quantitative_operator,
+         quantity_units=quantitative_unit,
          quantity_comments=z_analyte_comment_ct) %>%
   # Format date
   mutate(date=as.character(date),
@@ -283,7 +289,7 @@ data <- data_orig %>%
          quantity=ifelse(!is.na(quantity1), quantity1, quantity3)) %>%
   select(-c(quantity1, quantity2, quantity3, quantity_diff)) %>%
   # Extract quantity operator from comments
-  mutate(quantity_operator=ifelse(is.na(quantity_operator) & grepl("<", quantity_comments), "<", quantity_comments),
+  mutate(quantity_operator=ifelse(is.na(quantity_operator) & grepl("<", quantity_comments), "<", quantity_operator),
          quantity_operator=ifelse(is.na(quantity_operator), "", quantity_operator)) %>%
   # Add product info
   left_join(product_key, by="product") %>%

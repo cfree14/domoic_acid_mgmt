@@ -171,6 +171,7 @@ data <- data_full %>%
   mutate(sample_year=year(sample_date),
          sample_month=month(sample_date)) %>%
   # Format domoic values (<0, NoTest, NTD, UNSAT)
+  # UNSAT = unsatisfactory for testing (NA); NTD = No Toxin Detected (0); no test = no test conducted (NA)
   mutate(domoic_ppm=recode(domoic_ppm,
                            "<1"="0",
                            "NoTest"="",
@@ -199,6 +200,8 @@ data <- data_full %>%
   # Add location info
   # Merge based on county, waterbody, and site
   left_join(site_key_xy %>% select(county, waterbody, site, lat_dd, long_dd), by=c("county", "waterbody", "site")) %>%
+  # Update Westport site name to keep site name unique
+  mutate(site=ifelse(site_id=="GHPO010", "Westport 2", site)) %>%
   # Add sample id
   # Use PSP id as overall id because it is complete and unique
   mutate(sample_id=psp_id) %>%
@@ -295,7 +298,7 @@ site_key <- data %>%
 
 # Check for duplicates
 freeR::which_duplicated(site_key$site_id)
-freeR::which_duplicated(site_key$site) # Westport duplicated
+freeR::which_duplicated(site_key$site) # Fixed original Westport duplication
 
 
 # Export data

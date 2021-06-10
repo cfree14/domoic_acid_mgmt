@@ -24,7 +24,9 @@ data_orig <- readRDS(file=file.path(outdir, "CA_OR_WA_da_sampling_data.Rds"))
 # Data
 data <- data_orig %>%
   filter(comm_name %in% c("Razor clam", "California mussel") & date >= ymd("2014-01-01") &
-           !is.na(date) & !is.na(lat_dd) & !is.na(da_ppm))
+           !is.na(date) & !is.na(lat_dd) & !is.na(da_ppm)) %>%
+  # Set 0 to 1
+  mutate(da_ppm=ifelse(da_ppm==0, 1, da_ppm))
 
 # Seasons
 seasons_do <- 2014:2020

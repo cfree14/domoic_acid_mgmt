@@ -14,6 +14,7 @@ library(tidyverse)
 # Directories
 wadir <- "data/washington/da_sampling/data"
 ordir <- "data/oregon/processed"
+cadir <- "data/california/da_sampling/data"
 outdir <- "data/merged/processed"
 plotdir <- "data/merged/figures"
 
@@ -23,8 +24,10 @@ data_wa_orig <- readRDS(file.path(wadir, "WA_DOH_2000_2020_biotoxin_sampling_dat
 # Read OR data
 data_or_orig <- readRDS(file.path(ordir, "ODA_2000_2020_da_sampling_data_final.Rds"))
 
-# Read CA data
-data_ca_crab_orig <- readRDS("/Users/cfree/Dropbox/Chris/UCSB/projects/domoic_acid/data/da_sampling/2020_request/processed/CDPH_crab_viscera_da_data.rds")
+# Read CA crustacean data
+data_ca_crab_orig <- readRDS(file.path(cadir, "CDPH_2015_2021_crustacean_data.Rds"))
+
+# Read CA bivalve data
 data_ca_biv_orig <- readRDS("/Users/cfree/Dropbox/Chris/UCSB/projects/domoic_acid/data/da_sampling/2020_request/processed/CDPH_mollusc_viscera_da_data.rds")
 
 
@@ -33,14 +36,10 @@ data_ca_biv_orig <- readRDS("/Users/cfree/Dropbox/Chris/UCSB/projects/domoic_aci
 
 # Format CA crab data
 data_ca_crab <- data_ca_crab_orig %>%
-  # Lat/long
-  mutate(date=ymd(date),
-         lat_dd_use=ifelse(!is.na(lat_dd), lat_dd, block_lat_dd),
-         long_dd_use=ifelse(!is.na(long_dd), long_dd, block_long_dd)) %>%
   # Select columns of interest
   select(comm_name, species, date,
-         region, area, lat_dd_use, long_dd_use,
-         sampleid, da_ppm_prefix, da_ppm) %>%
+         area, lat_dd, long_dd,
+         sample_id, da_prefix, da_ppm) %>%
   # Add columns
   mutate(state="California",
          month=month(date),
@@ -48,11 +47,10 @@ data_ca_crab <- data_ca_crab_orig %>%
          type="wild",
          tissue="viscera") %>%
   # Rename columns
-  rename(location=area, sci_name=species, lat_dd=lat_dd_use, long_dd=long_dd_use, da_oper=da_ppm_prefix) %>%
+  rename(sampleid=sample_id, location=area, sci_name=species, da_oper=da_prefix) %>%
   # Arrange
   select(comm_name, sci_name, state, location, lat_dd, long_dd,
-         year, month, date, sampleid, type, tissue, da_oper, da_ppm, everything()) %>%
-  select(-region)
+         year, month, date, sampleid, type, tissue, da_oper, da_ppm, everything())
 
 # Format CA bivalve data
 data_ca_biv <- data_ca_biv_orig %>%

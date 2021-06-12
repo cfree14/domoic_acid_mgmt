@@ -173,23 +173,23 @@ data <- data_full %>%
   # Format domoic values (<0, NoTest, NTD, UNSAT)
   # UNSAT = unsatisfactory for testing (NA); NTD = No Toxin Detected (0); no test = no test conducted (NA)
   mutate(domoic_ppm=recode(domoic_ppm,
-                           "<1"="0",
+                           "<1"="1",
                            "NoTest"="",
-                           "NTD"="0",
+                           "NTD"="1",
                            "UNSAT"=""),
          domoic_ppm=as.numeric(domoic_ppm)) %>%
   # Format PSP value (<38, NoTest, NTD, UNSAT)
   mutate(psp_ug100g=recode(psp_ug100g,
-                           "<38"="0",
+                           "<38"="38",
                            "NoTest"="",
-                           "NTD"="0",
+                           "NTD"="38",
                            "UNSAT"=""),
          psp_ug100g=as.numeric(psp_ug100g)) %>%
   # Format DSP values (<1, No Test, NTD)
   mutate(dsp_ug100g=recode(dsp_ug100g,
-                           "<1"="0",
+                           "<1"="1",
                            "No Test"="",
-                           "NTD"="0"),
+                           "NTD"="1"),
          dsp_ug100g=as.numeric(dsp_ug100g)) %>%
   # Format tissue types
   mutate(domoic_tissue=ifelse((domoic_tissue=="" | is.na(domoic_tissue)) & !is.na(domoic_ppm), "Unknown", domoic_tissue)) %>%

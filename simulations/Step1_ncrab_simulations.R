@@ -17,12 +17,17 @@ outputdir <- "simulations/output"
 ################################################################################
 
 # Number of iterations
-niter <- 50
+niter <- 1000
+
+# Parameters
+medians <- seq(5,100,5)
+cvs <- seq(0.25, 4.5, 0.25)
+ncrabs <- seq(6, 36, 6)
 
 # Build results container
-results <- expand.grid(median_ppm=seq(5,100,5),
-                       cv_ppm=seq(0.25, 4.5, 0.25),
-                       ncrabs=seq(6, 36, 6),
+results <- expand.grid(median_ppm=medians,
+                       cv_ppm=cvs,
+                       ncrabs=ncrabs,
                        niter=1:niter) %>%
   # Calculate meanlog and sdlog
   mutate(meanlog=log(median_ppm),
@@ -37,6 +42,7 @@ results <- expand.grid(median_ppm=seq(5,100,5),
 
 # Loop through result
 i <- 1
+tictoc::tic()
 for(i in 1:nrow(results)){
 
   # Parameters
@@ -59,7 +65,7 @@ for(i in 1:nrow(results)){
 
   # Plot results
   if(F){
-    x <- seq(1,100,)
+    x <- seq(1,100,1)
     y <- dlnorm(x=x, meanlog=meanlog, sd=sdlog)
     plot(y ~ x, type="l", main=paste0("mu=", meanlog, " ; sigma=", sdlog))
     abline(v=thresh_ppm, lty=3)
@@ -67,6 +73,7 @@ for(i in 1:nrow(results)){
   }
 
 }
+tictoc::toc()
 
 # Export results
 saveRDS(results, file=file.path(outputdir, "ncrab_simulation_output.Rds"))

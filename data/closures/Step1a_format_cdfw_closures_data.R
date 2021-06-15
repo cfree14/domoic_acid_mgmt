@@ -14,8 +14,11 @@ indir <- "data/closures/raw"
 outdir <- "data/closures/processed"
 plotdir <- "data/closures/figures"
 
+# CA base url
+base_url <- "https://docs.google.com/spreadsheets/u/1/d/1nHfQexwdpDZBZinkCCA1C6rZCkb0sPW8ILq83j2DMxQ/edit#gid=0"
+
 # Read data
-data_orig <- readxl::read_excel(file.path(indir, "CA fishery closures spreadsheet.xlsx"), sheet="CDFW closures", na="NA")
+data_orig <- googlesheets4::read_sheet(ss=base_url, sheet="CDFW closures")
 
 
 # Format data
@@ -150,7 +153,7 @@ build_closure_grid <- function(data, species, fishery, season_key){
 
   # Build empty grid
   date1 <- ymd("2015-01-01")
-  date2 <- ymd("2020-07-31")
+  date2 <- ymd("2021-07-31")
   dates <- seq(date1, date2, by="1 day")
   lat1 <- 32.5
   lat2 <- 42
@@ -226,14 +229,14 @@ build_closure_grid <- function(data, species, fishery, season_key){
     # Plot raster
     geom_raster() +
     # Plot events
-    geom_segment(data=sdata, mapping=aes(x=date, xend=date, y=lat_s, yend=lat_n, linetype=action, ), inherit.aes = F) +
+    # geom_segment(data=sdata, mapping=aes(x=date, xend=date, y=lat_s, yend=lat_n, linetype=action), inherit.aes = F) +
     # Axis
     scale_x_date(date_breaks="1 year", date_labels = "%Y") +
     scale_y_continuous(breaks=32:42) +
     # Labels
     labs(x="", y="Latitude (°N)", title=title) +
     # Legends
-    scale_fill_manual(name="Season status", values=c("grey40", "grey80", "pink", "darkred", "navy"), drop=F) +
+    # scale_fill_manual(name="Season status", values=c("grey40", "grey80", "pink", "darkred", "navy"), drop=F) +
     # Theme
     theme_bw()
   print(g)
@@ -286,26 +289,28 @@ plot_closures <- function(data){
 
 # Apply individually
 closures_dcrabs_comm <- build_closure_grid(data=data3, species="Dungeness crab", fishery="Commercial", season_key=dcrab_seasons)
-closures_dcrabs_rec <- build_closure_grid(data=data3, species="Dungeness crab", fishery="Recreational", season_key=dcrab_seasons)
-closures_rcrabs_comm <- build_closure_grid(data=data3, species="Rock crab", fishery="Commercial", season_key=dcrab_seasons)
-closures_rcrabs_rec <- build_closure_grid(data=data3, species="Rock crab", fishery="Recreational", season_key=dcrab_seasons)
 
-# Plot individually
-plot_closures(closures_dcrabs_comm)
-plot_closures(closures_dcrabs_rec)
-plot_closures(closures_rcrabs_comm)
-plot_closures(closures_rcrabs_rec)
-
+saveRDS(closures_dcrabs_comm , file=file.path(outdir, "CDFW_2015_2021_comm_dcrab_closures.Rds"))
 
 # Merge and export
 ################################################################################
 
-# Merge together
-data <- bind_rows(closures_dcrabs_rec, closures_dcrabs_comm,
-                  closures_rcrabs_rec, closures_rcrabs_comm)
+# # Merge together
+# data <- bind_rows(closures_dcrabs_rec, closures_dcrabs_comm,
+#                   closures_rcrabs_rec, closures_rcrabs_comm)
+#
+# # Export data
+# saveRDS(data, file=file.path(datadir, "CDFW_2015_2020_fishery_closures.Rds"))
+# write.csv(events, file=file.path(datadir, "CDFW_2015_2020_fishery_closure_announcements.csv"))
 
-# Export data
-saveRDS(data, file=file.path(datadir, "CDFW_2015_2020_fishery_closures.Rds"))
-write.csv(events, file=file.path(datadir, "CDFW_2015_2020_fishery_closure_announcements.csv"))
 
 
+# closures_dcrabs_rec <- build_closure_grid(data=data3, species="Dungeness crab", fishery="Recreational", season_key=dcrab_seasons)
+# closures_rcrabs_comm <- build_closure_grid(data=data3, species="Rock crab", fishery="Commercial", season_key=dcrab_seasons)
+# closures_rcrabs_rec <- build_closure_grid(data=data3, species="Rock crab", fishery="Recreational", season_key=dcrab_seasons)
+#
+# # Plot individually
+# plot_closures(closures_dcrabs_comm)
+# plot_closures(closures_dcrabs_rec)
+# plot_closures(closures_rcrabs_comm)
+# plot_closures(closures_rcrabs_rec)

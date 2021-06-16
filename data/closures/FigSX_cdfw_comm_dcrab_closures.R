@@ -64,7 +64,7 @@ g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
   # State/region lines
   geom_hline(yintercept = son_mend_county, linetype="dashed", size=0.5) + # Sonoma/Mendocino
   # Labels
-  labs(x="Date", y="Latitude (°N)", title="PSMFC Commercial Dungeness crab closures") +
+  labs(x="Date", y="Latitude (°N)", title="CDFW Commercial Dungeness crab closures") +
   # Legends
   scale_fill_manual(name="Season status", values=c("grey90", "pink", "orange", "darkred", "coral", "navy", "blue"), na.translate = F, drop=F) +
   # Theme

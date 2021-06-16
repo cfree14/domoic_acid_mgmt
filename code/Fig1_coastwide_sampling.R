@@ -23,6 +23,9 @@ sample_sites2020_orig <- readxl::read_excel("data/tri_state/sampling_sites/2020m
 # Read California sampling sites
 sample_sites_ca <- readxl::read_excel("data/california/zones/CDFW_2020_proposed_biotoxin_zones_sites.xlsx")
 
+# Read SMA coordinates
+sma_coords <- readxl::read_excel("data/washington/gis_data/processed/SMA_coordinates.xlsx")
+
 # Get land
 usa <- rnaturalearth::ne_states(country="United States of America", returnclass = "sf")
 foreign <- rnaturalearth::ne_countries(country=c("Canada", "Mexico"), returnclass = "sf")
@@ -164,6 +167,8 @@ g <- ggplot(zones) +
   geom_hline(data=zones, mapping=aes(yintercept=lat_dd_north), linetype="dotted", size=0.2) +
   geom_text(data=zones, mapping=aes(y=lat_dd_avg, label=zone_id), x=-126.5, hjust=0, size=2, show.legend = F) +
   geom_hline(yintercept=borders, linetype="solid", color="black", size=0.2) +
+  # Plot SMAs
+  geom_path(data=sma_coords, mapping=aes(x=long_dd, y=lat_dd, group=subunit)) +
   # Plot land
   geom_sf(data=foreign, fill="grey90", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey90", color="white", lwd=0.3) +

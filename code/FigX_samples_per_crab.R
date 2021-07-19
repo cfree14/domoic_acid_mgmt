@@ -18,17 +18,16 @@ datadir <- "data/merged/processed"
 samples_orig <- readRDS(file.path(datadir, "CA_OR_WA_da_sampling_data.Rds"))
 
 # Read landings data
-dcrab_orig <- wcfish::pacfin_crab2
-pacfin_ports <- wcfish::pacfin_ports
+landings_orig <- readRDS(file.path(datadir, "PACFIN_1980_2020_dcrab_landings_by_state.Rds"))
 
 
-# Landings per season
+# Build data
 ################################################################################
 
 # Calculate samples per season
-samples <- dcrab_orig %>%
+samples <- samples_orig %>%
   # Reduce to Dungeness crab
-  filter(comm_name=="Dungeness crab" & date>=ymd("2000-01-01")) %>%
+  filter(comm_name=="Dungeness crab" & date>="2000-01-01") %>%
   # Add season marker
   mutate(season=ifelse(month>=10, paste(year, year+1, sep="-"), paste(year-1, year, sep="-"))) %>%
   # Summarize by state and season
@@ -36,32 +35,79 @@ samples <- dcrab_orig %>%
   summarize(nsamples=n()) %>%
   ungroup()
 
-# Calculate landings per season
-dcrab <- dcrab_orig %>%
-  # Summarize by state and season
-  group_by(season, state, port_code, port_complex) %>%
-  summarize(landings_mt=sum(landings_mt)) %>%
-  ungroup() %>%
-  # Calculate 10 year mean
-  mutate(year1=substr(season,1,4) %>% as.numeric) %>%
-  filter(year1>=2010) %>%
-  group_by(state, port_code, port_complex) %>%
-  summarize(landings_mt=mean(landings_mt)) %>%
-  ungroup() %>%
-  # Add lat/long
-  left_join(wcfish::pacfin_ports %>% select(port_code, lat_dd, long_dd, port_yn))
-
 # Build dataset
 data <- samples %>%
-  left_join(landings) %>%
+  # Add landings
+  left_join(landings_orig, by=c("state", "season")) %>%
+  # Calculate samples per mt
   mutate(samples_per_mt=nsamples/landings_mt,
          mt_per_sample=landings_mt/nsamples) %>%
-  # Remove recent season
-  filter(season!="2020-2021")
+  # Calculate samples per latitude
+  mutate(lat_dd=recode(state,
+                       "California"="7",
+                       "Oregon"="4.25",
+                       "Washington"="2.18") %>% as.numeric()) %>%
+  mutate(samples_per_lat=nsamples/lat_dd,
+         lat_per_sample=lat_dd/nsamples) %>%
+  # Reduce to seasons of interest
+  filter(year>=2014 & year <=2019) %>%
+  # Order states
+  mutate(state=factor(state, levels=c("Washington", "Oregon", "California")))
 
-# Plot
-g <- ggplot(data, mapping=aes(x=season, y=mt_per_sample, fill=state)) +
-  geom_bar(stat="identity", position="dodge") +
-  labs(x="Season", y="Landed crab (mt) per sampled crab") +
-  theme_bw()
+
+# Plot data
+################################################################################
+
+# Base theme
+base_theme <- theme(axis.text=element_text(size=6),
+                    axis.title=element_text(size=8),
+                    legend.text=element_text(size=6),
+                    legend.title=element_blank(),
+                    strip.text=element_text(size=8),
+                    plot.title=element_text(size=10),
+                    # Gridlines
+                    panel.grid.major = element_blank(),
+                    panel.grid.minor = element_blank(),
+                    panel.background = element_blank(),
+                    axis.line = element_line(colour = "black"),
+                    legend.key.size = unit(0.3, "cm"),
+                    legend.background = element_rect(fill=alpha('blue', 0)))
+
+# Plot number of samples over time
+g1 <- ggplot(data, mapping=aes(x=year, y=nsamples, color=state)) +
+  geom_line() +
+  geom_point() +
+  # Labels
+  labs(x="Season", y="Number of samples") +
+  theme_bw() + base_theme +
+  theme(legend.position = c(0.75, 0.85))
+g1
+
+# Plot number of samples over time
+g2 <- ggplot(data, mapping=aes(x=year, y=samples_per_mt, color=state)) +
+  geom_line() +
+  geom_point() +
+  # Labels
+  labs(x="Season", y="Number of samples\nper metric ton of landings") +
+  theme_bw() + base_theme +
+  theme(legend.position = "none")
+g2
+
+# Plot number of samples over time
+g3 <- ggplot(data, mapping=aes(x=year, y=samples_per_lat, color=state)) +
+  geom_line() +
+  geom_point() +
+  # Labels
+  labs(x="Season", y="Number of samples\nper latitude of coast") +
+  theme_bw() + base_theme +
+  theme(legend.position = "none")
+g3
+
+# Merge plots
+g <- gridExtra::grid.arrange(g1, g2, g3, nrow=1)
 g
+
+# Export plot
+ggsave(g, filename=file.path(plotdir, "FigSX_sample_density_over_time.png"),
+       width=6.5, height=2.25, units="in", dpi=600)
+

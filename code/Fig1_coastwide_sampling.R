@@ -16,12 +16,12 @@ plotdir <- "figures"
 # Read zones
 zones_orig <- readxl::read_excel("data/merged/processed/WC_dcrab_da_mgmt_zones.xlsx")
 
-# Read tri-state sampling sites
-sample_sites2014_orig <- readxl::read_excel("data/tri_state/sampling_sites/2014jul_dcrab_da_sampling_sites.xlsx")
-sample_sites2020_orig <- readxl::read_excel("data/tri_state/sampling_sites/2020may_dcrab_da_sampling_sites.xlsx")
-
-# Read California sampling sites
-sample_sites_ca <- readxl::read_excel("data/california/zones/CDFW_2020_proposed_biotoxin_zones_sites.xlsx")
+# Read sites
+sites1 <- readxl::read_excel("data/merged/processed/WC_dcrab_sampling_sites.xlsx", sheet=1)
+sites2 <- readxl::read_excel("data/merged/processed/WC_dcrab_sampling_sites.xlsx", sheet=2)
+sample_sites <- bind_rows(sites1, sites2) %>%
+  rename(season=year) %>%
+  mutate(season=paste(season, "season"))
 
 # Read SMA coordinates
 sma_coords <- readxl::read_excel("data/washington/gis_data/processed/SMA_coordinates.xlsx")
@@ -29,6 +29,9 @@ sma_coords <- readxl::read_excel("data/washington/gis_data/processed/SMA_coordin
 # Get land
 usa <- rnaturalearth::ne_states(country="United States of America", returnclass = "sf")
 foreign <- rnaturalearth::ne_countries(country=c("Canada", "Mexico"), returnclass = "sf")
+
+# Sonoma-Mendocino county line
+son_mend_county <- 38+46.125/60
 
 
 # Build port data
@@ -102,6 +105,9 @@ zones <- bind_rows(zones1, zones2) %>%
   # Alter Zone I lat
   mutate(lat_dd_avg=ifelse(zone_id=="H", 35.3, lat_dd_avg))
 
+zones_no_ncal_line <- zones %>%
+  filter(landmark_north!="Sonoma/Mendocino County Line")
+
 # Zone points
 zone_pts <- zones %>%
   mutate(!is.na(lat_dd))
@@ -116,30 +122,39 @@ borders <- c(border_n, borders_s) %>% unique()
 # Build sampling sites
 ##########################################
 
-# Format new CA sample sites
-sample_sites_ca_use <- sample_sites_ca %>%
-  # Add
-  mutate(state="California") %>%
-  # Rename
-  rename(area=port_area, location=sampling_site) %>%
-  # Reduce to new sites
-  filter(type=="new") %>%
-  # Simplify
-  select(state, area, location, long_dd, lat_dd)
-
-# Merge 2020 tri-state and 2020 CA sites
-sample_sites2020 <- sample_sites2020_orig %>%
-  select(state, area, location, long_dd, lat_dd) %>%
-  mutate(long_dd=long_dd*-1) %>%
-  bind_rows(sample_sites_ca_use) %>%
-  mutate(season="2020-21 season")
-
-# Build
-sample_sites <- sample_sites2014_orig %>%
-  mutate(season="2015-16 season") %>%
-  select(season, state, area, location, long_dd, lat_dd) %>%
-  mutate(long_dd=long_dd*-1) %>%
-  bind_rows(sample_sites2020)
+# # OLD METHOD BASED ON TRI-STATE
+#
+# # Read tri-state sampling sites
+# sample_sites2014_orig <- readxl::read_excel("data/tri_state/sampling_sites/2014jul_dcrab_da_sampling_sites.xlsx")
+# sample_sites2020_orig <- readxl::read_excel("data/tri_state/sampling_sites/2020may_dcrab_da_sampling_sites.xlsx")
+#
+# # Read California sampling sites
+# sample_sites_ca <- readxl::read_excel("data/california/zones/CDFW_2020_proposed_biotoxin_zones_sites.xlsx")
+#
+# # Format new CA sample sites
+# sample_sites_ca_use <- sample_sites_ca %>%
+#   # Add
+#   mutate(state="California") %>%
+#   # Rename
+#   rename(area=port_area, location=sampling_site) %>%
+#   # Reduce to new sites
+#   filter(type=="new") %>%
+#   # Simplify
+#   select(state, area, location, long_dd, lat_dd)
+#
+# # Merge 2020 tri-state and 2020 CA sites
+# sample_sites2020 <- sample_sites2020_orig %>%
+#   select(state, area, location, long_dd, lat_dd) %>%
+#   mutate(long_dd=long_dd*-1) %>%
+#   bind_rows(sample_sites_ca_use) %>%
+#   mutate(season="2020-21 season")
+#
+# # Build
+# sample_sites <- sample_sites2014_orig %>%
+#   mutate(season="2015-16 season") %>%
+#   select(season, state, area, location, long_dd, lat_dd) %>%
+#   mutate(long_dd=long_dd*-1) %>%
+#   bind_rows(sample_sites2020)
 
 
 # Plot data
@@ -164,11 +179,13 @@ g <- ggplot(zones) +
   # Facet by season
   facet_wrap(~season) +
   # Plot management zones
-  geom_hline(data=zones, mapping=aes(yintercept=lat_dd_north), linetype="dotted", size=0.2) +
+  geom_hline(data=zones_no_ncal_line, mapping=aes(yintercept=lat_dd_north), linetype="dotted", size=0.2) +
   geom_text(data=zones, mapping=aes(y=lat_dd_avg, label=zone_id), x=-126.5, hjust=0, size=2, show.legend = F) +
   geom_hline(yintercept=borders, linetype="solid", color="black", size=0.2) +
+  # Plot Sonoma-Mendocino country line
+  geom_hline(yintercept=son_mend_county, linetype="dashed", size=0.2) +
   # Plot SMAs
-  geom_path(data=sma_coords, mapping=aes(x=long_dd, y=lat_dd, group=subunit)) +
+  # geom_path(data=sma_coords, mapping=aes(x=long_dd, y=lat_dd, group=subunit)) +
   # Plot land
   geom_sf(data=foreign, fill="grey90", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey90", color="white", lwd=0.3) +

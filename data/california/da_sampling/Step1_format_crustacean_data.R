@@ -11,7 +11,8 @@ library(lubridate)
 library(tidyverse)
 
 # Directories
-datadir <- "data/california/da_sampling/data"
+indir <- "data/california/da_sampling/data/raw"
+outdir <- "data/california/da_sampling/data"
 plotdir <- "data/california/da_sampling/figures"
 
 # Blocks
@@ -22,43 +23,43 @@ blocks <- wcfish::blocks %>%
 ################################################################################
 
 # Read data
-crab1 <- readxl::read_excel(file.path(datadir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Crab 2015-2017") %>%
+crab1 <- readxl::read_excel(file.path(indir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Crab 2015-2017") %>%
   setNames(c("sample_id", "port", "date", "comm_name", "area", "block_id", "fathoms", "da_ppm")) %>%
   mutate_all(as.character)
 
-crab2 <- readxl::read_excel(file.path(datadir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Crab 2017-2018") %>%
+crab2 <- readxl::read_excel(file.path(indir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Crab 2017-2018") %>%
   setNames(c("sample_id", "port", "date", "comm_name", "area", "block_id", "latlong", "fathoms", "da_ppm")) %>%
   mutate_all(as.character)
 
-crab3 <- readxl::read_excel(file.path(datadir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Crab 2018-2019") %>%
+crab3 <- readxl::read_excel(file.path(indir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Crab 2018-2019") %>%
   setNames(c("sample_id", "port", "date", "comm_name", "area", "block_id", "latlong", "fathoms", "da_ppm")) %>%
   mutate_all(as.character)
 
-crab4 <- readxl::read_excel(file.path(datadir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Crab 2019-2020") %>%
+crab4 <- readxl::read_excel(file.path(indir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Crab 2019-2020") %>%
   setNames(c("sample_id", "port", "date", "comm_name", "area", "block_id", "latlong", "fathoms", "da_ppm")) %>%
   mutate_all(as.character)
 
-crab5 <- readxl::read_excel(file.path(datadir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Crab 2020-2021") %>%
+crab5 <- readxl::read_excel(file.path(indir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Crab 2020-2021") %>%
   setNames(c("sample_id", "port", "date", "comm_name", "area", "block_id", "latlong", "fathoms", "da_ppm")) %>%
   mutate_all(as.character)
 
-lobster1 <- readxl::read_excel(file.path(datadir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Lobster 2016") %>%
+lobster1 <- readxl::read_excel(file.path(indir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Lobster 2016") %>%
   setNames(c("sample_id", "port", "date", "comm_name", "area", "block_id",  "fathoms", "da_ppm")) %>%
   mutate_all(as.character)
 
-lobster2 <- readxl::read_excel(file.path(datadir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Lobster 2017-2018") %>%
+lobster2 <- readxl::read_excel(file.path(indir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Lobster 2017-2018") %>%
   setNames(c("sample_id", "port", "date", "comm_name", "area", "block_id", "latlong", "fathoms", "da_ppm")) %>%
   mutate_all(as.character)
 
-lobster3 <- readxl::read_excel(file.path(datadir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Lobster 2018-2019") %>%
+lobster3 <- readxl::read_excel(file.path(indir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Lobster 2018-2019") %>%
   setNames(c("sample_id", "port", "date", "comm_name", "area", "block_id",  "latlong", "fathoms", "da_ppm")) %>%
   mutate_all(as.character)
 
-lobster4 <- readxl::read_excel(file.path(datadir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Lobster 2019-2020") %>%
+lobster4 <- readxl::read_excel(file.path(indir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Lobster 2019-2020") %>%
   setNames(c("sample_id", "port", "date", "comm_name", "area", "block_id",  "latlong", "fathoms", "da_ppm")) %>%
   mutate_all(as.character)
 
-lobster5 <- readxl::read_excel(file.path(datadir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Lobster 2020-2021") %>%
+lobster5 <- readxl::read_excel(file.path(indir, "Free Request 06-09-2021 2015-2021 DA.xlsx"), sheet="Lobster 2020-2021") %>%
   setNames(c("sample_id", "port", "date", "comm_name", "area", "block_id",  "latlong", "fathoms", "da_ppm")) %>%
   mutate_all(as.character)
 
@@ -339,5 +340,5 @@ freeR::complete(data2)
 ################################################################################
 
 # Export data
-saveRDS(data2, file=file.path(datadir, "CDPH_2015_2021_crustacean_data.Rds"))
+saveRDS(data2, file=file.path(indir, "CDPH_2015_2021_crustacean_data.Rds"))
 

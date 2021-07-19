@@ -28,7 +28,7 @@ data_or_orig <- readRDS(file.path(ordir, "ODA_2000_2020_da_sampling_data_final.R
 data_ca_crab_orig <- readRDS(file.path(cadir, "CDPH_2015_2021_crustacean_data.Rds"))
 
 # Read CA bivalve data
-data_ca_biv_orig <- readRDS("/Users/cfree/Dropbox/Chris/UCSB/projects/domoic_acid/data/da_sampling/2020_request/processed/CDPH_mollusc_viscera_da_data.rds")
+data_ca_biv_orig <- readRDS(file.path(cadir, "CDPH_2000_2021_other_data.Rds"))
 
 
 # Build data
@@ -59,11 +59,13 @@ data_ca_biv <- data_ca_biv_orig %>%
          state="California",
          month=month(date)) %>%
   # Rename
-  rename(sci_name=species, da_oper=da_ppm_prefix) %>%
+  rename(sci_name=species, location=site) %>%
   # Arrange
   select(comm_name, sci_name, state, location, lat_dd, long_dd,
          year, month, date, sampleid, type, tissue, da_oper, da_ppm, everything()) %>%
-  select(-c(county, type_orig, notes))
+  select(-c(county, sample_type, nindivs)) %>%
+  # Exclude spiny lobster samples
+  filter(comm_name!="Spiny lobster")
 
 # Format OR data
 data_or <- data_or_orig %>%
@@ -100,7 +102,9 @@ data <- bind_rows(data_ca_crab, data_ca_biv, data_or, data_wa) %>%
                           "Basket cockle"="Cockle",
                           "Native littleneck clam"="Littleneck clam",
                           "Sea mussel"="California mussel",
-                          "Washington clam"="Butter clam")) %>%
+                          "Washington clam"="Butter clam",
+                          "Horse clam"="Gaper (horse) clam",
+                          "Gaper clam"="Gaper (horse) clam")) %>%
   # Format scientific names
   mutate(sci_name=recode(sci_name, "unknown"="Unknown"),
          sci_name=ifelse(is.na(sci_name), "Unknown", sci_name),
@@ -131,10 +135,16 @@ table(data$da_oper)
 # Inspect species -------- VERY IMPERFECT
 table(data$comm_name)
 table(data$sci_name)
+
+
+# Species key
 spp_key <- data %>%
-  group_by(sci_name, comm_name) %>%
+  group_by(comm_name, sci_name, ) %>%
   summarise(n=n()) %>%
-  arrange(sci_name)
+  arrange(desc(n))
+
+freeR::which_duplicated(spp_key$comm_name)
+freeR::which_duplicated(spp_key$comm_name)
 
 
 # Export data

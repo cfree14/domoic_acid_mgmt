@@ -59,7 +59,7 @@ data <- data_orig %>%
             n=n(),
             nover=sum(da_ppm>=da_ppm_thresh),
             pover=nover/n,
-            da_ppm_avg=mean(da_ppm),
+            da_ppm_avg=median(da_ppm),
             type=cut(pover, breaks = c(-Inf, 0.00000001, 0.5, Inf),
                      labels=c("Clean (0% over)", "Intermediate (<50% over)", "Closed (≥50% over)"), right = F, ordered_result = T)) %>%
   ungroup()
@@ -156,7 +156,7 @@ g <- ggplot(data %>% filter(date>=date_min_do),
   # Labels
   labs(x="Sample date", y="Latitude (°N)") +
   # Legends
-  scale_size_continuous(name="Mean survey\ndomoic acid (ppm)", range = c(0.01, 4)) +
+  scale_size_continuous(name="Median survey\ndomoic acid (ppm)", range = c(0.01, 4)) +
   scale_fill_ordinal(name="Survey results") +
   # Theme
   theme_bw() + my_theme

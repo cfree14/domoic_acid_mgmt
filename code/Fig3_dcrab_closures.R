@@ -109,7 +109,7 @@ g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
 g
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "Fig4_dcrab_closures.png"),
+ggsave(g, filename=file.path(plotdir, "Fig3_dcrab_closures.png"),
        width=6.5, height=4, units="in", dpi=600)
 
 

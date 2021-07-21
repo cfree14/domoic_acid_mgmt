@@ -40,7 +40,7 @@ results <- expand.grid(median_ppm=medians,
   # Remove unlikely rows
   filter(!(cv_ppm > 1.2 & median_ppm >= 40) & !(median_ppm < 40 & cv_ppm > (6-median_ppm*0.12 )))
 
-# Loop through result
+# Loop through results
 i <- 1
 tictoc::tic()
 for(i in 1:nrow(results)){

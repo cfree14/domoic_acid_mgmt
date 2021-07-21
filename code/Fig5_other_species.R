@@ -170,6 +170,6 @@ g2
 g <- gridExtra::grid.arrange(g1, g2, ncol=1)
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "Fig4_other_species.png"),
+ggsave(g, filename=file.path(plotdir, "Fig5_other_species.png"),
        width=6.5, height=5, units="in", dpi=600)
 

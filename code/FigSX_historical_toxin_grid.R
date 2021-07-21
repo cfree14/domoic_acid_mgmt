@@ -20,14 +20,6 @@ data_orig <- readRDS(file=file.path(outdir, "CA_OR_WA_da_sampling_data.Rds"))
 # Read zones
 zones <- readxl::read_excel("data/merged/processed/WC_dcrab_da_mgmt_zones.xlsx")
 
-# # Build zones dataframe
-# zones_df <- zones %>%
-#   filter(type=="Current" & !is.na(lat_dd_north)) %>%
-#   select(state, lat_dd_north) %>%
-#   rename(y=lat_dd_north) %>%
-#   mutate(x1=ifelse(state=="Oregon", "2017-11-01", "2014-10-01") %>% ymd(),
-#          x2=ymd("2021-08-14"))
-
 # Build zones dataframe
 zones_df <- zones %>%
   filter(!is.na(lat_dd_north)) %>%
@@ -46,23 +38,32 @@ zones_df <- zones %>%
 # Theshold
 da_ppm_thresh <- 30
 
-# Data
+# Build data
 data <- data_orig %>%
   # Reduce to Dungness crab
-  filter(comm_name=="Dungeness crab" & tissue=="viscera" & date >= ymd("2000-01-01")) %>%
-  # Add survey id
-  mutate(surveyid=paste(date, location, sep="-")) %>%
-  # Summarize results by surveyid
-  group_by(state, year, month, date, location, surveyid) %>%
-  summarize(lat_dd=mean(lat_dd),
-            long_dd=mean(long_dd),
-            n=n(),
-            nover=sum(da_ppm>=da_ppm_thresh),
-            pover=nover/n,
-            da_ppm_avg=median(da_ppm),
-            type=cut(pover, breaks = c(-Inf, 0.00000001, 0.5, Inf),
-                     labels=c("Clean (0% over)", "Intermediate (<50% over)", "Closed (≥50% over)"), right = F, ordered_result = T)) %>%
-  ungroup()
+  filter(comm_name=="Dungeness crab" & tissue=="viscera" & date >= ymd("2014-01-01")) %>%
+  # Add lat/week bin
+  mutate(lat_bin=cut(lat_dd, breaks=seq(34,48,0.5)),
+         week=lubridate::week(date),
+         week_bin=paste(year, week, sep="-")) %>%
+  # Summarize by bins
+  group_by(week_bin, lat_bin) %>%
+  summarize(n=n(),
+            nover=da_ppm>=30,
+            pover=nover/n)
+
+# Plot data
+g <- ggplot(data, aes(x=week_bin, y=lat_bin, fill=pover)) +
+  geom_tile() +
+  # Legend
+  scale_fill_gradientn("Proportion", colors=RColorBrewer::brewer.pal(9, "YlOrRd")) +
+  guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
+  # Theme
+  theme_bw()
+g
+
+
+
 
 
 # Season info
@@ -95,8 +96,8 @@ seasons_or <- tibble(year=paste(seasons_do, seasons_do+1, sep="-"),
 openers_ca_n <- paste0(seasons_do, "-12-01") %>% ymd()
 closers_ca_n <- paste0(seasons_do+1, "-07-15") %>% ymd()
 seasons_ca_n <- tibble(year=paste(seasons_do, seasons_do+1, sep="-"),
-                     open=openers_ca_n,
-                     close=closers_ca_n)
+                       open=openers_ca_n,
+                       close=closers_ca_n)
 
 # California-Central season
 # November 15th to June 30th
@@ -131,7 +132,7 @@ date_max_do <- ymd(paste0(max(seasons_do)+1, "-01-01"))
 
 # Plot data
 g <- ggplot(data %>% filter(date>=date_min_do),
-            aes(x=date, y=lat_dd, size=da_ppm_avg, fill=pover)) +
+            aes(x=date, y=lat_dd, size=da_ppm_avg, fill=type)) +
   # Season shading
   geom_rect(data=seasons_wa, inherit.aes=F, mapping=aes(xmin=open, xmax=close), ymin=46.25, ymax=48.48, fill="grey90") +
   geom_rect(data=seasons_or, inherit.aes=F, mapping=aes(xmin=open, xmax=close), ymin=42, ymax=46.25, fill="grey90") +
@@ -157,10 +158,7 @@ g <- ggplot(data %>% filter(date>=date_min_do),
   labs(x="Sample date", y="Latitude (°N)") +
   # Legends
   scale_size_continuous(name="Median survey\ndomoic acid (ppm)", range = c(0.01, 4)) +
-  # scale_fill_ordinal(name="Survey results") +
-  scale_fill_gradientn(name="Percent above\naction threshold", colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
-                       labels = scales::percent_format(accuracy = 1)) +
-  guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
+  scale_fill_ordinal(name="Survey results") +
   # Theme
   theme_bw() + my_theme
 g

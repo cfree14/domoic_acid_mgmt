@@ -108,6 +108,6 @@ g <- gridExtra::grid.arrange(g1, g2, g3, nrow=1)
 g
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "FigSX_sample_density_over_time.png"),
+ggsave(g, filename=file.path(plotdir, "Fig4_sample_density_by_state.png"),
        width=6.5, height=2.25, units="in", dpi=600)
 

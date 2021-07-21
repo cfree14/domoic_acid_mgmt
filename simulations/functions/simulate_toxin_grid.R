@@ -37,7 +37,7 @@ simulate_toxin_grid <- function(grid, type){
     setExtent(ext=grid_extent)
 
   # Plot
-  g <- plot_grid(toxin_grid2)
+  g <- plot_grid_unscaled(toxin_grid2)
   print(g)
 
   # Return

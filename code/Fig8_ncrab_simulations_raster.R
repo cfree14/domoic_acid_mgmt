@@ -26,11 +26,14 @@ surveys_orig <- readRDS(file=file.path(datadir, "CA_OR_WA_da_survey_results.Rds"
 # Format simulation results
 ################################################################################
 
+# Define action threshold
+thresh <- 1/6
+
 # Format results
 data <- data_orig %>%
   # What should have been done, what was done, and was this correct?
-  mutate(action_true=ifelse(pover_true>=0.5, "close", "open"),
-         action_obs=ifelse(pover_obs>=0.5, "close", "open"),
+  mutate(action_true=ifelse(pover_true>=thresh, "close", "open"),
+         action_obs=ifelse(pover_obs>=thresh, "close", "open"),
          obs_correct=ifelse(action_true==action_obs, "correct", "incorrect")) %>%
   # Classify actions
   mutate(action_type=paste(action_true, action_obs, sep="-"),
@@ -53,7 +56,7 @@ data <- data_orig %>%
   select(median_ppm:ncrabs, p_opened_incorr, p_closed_incorr) %>%
   gather(key="metric", value="probability", 6:7) %>%
   mutate(metric=recode_factor(metric,
-                              "p_closed_incorr"="Risk of delaying\nunnecessarily",
+                              "p_closed_incorr"="Risk of closing\nunnecessarily",
                               "p_opened_incorr"="Risk of opening\nrecklessly")) %>%
   # Format crabs
   mutate(ncrabs_label=paste(ncrabs, "crabs"),
@@ -86,7 +89,7 @@ surveys <- surveys_orig %>%
                       ifelse(median_ppm>30 & median_ppm<=45, "upper", "none")))
 
 
-# Calculate number of decisisons within bin
+# Calculate number of decisions within bin
 bin_n <- surveys %>%
   # Number of surveys in each category
   group_by(risky, mu_bin, cv_bin) %>%
@@ -118,7 +121,7 @@ bin_wrong_hist <- bin_n %>%
          pwrong_exp_label=paste0(round(pwrong_exp*100,0), "%")) %>%
   # Reduce to scenarios of interest
   filter(risky!="none") %>%
-  filter( (metric=="Risk of delaying\nunnecessarily" & risky=="lower") | (metric == "Risk of opening\nrecklessly" & risky=="upper")) %>%
+  filter( (metric=="Risk of closing\nunnecessarily" & risky=="lower") | (metric == "Risk of opening\nrecklessly" & risky=="upper")) %>%
   # Arrange
   arrange(metric, ncrabs_label)
 
@@ -128,7 +131,7 @@ bin_wrong_hist <- bin_n %>%
 ################################################################################
 
 # Challenging zones
-challenge_zones <-tibble(metric=factor(x=c("Risk of delaying\nunnecessarily", "Risk of opening\nrecklessly")),
+challenge_zones <-tibble(metric=factor(x=c("Risk of closing\nunnecessarily", "Risk of opening\nrecklessly")),
                          x1=c(15,30),
                          x2=c(30,45))
 
@@ -149,14 +152,14 @@ my_theme <- theme(axis.text=element_text(size=6),
 # Plot data
 g <- ggplot(data, aes(x=median_ppm, y=cv_ppm, fill=probability)) +
   facet_grid(metric~ncrabs_label) +
-  geom_raster(hjust=1) +
+  geom_raster() +
   # Plot survey points
-  # geom_point(data=surveys, mapping=aes(x=median_ppm, y=cv_ppm, color=risky),
-  #            inherit.aes = F, pch=1, alpha=0.6, size=0.8, stroke=0.2) +
+  geom_point(data=surveys, mapping=aes(x=median_ppm, y=cv_ppm), color="grey40",
+             inherit.aes = F, pch=1, alpha=0.6, size=0.8, stroke=0.2) +
   # Add percent expected wrong
-  geom_text(data=bin_wrong_hist, mapping=aes(x=60, y=4.5, label=pwrong_exp_label), hjust=1, size=2, inherit.aes = F) +
+  # geom_text(data=bin_wrong_hist, mapping=aes(x=60, y=4.5, label=pwrong_exp_label), hjust=1, size=2, inherit.aes = F) +
   # Plot challenging zones
-  geom_segment(data=challenge_zones, mapping=aes(x=x1, xend=x2, y=0.1, yend=0.1), inherit.aes = F) +
+  # geom_segment(data=challenge_zones, mapping=aes(x=x1, xend=x2, y=0.1, yend=0.1), inherit.aes = F) +
   # Lines
   geom_vline(xintercept = 30, linetype="dotted", lwd=0.2) +
   # Labels
@@ -165,13 +168,14 @@ g <- ggplot(data, aes(x=median_ppm, y=cv_ppm, fill=probability)) +
   # Legend
   # scale_color_manual(name="Risky", values=c("grey80", "black"), guide=F) +
   scale_fill_gradientn(name="Probability",
-                       colors=RColorBrewer::brewer.pal(9, "YlOrRd")[2:9]) +
+                       colors=RColorBrewer::brewer.pal(9, "YlOrRd")[2:9],
+                       labels = scales::percent_format(accuracy = 1)) +
   guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
   # Theme
   theme_bw() + my_theme
 g
 
 # Export figure
-ggsave(g, filename=file.path(plotdir, "Fig6_ncrab_simulations.png"),
+ggsave(g, filename=file.path(plotdir, "Fig8_ncrab_simulations_raster.png"),
        width=6.5, height=2.75, units="in", dpi=600)
 

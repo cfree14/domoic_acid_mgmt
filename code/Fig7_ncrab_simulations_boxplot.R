@@ -22,6 +22,11 @@ data_orig <- readRDS(file=file.path(outputdir, "ncrab_simulation_output.Rds"))
 # Read survey results
 surveys_orig <- readRDS(file=file.path(datadir, "CA_OR_WA_da_survey_results.Rds"))
 
+# Number of combos
+combo_key <- data_orig %>%
+  select(median_ppm, cv_ppm) %>%
+  unique()
+
 
 # Format simulation results
 ################################################################################

@@ -22,16 +22,88 @@ sapply(list.files(codedir), function(x) source(file.path(codedir, x)))
 # Run some simulation
 ################################################################################
 
-# Setup scenario
-grid_temp <- set_grid(ymin=42, ymax=46, yres=0.05, ndays=180)
-mgmt_info <- set_mgmt_even(nstations=12, grid=grid_temp)
-stations <- mgmt_info$stations
-mgmt_zones <- mgmt_info$zones
-toxin_grid <- simulate_toxin_grid(grid=grid_temp, type="auto")
-plot_setup(toxin_grid, stations, mgmt_zones)
+# Parameters
+niter <- 100
+nstations <- seq(2, 20, 2)
+key <- expand.grid(nstations=nstations,
+                   iter=1:niter) %>%
+  arrange(nstations, iter)
 
-# Run scenario
-results <- simulate_mgmt(toxin_grid, stations, mgmt_zones)
+# Loop though number of stations
+x <- 1
+results <- purrr::map_df(1:nrow(key), function(x){
+
+  # Extract parameters
+  nstations <- key$nstations[x]
+  iter <- key$iter[x]
+
+  # Setup grid
+  grid_temp <- set_grid(ymin=42, ymax=46, yres=0.05, ndays=180)
+
+  # Setup management
+  mgmt_info <- set_mgmt_even(nstations=nstations, grid=grid_temp, plot=F)
+  stations <- mgmt_info$stations
+  mgmt_zones <- mgmt_info$zones
+
+  # Setup toxin grid
+  toxin_grid <- simulate_toxin_grid(grid=grid_temp, type="diagonal", plot=F)
+  # plot_setup(toxin_grid, stations, mgmt_zones)
+
+  # Run scenario
+  output <- simulate_mgmt(toxin_grid, stations, mgmt_zones, plot=F)
+
+  # Quantify performance
+  perf_stats <- quantify_performance(output)
+
+  # Prepare results
+  results_i <- perf_stats %>%
+    mutate(nstations=nstations,
+           iter=iter) %>%
+    select(nstations, iter, everything())
+
+  # Return
+  results_i
+
+})
+
+# Format results for plotting
+stats <- results %>%
+  # Calculate iteration-level stats
+  group_by(nstations, iter) %>%
+  summarize(p_risk_missed=n[status_diff=="Open recklessly"]/(n[status_diff=="Open recklessly"] + n[status_diff=="Closed correctly"]),
+            p_close_unneeded=n[status_diff=="Closed unnecessarily"] / (n[status_diff=="Closed unnecessarily"] + n[status_diff=="Closed correctly"])) %>%
+  ungroup() %>%
+  # Calculate station-level averages
+  group_by(nstations) %>%
+  summarize(p_risk_missed=mean(p_risk_missed),
+            p_close_unneeded=mean(p_close_unneeded)) %>%
+  ungroup()
+
+# Plot results
+g <- ggplot(stats, aes(x=p_risk_missed, y=p_close_unneeded, fill=nstations)) +
+  geom_point(pch=21, size=4) +
+  geom_point(x=0, y=0, color="black", size=4, pch=16) +
+  # Axes
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1), lim=c(0,NA)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.5), lim=c(0,NA)) +
+  # Legend
+  scale_fill_gradientn(name="Number of stations", colors=RColorBrewer::brewer.pal(9, "YlOrRd")) +
+  guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
+  # Labels
+  labs(x="Proportion of PH risk missed by closures", y="Proportion of fishery closures\nthat were unnecessary") +
+  # Theme
+  theme_bw()
+g
+
+
+
+
+
+
+
+
+
+
 
 # Plot results of scenario
 toxin_grid <- simulate_toxin_grid(grid=grid_temp, type="diagonal")

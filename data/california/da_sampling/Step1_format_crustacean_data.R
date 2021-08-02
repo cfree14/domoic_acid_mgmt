@@ -19,6 +19,7 @@ plotdir <- "data/california/da_sampling/figures"
 blocks <- wcfish::blocks %>%
   sf::st_drop_geometry()
 
+
 # Read and merge data
 ################################################################################
 
@@ -111,13 +112,14 @@ data <- data_orig %>%
                           "Lobster"="California spiny lobster",
                           "Lobster (f)"="California spiny lobster",
                           "Lobster (m)"="California spiny lobster",
-                          "Spider crab"="Sheep crab")) %>%
+                          "Sheep crab"="Sheep (spider) crab",
+                          "Spider crab"="Sheep (spider) crab")) %>%
   # Add species
   mutate(species=recode(comm_name,
                         "Dungeness crab"="Metacarcinus magister",
                         "Rock crab"="Cancer spp.",
-                        "Sheep crab"="Loxorhynchus grandis",
-                        "Spiny lobster"="Panulirus interruptus")) %>%
+                        "Sheep (spider) crab"="Loxorhynchus grandis",
+                        "California spiny lobster"="Panulirus interruptus")) %>%
   # Add block meta-data
   left_join(blocks %>% select(block_id, block_lat_dd, block_long_dd), by="block_id") %>%
   # Format lat/long
@@ -340,5 +342,5 @@ freeR::complete(data2)
 ################################################################################
 
 # Export data
-saveRDS(data2, file=file.path(indir, "CDPH_2015_2021_crustacean_data.Rds"))
+saveRDS(data2, file=file.path(outdir, "CDPH_2015_2021_crustacean_data.Rds"))
 

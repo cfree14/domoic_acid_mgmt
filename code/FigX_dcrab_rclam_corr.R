@@ -45,7 +45,7 @@ data_all_spp <- data_orig %>%
   # Compute medians
   group_by(comm_name, tissue, lat_catg, time_catg) %>%
   summarize(n=n(),
-            da_ppm_med=median(da_ppm)) %>%
+            da_ppm_med=quantile(da_ppm, probs=0.5)) %>%
   ungroup()
 
 # Extract razor clam
@@ -66,10 +66,61 @@ data <- data_rclam %>%
 
 # Plot data
 g <- ggplot(data, aes(x=da_ppm_rclam, y=da_ppm_dcrab)) +
+  geom_smooth(method="lm") +
   geom_point()
 g
 
 
+# Build data
+################################################################################
 
+# Data
+surveys <- data_orig %>%
+  # Reduce to Dungness crab
+  filter(comm_name=="Dungeness crab" & tissue=="viscera" & date >= ymd("2000-01-01")) %>%
+  # Add survey id
+  mutate(surveyid=paste(date, location, sep="-")) %>%
+  # Summarize results by surveyid
+  group_by(state, year, month, date, location, surveyid) %>%
+  summarize(lat_dd=mean(lat_dd),
+            long_dd=mean(long_dd),
+            n=n(),
+            nover=sum(da_ppm>=30),
+            pover=nover/n,
+            da_ppm_avg=median(da_ppm)) %>%
+  ungroup() %>%
+  # Filter to complete surveys
+  filter(n>=5) %>%
+  # Assign a zone and week
+  # Categorize spatial zones
+  mutate(lat_catg=cut(lat_dd, breaks=zone_breaks, labels = zone_labels)) %>%
+  # Categorize temporal zones
+  mutate(jweek=week(date),
+         jweek_rounded=floor(jweek/2)*2,
+         time_catg=paste(year, jweek_rounded, sep="-")) %>%
+  # Add razor clam
+  inner_join(data_rclam, by=c("lat_catg", "time_catg")) %>%
+  # over
+  mutate(over=ifelse(nover>0, 1, 0))
+
+ggplot(surveys, aes(x=da_ppm_rclam, y=pover)) +
+  geom_point()
+
+glmfit <- glm(over ~ da_ppm_rclam, data=surveys, family = "binomial")
+summary(glmfit)
+
+# plot(glmfit)
+
+x <- 1:500
+y <- predict.glm(object=glmfit, newdata = tibble(da_ppm_rclam=x), type="response")
+df <- tibble(x=x,
+             p_contam=y)
+
+g <- ggplot(data=df, aes(x=x, y=p_contam)) +
+  geom_line() +
+  geom_point(data=surveys, mapping=aes(x=da_ppm_rclam, y=over)) +
+  lims(y=c(0,1)) +
+  theme_bw()
+g
 
 

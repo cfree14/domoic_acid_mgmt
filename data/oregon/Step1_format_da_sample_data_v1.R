@@ -43,7 +43,7 @@ mussels <- mussels_orig %>%
   janitor::clean_names("snake") %>%
   rename(date=sampled_date, location=collection_site,
          da_oper=vari_for_da, da_ppm=domoic_acid, psp_oper=vari_for_psp, psp_ppm=psp_toxins) %>%
-  mutate(comm_name="California mussel",
+  mutate(comm_name="California (sea) mussel",
          species="Mytilus californianus")
 
 # Merge shellfish

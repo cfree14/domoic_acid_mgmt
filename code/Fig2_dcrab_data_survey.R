@@ -20,14 +20,6 @@ data_orig <- readRDS(file=file.path(outdir, "CA_OR_WA_da_sampling_data.Rds"))
 # Read zones
 zones <- readxl::read_excel("data/merged/processed/WC_dcrab_da_mgmt_zones.xlsx")
 
-# # Build zones dataframe
-# zones_df <- zones %>%
-#   filter(type=="Current" & !is.na(lat_dd_north)) %>%
-#   select(state, lat_dd_north) %>%
-#   rename(y=lat_dd_north) %>%
-#   mutate(x1=ifelse(state=="Oregon", "2017-11-01", "2014-10-01") %>% ymd(),
-#          x2=ymd("2021-08-14"))
-
 # Build zones dataframe
 zones_df <- zones %>%
   filter(!is.na(lat_dd_north)) %>%
@@ -62,7 +54,18 @@ data <- data_orig %>%
             da_ppm_avg=median(da_ppm),
             type=cut(pover, breaks = c(-Inf, 0.00000001, 0.5, Inf),
                      labels=c("Clean (0% over)", "Intermediate (<50% over)", "Closed (≥50% over)"), right = F, ordered_result = T)) %>%
-  ungroup()
+  ungroup() %>%
+  # Filter to complete surveys
+  filter(n>=5)
+
+# Individual results
+data_indiv <- data_orig %>%
+  # Reduce to Dungness crab
+  filter(comm_name=="Dungeness crab" & tissue=="viscera" & date >= ymd("2000-01-01")) %>%
+  # Add survey id
+  mutate(surveyid=paste(date, location, sep="-")) %>%
+  # Filter to surveys not included
+  filter(!surveyid %in% data$surveyid)
 
 
 # Season info
@@ -108,6 +111,16 @@ seasons_ca_c <- tibble(year=paste(seasons_do, seasons_do+1, sep="-"),
 
 
 
+# Stats for manuscript
+################################################################################
+
+# When did the WA end of season in 2016
+data %>%
+  filter(state=="Washington" & date >= "2015-01-01" & date <= "2015-10-01") %>%
+  group_by(date) %>%
+  summarize(n=n()) %>%
+  arrange(date)
+
 # Plot data
 ################################################################################
 
@@ -137,8 +150,10 @@ g <- ggplot(data %>% filter(date>=date_min_do),
   geom_rect(data=seasons_or, inherit.aes=F, mapping=aes(xmin=open, xmax=close), ymin=42, ymax=46.25, fill="grey90") +
   geom_rect(data=seasons_ca_n, inherit.aes=F, mapping=aes(xmin=open, xmax=close), ymin=son_mend_county, ymax=42, fill="grey90") +
   geom_rect(data=seasons_ca_c, inherit.aes=F, mapping=aes(xmin=open, xmax=close), ymin=35, ymax=son_mend_county, fill="grey90") +
-  # Sampling points
-  geom_point(alpha=0.8, pch=21) +
+  # Survey points
+  geom_point(alpha=0.8, pch=21, stroke=0.5) +
+  # Incomplete survey points
+  # geom_point(data=data_indiv %>% filter(date>=date_min_do), aes(x=date, y=lat_dd), shape="x", inherit.aes = F) +
   # Management zone lines
   geom_segment(data=zones_df, mapping=aes(x=x1, xend=x2, y=y, yend=y),
                inherit.aes = F, color="grey40", size=0.35) +

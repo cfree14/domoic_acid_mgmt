@@ -65,7 +65,7 @@ data_ca_biv <- data_ca_biv_orig %>%
          year, month, date, sampleid, type, tissue, da_oper, da_ppm, everything()) %>%
   select(-c(county, sample_type, nindivs)) %>%
   # Exclude spiny lobster samples
-  filter(comm_name!="Spiny lobster")
+  filter(!comm_name %in% c(data_ca_crab$comm_name))
 
 # Format OR data
 data_or <- data_or_orig %>%
@@ -100,17 +100,10 @@ data <- bind_rows(data_ca_crab, data_ca_biv, data_or, data_wa) %>%
   mutate(comm_name=recode(comm_name,
                           "Cockle clam"="Cockle",
                           "Basket cockle"="Cockle",
-                          "Native littleneck clam"="Littleneck clam",
-                          "Sea mussel"="California mussel",
-                          "Washington clam"="Butter clam",
-                          "Horse clam"="Gaper (horse) clam",
-                          "Gaper clam"="Gaper (horse) clam")) %>%
+                          "Native littleneck clam"="Littleneck clam")) %>%
   # Format scientific names
   mutate(sci_name=recode(sci_name, "unknown"="Unknown"),
-         sci_name=ifelse(is.na(sci_name), "Unknown", sci_name),
-         sci_name=recode(sci_name,
-                         "Saxidomus giganteus"="Saxidomus gigantea",
-                         "Saxidomus spp."="Saxidomus gigantea")) %>%
+         sci_name=ifelse(is.na(sci_name), "Unknown", sci_name)) %>%
   # Format type
   mutate(type=ifelse(is.na(type), "unknown", type)) %>%
   # Format tissue
@@ -132,19 +125,18 @@ table(data$type)
 table(data$tissue)
 table(data$da_oper)
 
-# Inspect species -------- VERY IMPERFECT
+# Inspect species
 table(data$comm_name)
 table(data$sci_name)
 
-
 # Species key
 spp_key <- data %>%
-  group_by(comm_name, sci_name, ) %>%
+  group_by(comm_name, sci_name) %>%
   summarise(n=n()) %>%
   arrange(desc(n))
 
 freeR::which_duplicated(spp_key$comm_name)
-freeR::which_duplicated(spp_key$comm_name)
+freeR::which_duplicated(spp_key$sci_name)
 
 
 # Export data
@@ -152,3 +144,4 @@ freeR::which_duplicated(spp_key$comm_name)
 
 # Export
 saveRDS(data, file=file.path(outdir, "CA_OR_WA_da_sampling_data.Rds"))
+

@@ -1,7 +1,7 @@
 
 # Set sampling stations
 # nstations=3; grid=grid_temp
-simulate_toxin_grid <- function(grid, type){
+simulate_toxin_grid <- function(grid, type, plot=F){
 
   # Grid dimensions
   ndays <- ncol(grid)
@@ -37,8 +37,10 @@ simulate_toxin_grid <- function(grid, type){
     setExtent(ext=grid_extent)
 
   # Plot
-  g <- plot_grid_unscaled(toxin_grid2)
-  print(g)
+  if(plot==T){
+    g <- plot_grid_unscaled(toxin_grid2)
+    print(g)
+  }
 
   # Return
   return(toxin_grid2)

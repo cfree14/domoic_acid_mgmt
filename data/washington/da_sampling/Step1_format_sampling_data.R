@@ -142,20 +142,24 @@ data <- data_full %>%
                              "Coast Seafood Company"="Coast Seafoods Company",
                              "Bay Center Mariculture Co"="Bay Center Mariculture Co.")) %>%
   # Format common name
-  mutate(comm_name=stringr::str_to_sentence(comm_name)) %>%
+  mutate(comm_name=stringr::str_to_sentence(comm_name),
+         comm_name=recode(comm_name,
+                          "Other"="Unknown",
+                          "Horse clam"="Gaper (horse) clam",
+                          "California mussel"="California (sea) mussel")) %>%
   # Add scientific name
   mutate(sci_name=recode(comm_name,
-                         "Barnacle"="Barnacle spp.", # Balanus glandula??? Acorn barnacle???
+                         "Barnacle"="Unknown", # Balanus glandula??? Acorn barnacle???
                          "Blue mussel"="Mytilus trossulus", # Pacific blue mussel
                          "Butter clam"="Saxidomus gigantea",
-                         "California mussel"="Mytilus californianus",
+                         "California (sea) mussel"="Mytilus californianus",
                          "Cockle"="Clinocardium nuttallii",
                          "Dungeness crab"="Metacarcinus magister",
-                         "Horse clam"="Tresus capax", # Gaper clam
+                         "Gaper (horse) clam"="Tresus capax/nuttallii", # Gaper clam
                          "Littleneck clam"="Leukoma staminea", # Native littleneck clam
                          "Manila clam"="Ruditapes philippinarum", # Manila (littleneck) clam
                          "Olympia oyster"="Ostrea lurida",
-                         "Other"="Unknown",
+                         "Unknown"="Unknown",
                          "Pacific oyster"="Crassostrea gigas",
                          "Razor clam"="Siliqua patula")) %>%
   # Recode incorrect SUBMIT dates

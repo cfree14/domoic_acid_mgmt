@@ -39,13 +39,19 @@ stats <- samples_orig %>%
                        "California"="CA",
                        "California, Oregon"="CA/OR",
                        "California, Oregon, Washington"="CA/OR/WA",
+                       "California, Washington"="CA/WA",
                        "Oregon"="OR",
-                       "Washington"="WA")) %>%
+                       "Washington"="WA",
+                       "Oregon, Washington"="OR/WA")) %>%
   # Add label
   mutate(species_label=paste0(comm_name, " (", sci_name, ")")) %>%
+  # Simplify label
+  mutate(species_label=gsub(" \\(Unknown\\)", "", species_label)) %>%
+  # Arrange
   select(species_label, states, n)
 
+# Inspect
 table(stats$states)
 
 # Export
-write.csv(stats, file=file.path(tabledir, "TableSX_species_sample_size.csv"), row.names=F)
+write.csv(stats, file=file.path(tabledir, "TableS2_species_sample_size.csv"), row.names=F)

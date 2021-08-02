@@ -23,8 +23,9 @@ sample_sites <- bind_rows(sites1, sites2) %>%
   rename(season=year) %>%
   mutate(season=paste(season, "season"))
 
-# Read SMA coordinates
-sma_coords <- readxl::read_excel("data/washington/gis_data/processed/SMA_coordinates.xlsx")
+# Read SMA polygons
+sma_polys <- sf::st_read("data/washington/gis_data/processed/sma_polygons.shp")
+# sma_coords <- readxl::read_excel("data/washington/gis_data/processed/SMA_coordinates.xlsx")
 
 # Get land
 usa <- rnaturalearth::ne_states(country="United States of America", returnclass = "sf")
@@ -178,6 +179,8 @@ base_theme <- theme(axis.text=element_text(size=7),
 g <- ggplot(zones) +
   # Facet by season
   facet_wrap(~season) +
+  # Plot SMA
+  geom_sf(data=sma_polys, fill="grey60", color=NA) +
   # Plot management zones
   geom_hline(data=zones_no_ncal_line, mapping=aes(yintercept=lat_dd_north), linetype="dotted", size=0.2) +
   geom_text(data=zones, mapping=aes(y=lat_dd_avg, label=zone_id), x=-126.5, hjust=0, size=2, show.legend = F) +
@@ -193,6 +196,8 @@ g <- ggplot(zones) +
   # geom_point(data=landings, mapping=aes(x=long_dd, y=lat_dd, size=landings_mt), color="grey50", pch=21) +
   # # geom_text(data=landings, mapping=aes(x=long_dd, y=lat_dd, label=port_complex), color="grey50", size=2, hjust=0, nudge_x = 0.4) +
   # ggrepel::geom_text_repel(data=landings, mapping=aes(x=long_dd, y=lat_dd, label=port_complex), color="grey50", size=2, hjust=0, nudge_x = 0.5, segment.color=NA) +
+  # Plot SMA labels
+  geom_sf_text(data=sma_polys %>% filter(subunit!="Quinault-Split Rock to Raft River"), mapping=aes(label=sma), hjust=-0.1, size=2, fontface = "italic") +
   # Plot management zone points
   geom_text(data=zone_pts, mapping=aes(x=long_dd, y=lat_dd, label=zone_id), size=2, hjust=0) +
   # Plot sampling sites

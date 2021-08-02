@@ -15,7 +15,8 @@ outdir <- "data/merged/processed"
 plotdir <- "figures"
 
 # Read data
-data_orig <- readRDS(file=file.path(outdir, "CA_OR_WA_da_sampling_data.Rds"))
+data_orig <- readRDS(file=file.path(outdir, "CA_OR_WA_da_sampling_data.Rds")) %>%
+  mutate(comm_name=recode(comm_name, "California (sea) mussel"="California mussel"))
 
 
 # Season info

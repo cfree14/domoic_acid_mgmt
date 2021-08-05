@@ -39,14 +39,14 @@ data <- data_orig %>%
   mutate(action_type=paste(action_true, action_obs, sep="-"),
          action_type=recode(action_type,
                             "close-close"="Closed correctly",
-                            "close-open"="Opened recklessly",
+                            "close-open"="Opened riskily",
                             "open-close"="Closed unnecessarily",
                             "open-open"="Opened correctly")) %>%
   # Quantify frequency of actions
   group_by(median_ppm, cv_ppm, meanlog, sdlog, ncrabs) %>%
   summarize(n=n(),
             ncorrect=sum(obs_correct=="correct"),
-            n_opened_incorr=sum(action_type=="Opened recklessly"),
+            n_opened_incorr=sum(action_type=="Opened riskily"),
             n_closed_incorr=sum(action_type=="Closed unnecessarily")) %>%
   ungroup() %>%
   mutate(pcorrect=ncorrect/n,
@@ -56,8 +56,8 @@ data <- data_orig %>%
   select(median_ppm:ncrabs, p_opened_incorr, p_closed_incorr) %>%
   gather(key="metric", value="probability", 6:7) %>%
   mutate(metric=recode_factor(metric,
-                              "p_closed_incorr"="Risk of closing\nunnecessarily",
-                              "p_opened_incorr"="Risk of opening\nrecklessly")) %>%
+                              "p_closed_incorr"="Probability of\nclosing unnecessarily",
+                              "p_opened_incorr"="Probability of\nopening riskily")) %>%
   # Format crabs
   mutate(ncrabs_label=paste(ncrabs, "crabs"),
          ncrabs_label=factor(ncrabs_label, levels=paste(seq(6, 36, 6), "crabs"))) %>%
@@ -80,7 +80,7 @@ surveys <- surveys_orig %>%
   rename(median_ppm=ln_median, cv_ppm=ln_cv) %>%
   # Add metric and ncrabs to place in one corner of plot
   mutate(ncrabs_label=factor("30 crabs", levels=levels(data$ncrabs_label)),
-         metric=factor("Risk of opening\nrecklessly", levels=levels(data$metric))) %>%
+         metric=factor("Probability of\nopening riskily", levels=levels(data$metric))) %>%
   # Classify within bins
   mutate(mu_bin=cut(median_ppm, breaks=mu_breaks),
          cv_bin=cut(cv_ppm, breaks=cv_breaks)) %>%
@@ -121,7 +121,7 @@ bin_wrong_hist <- bin_n %>%
          pwrong_exp_label=paste0(round(pwrong_exp*100,0), "%")) %>%
   # Reduce to scenarios of interest
   filter(risky!="none") %>%
-  filter( (metric=="Risk of closing\nunnecessarily" & risky=="lower") | (metric == "Risk of opening\nrecklessly" & risky=="upper")) %>%
+  filter( (metric=="Probability of\nclosing unnecessarily" & risky=="lower") | (metric == "Probability of\nopening riskily" & risky=="upper")) %>%
   # Arrange
   arrange(metric, ncrabs_label)
 
@@ -131,7 +131,7 @@ bin_wrong_hist <- bin_n %>%
 ################################################################################
 
 # Challenging zones
-challenge_zones <-tibble(metric=factor(x=c("Risk of closing\nunnecessarily", "Risk of opening\nrecklessly")),
+challenge_zones <-tibble(metric=factor(x=c("Risk of closing\nunnecessarily", "Risk of opening\nriskily")),
                          x1=c(15,30),
                          x2=c(30,45))
 

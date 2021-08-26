@@ -7,21 +7,28 @@
 rm(list = ls())
 
 # Packages
+library(raster)
 library(lubridate)
 library(tidyverse)
 
 # Directories
-outdir <- "data/california/pier_sampling/data"
+datadir1 <- "data/california/pier_sampling/data"
+datadir2 <- "data/merged/processed"
 plotdir <- "figures"
 
 # Read pier sampling data
-pn_orig <- readRDS(file.path(outdir, "2014_2021_pn_density_by_pier_for_plotting.Rds"))
-pda_orig <- readRDS(file.path(outdir, "2014_2021_pda_density_by_pier_for_plotting.Rds"))
+pn_orig <- readRDS(file.path(datadir1, "2014_2021_pn_density_by_pier_for_plotting.Rds"))
+pda_orig <- readRDS(file.path(datadir1, "2014_2021_pda_density_by_pier_for_plotting.Rds"))
+
+# Read pier sampling sites
+sites <- read.csv(file=file.path(datadir2, "WC_pn_pda_beach_pier_sampling_sites.csv"), as.is=T)
 
 # Read C-HARM data
 charmdir <- "/Users/cfree/Dropbox/Chris/UCSB/projects/domoic_acid/data/charm/processed/"
 charm_hov_orig <- readRDS(file.path(charmdir, "CHARM_20140305_to_present_imputed_hovmoller_data_for_plotting.Rds"))
 
+# Read C-HARM time series
+charm_pda <- raster::brick(file.path(charmdir, "CHARM_DAP_20140305_to_present_imputed.grd"))
 
 # Format observation data
 ################################################################################
@@ -101,6 +108,13 @@ charm_hov <- charm_hov_orig %>%
   # Sample
   # sample_frac(0.)
 
+# Format C-HARM raster for plotting
+data_do <- "2018-04-01"
+data_do_label <- data_do %>% gsub("-", ".", .) %>% paste0("X", .)
+charm_df <- charm_pda[[data_do_label]] %>%
+  raster::as.data.frame(., xy=T) %>%
+  setNames(c("long_dd", "lat_dd", "pda"))
+
 
 # Plot data
 ################################################################################
@@ -114,7 +128,7 @@ my_theme <-  theme(axis.text=element_text(size=6),
                    axis.title.x=element_blank(),
                    plot.title=element_text(size=8),
                    legend.text=element_text(size=5),
-                   legend.title=element_text(size=7),
+                   legend.title=element_text(size=6),
                    axis.text.y = element_text(angle = 90, hjust = 0.5),
                    plot.tag = element_text(size=8),
                    # Gridlines
@@ -129,23 +143,50 @@ foreign <- rnaturalearth::ne_countries(country=c("Canada", "Mexico"), returnclas
 
 # Plot pier sampling sites
 g1 <- ggplot() +
-  # Plot Sonoma-Mendocino country line
-  # geom_hline(yintercept=son_mend_county, linetype="dashed", size=0.2) +
+  # Plot land
+  geom_sf(data=foreign, fill="grey90", color="white", lwd=0.3) +
+  geom_sf(data=usa, fill="grey90", color="white", lwd=0.3) +
+  # Plot sampling sites
+  geom_point(data=sites, mapping=aes(x=long_dd, lat_dd), size=1) +
+  geom_text(data=sites %>% filter(site=="Monterey Wharf"), mapping=aes(x=long_dd, lat_dd, label=site), size=2, hjust=-0.1) +
+  # Labels
+  labs(x="", y="", title="Beach and pier monitoring", tag="A") +
+  scale_y_continuous(breaks=seq(32,48,2)) +
+  # Crop
+  coord_sf(xlim = c(-127, -116.6), ylim = c(32, 48)) +
+  # Theme
+  theme_bw() + my_theme +
+  theme(axis.title=element_blank())
+g1
+
+# Plot C-HARM forecasts
+g2 <- ggplot() +
+  # Plot raster
+  geom_raster(data=charm_df, mapping=aes(x=long_dd, y=lat_dd, fill=pda)) +
   # Plot land
   geom_sf(data=foreign, fill="grey90", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey90", color="white", lwd=0.3) +
   # Labels
-  labs(x="", y="", tag="A") +
+  labs(x="", y="", title="HAB nowcasts and forecasts", tag="D") +
+  scale_y_continuous(breaks=seq(32,48,2)) +
+  # Legend
+  scale_fill_gradientn(name="pDA risk", colors=RColorBrewer::brewer.pal(9, "YlOrRd"), lim=c(0,1)) +
+  guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
   # Crop
-  coord_sf(xlim = c(-125, -116), ylim = c(32.5, 42)) +
+  coord_sf(xlim = c(-127, -116.6), ylim = c(32, 48)) +
   # Theme
-  theme_bw() + my_theme
-g1
+  theme_bw() + my_theme +
+  theme(axis.title=element_blank(),
+        legend.position = c(0.16, 0.82),
+        legend.key.size = unit(0.3, "cm"),
+        legend.key = element_rect(fill=alpha('blue', 0)),
+        legend.background = element_rect(fill=alpha('blue', 0)))
+g2
 
 # Plot PN data
 # Clarissa's bloom threshold is 10^4 cells / L
 ymax <- max(pn$cells_l_max, na.rm=T) + 1
-g2 <- ggplot() +
+g3 <- ggplot() +
   # Seasons
   geom_rect(data=season_key, mapping=aes(xmin=open_date, xmax=close_date), ymin=-10, ymax=ymax, fill="grey90") +
   # Lines
@@ -165,16 +206,17 @@ g2 <- ggplot() +
   # Theme
   theme_bw() + my_theme +
   theme(legend.position = c(0.897, 0.2),
-        legend.key.size = unit(0.5, "cm"),
+        legend.key.size = unit(0.3, "cm"),
+        legend.key = element_rect(fill=alpha('blue', 0)),
         legend.background = element_rect(fill=alpha('blue', 0)))
-g2
+g3
 
 # Plot pDA data
 # Clarissa's threshold of evevated pDA is 0.5 ug/L = 0.5 ng/ml
 # 0.5 ug/L * (1 L / 1000 mL) * (1 g / 10^6 ug) * (10^9 ng / 1 g)
 0.5  / 1000 / 10^6 * 10^9
 ymax <- max(pda$pda_ng_ml_max, na.rm=T) + 0.00001
-g3 <- ggplot() +
+g4 <- ggplot() +
   # Seasons
   geom_rect(data=season_key, mapping=aes(xmin=open_date, xmax=close_date), ymin=-10, ymax=ymax, fill="grey90") +
   # Lines
@@ -192,21 +234,6 @@ g3 <- ggplot() +
                      labels=parse(text=paste0("10^", 1:-5))) +
   # Theme
   theme_bw() + my_theme
-g3
-
-# Plot pier sampling sites
-g4 <- ggplot() +
-  # Plot Sonoma-Mendocino country line
-  # geom_hline(yintercept=son_mend_county, linetype="dashed", size=0.2) +
-  # Plot land
-  geom_sf(data=foreign, fill="grey90", color="white", lwd=0.3) +
-  geom_sf(data=usa, fill="grey90", color="white", lwd=0.3) +
-  # Labels
-  labs(x="", y="", tag="D") +
-  # Crop
-  coord_sf(xlim = c(-125, -116), ylim = c(32.5, 42)) +
-  # Theme
-  theme_bw() + my_theme
 g4
 
 # Plot C-HARM pDA
@@ -220,7 +247,7 @@ g5 <- ggplot(charm_hov %>% filter(variable=="Particulate domoic acid (pDA)"),
   labs(x="", y=" \nLatitude (°N)", tag="E",
        title="Historical predictions of particulate domoic acid risk from C-HARM") +
   # Legend
-  scale_fill_gradientn(name="", colors=RColorBrewer::brewer.pal(9, "YlOrRd")) +
+  scale_fill_gradientn(name="", colors=RColorBrewer::brewer.pal(9, "YlOrRd"), lim=c(0,1)) +
   scale_alpha_manual(name="", values=c(1, 0.3)) +
   # Theme
   theme_bw() + my_theme +
@@ -246,12 +273,12 @@ g6 <- ggplot(charm_hov %>% filter(variable=="Cellular domoic acid (cDA)"),
 g6
 
 # Merge plots
-layout_matrix <- matrix(data=c(1, 2,
-                               1, 3,
-                               4, 5,
-                               4, 6), ncol=2, byrow=T)
+layout_matrix <- matrix(data=c(1, 3,
+                               1, 4,
+                               2, 5,
+                               2, 6), ncol=2, byrow=T)
 g <- gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6,
-                             layout_matrix=layout_matrix, widths=c(0.4, 0.6))
+                             layout_matrix=layout_matrix, widths=c(0.3, 0.7))
 g
 
 # Export

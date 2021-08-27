@@ -17,11 +17,11 @@ datadir_ca <- "data/california/pier_sampling/data"
 outdir <- "data/merged/processed"
 
 # Read OR/WA sites (locations estimated by Chris using PNW HAB Bulletins and Google)
-sites_pnw <- readxl::read_excel(file.path(datadir, "WA_OR_pn_pda_beach_sampling_sites.xlsx"))
+sites_pnw <- readxl::read_excel(file.path(datadir, "WA_OR_pn_pda_beach_sampling_sites.xlsx")) %>%
+  mutate(public="Not public")
 
-# Read CA data
-data_ca1 <- readRDS(file.path(datadir_ca, "1969_2019_pier_sampling_data.Rds"))
-data_ca2 <- readRDS(file.path(datadir_ca, "2005_2021_pier_sampling_data.Rds"))
+# Read CA sites
+data_ca1 <- read.csv(file.path(datadir_ca, "CA_pier_sampling_locations.csv"), as.is=T)
 
 
 # Build sites
@@ -29,11 +29,8 @@ data_ca2 <- readRDS(file.path(datadir_ca, "2005_2021_pier_sampling_data.Rds"))
 
 # Build CA site key
 sites_ca <- data_ca1 %>%
-  select(location, lat_dd, long_dd) %>%
-  bind_rows(data_ca2 %>% select(location, lat_dd, long_dd)) %>%
-  unique() %>%
   mutate(state="California") %>%
-  select(state, location, lat_dd, long_dd) %>%
+  select(state, location, public, lat_dd, long_dd, everything()) %>%
   rename(site=location)
 
 # Merge site keys

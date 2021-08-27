@@ -1,0 +1,11 @@
+"location","public","lat_dd","long_dd","nobs","nyears","years"
+"Trinidad Pier","Public",41.05486,-124.146966,28,3,"2017, 2019, 2020"
+"Bodega Bay","Not public",38.316996,-123.070237,NA,NA,NA
+"Santa Cruz Wharf","Public",36.958,-122.017,484,12,"2002, 2011-2021"
+"Monterey Wharf","Public",36.603687,-121.889275,414,14,"1969, 2002, 2005, 2010-2020"
+"CalPoly Pier","Public",35.17,-120.741,748,14,"2008-2021"
+"Goleta Pier","Public",34.416107,-119.82875,117,4,"2005, 2009-2011"
+"Stearns Wharf","Public",34.408,-119.685,653,17,"1969, 1999, 2001, 2008-2021"
+"Santa Monica Pier","Public",34.008,-118.499,681,16,"1969, 2000, 2008-2021"
+"Newport Pier","Public",33.6061,-117.9311,648,16,"1969, 2001, 2008-2021"
+"Scripps Pier","Public",32.867,-117.257,870,13,"2008-2020"

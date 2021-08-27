@@ -21,7 +21,8 @@ pn_orig <- readRDS(file.path(datadir1, "2014_2021_pn_density_by_pier_for_plottin
 pda_orig <- readRDS(file.path(datadir1, "2014_2021_pda_density_by_pier_for_plotting.Rds"))
 
 # Read pier sampling sites
-sites <- read.csv(file=file.path(datadir2, "WC_pn_pda_beach_pier_sampling_sites.csv"), as.is=T)
+sites <- read.csv(file=file.path(datadir2, "WC_pn_pda_beach_pier_sampling_sites.csv"), as.is=T) %>%
+  mutate(public=factor(public, levels=c("Public", "Not public")))
 
 # Read C-HARM data
 charmdir <- "/Users/cfree/Dropbox/Chris/UCSB/projects/domoic_acid/data/charm/processed/"
@@ -32,15 +33,6 @@ charm_pda <- raster::brick(file.path(charmdir, "CHARM_DAP_20140305_to_present_im
 
 # Format observation data
 ################################################################################
-
-# Format PN data
-pn <- pn_orig %>%
-  filter(location=="Monterey Wharf") %>%
-  mutate(pn_group=factor(pn_group, levels=c("Seriata", "Delicatissima")))
-
-# Format PN data
-pda <- pda_orig %>%
-  filter(location %in% c("Monterey Wharf"))
 
 # Central Region season key
 season_key_c <- tibble(region="Central",
@@ -72,6 +64,59 @@ season_key_n <- tibble(region="Northern",
 
 # Merge season keys
 season_key <- bind_rows(season_key_c, season_key_n)
+
+# Season dates
+season_date_key_c <- purrr::map_df(1:nrow(season_key_c), function(x){
+  date1 <- season_key_c$open_date[x]
+  date2 <- season_key_c$close_date[x]
+  dates <- seq(date1, date2, by="1 day")
+  df <- tibble(season=season_key_c$season[x],
+               date=dates)
+
+})
+
+# Format PN data
+pn <- pn_orig %>%
+  filter(location=="Monterey Wharf") %>%
+  mutate(pn_group=factor(pn_group, levels=c("Seriata", "Delicatissima"))) %>%
+  # Add season
+  left_join(season_date_key_c, by=c("date_std"="date")) %>%
+  mutate(season=ifelse(is.na(season), "out-of-season", season))
+
+# Format PN data
+pda <- pda_orig %>%
+  filter(location %in% c("Monterey Wharf")) %>%
+  # Add season
+  left_join(season_date_key_c, by=c("date_std"="date")) %>%
+  mutate(season=ifelse(is.na(season), "out-of-season", season))
+
+# pDA max
+pda_max <- pda %>%
+  # Useful data
+  filter(!is.na(pda_ng_ml_max) & season!="out-of-season") %>%
+  # Identify max pDA date in each season
+  group_by(season) %>%
+  arrange(desc(pda_ng_ml_max)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  # Simplify
+  select(season, date_std, pda_ng_ml_max) %>%
+  # Create date label
+  mutate(date_label=format(date_std, format="%b %d"))
+
+# PN max
+pn_max <- pn %>%
+  # Useful data
+  filter(!is.na(cells_l_max) & season!="out-of-season") %>%
+  # Identify max pDA date in each season
+  group_by(season, pn_group) %>%
+  arrange(desc(cells_l_max)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  # Simplify
+  select(season, pn_group, date_std, cells_l_max) %>%
+  # Create date label
+  mutate(date_label=format(date_std, format="%b %d"))
 
 
 # Format prediction data
@@ -147,16 +192,22 @@ g1 <- ggplot() +
   geom_sf(data=foreign, fill="grey90", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey90", color="white", lwd=0.3) +
   # Plot sampling sites
-  geom_point(data=sites, mapping=aes(x=long_dd, lat_dd), size=1) +
+  geom_point(data=sites, mapping=aes(x=long_dd, lat_dd, fill=public), size=1.5, pch=21, stroke=0.1) +
   geom_text(data=sites %>% filter(site=="Monterey Wharf"), mapping=aes(x=long_dd, lat_dd, label=site), size=2, hjust=-0.1) +
   # Labels
   labs(x="", y="", title="Beach and pier monitoring", tag="A") +
   scale_y_continuous(breaks=seq(32,48,2)) +
+  # Legend
+  scale_fill_manual(name="", values=c("black", "white")) +
   # Crop
   coord_sf(xlim = c(-127, -116.6), ylim = c(32, 48)) +
   # Theme
   theme_bw() + my_theme +
-  theme(axis.title=element_blank())
+  theme(axis.title=element_blank(),
+        legend.position = c(0.2,0.1),
+        legend.key.size = unit(0.3, "cm"),
+        legend.key = element_rect(fill=alpha('blue', 0)),
+        legend.background = element_rect(fill=alpha('blue', 0)))
 g1
 
 # Plot C-HARM forecasts
@@ -193,14 +244,18 @@ g3 <- ggplot() +
   geom_line(data=pn, mapping=aes(x=date_std, y=cells_l_max+1, color=pn_group), lwd=0.4) +
   # Bloom threshhold reference line
   geom_hline(yintercept=c(10^4), linetype="dotted", lwd=0.4) +
+  # Max pDA each season
+  geom_point(data=pn_max, mapping=aes(x=date_std, y=cells_l_max+1, color=pn_group), size=1) +
+  geom_text(data=pn_max, mapping=aes(x=date_std, y=cells_l_max+1, label=date_label),
+            size=2, hjust=0.5, vjust=-0.7) +
   # Labels
   labs(x="", y="Cell\ndensity (cells/L)", tag="B",
        title=expression("Historical observations of "*italic("Pseudo-nitzschia")*" at Monterey Wharf")) +
   # Scales
-  scale_x_date(date_breaks = "1 year", date_labels="%Y") +
+  scale_x_date(date_breaks = "1 year", date_labels="%Y", lim=c("2014-01-01", "2021-07-15") %>% ymd()) +
   scale_y_continuous(trans="log10",
-                     breaks=10^c(0:5),
-                     labels=parse(text=paste0("10^", 0:5))) +
+                     breaks=10^c(0:6),
+                     labels=parse(text=paste0("10^", 0:6)), lim=c(NA, 10^6)) +
   # Legend
   scale_color_discrete(name="Size group") +
   # Theme
@@ -223,15 +278,19 @@ g4 <- ggplot() +
   geom_line(data=pda, mapping=aes(x=date_std, y=pda_ng_ml_max+0.00001), lwd=0.4) +
   # Elevated pDA reference line
   geom_hline(yintercept=0.5, linetype="dotted", lwd=0.4) +
+  # Max pDA each season
+  geom_point(data=pda_max, mapping=aes(x=date_std, y=pda_ng_ml_max+0.00001), size=1) +
+  geom_text(data=pda_max, mapping=aes(x=date_std, y=pda_ng_ml_max+0.00001, label=date_label),
+            size=2, hjust=0.5, vjust=-0.7) +
   # Labels
   labs(x="", y="Particulate\ndomoic acid (ng/ml)", tag="C",
        title="Historical observations of particulate domoic acid at Monterey Wharf") +
   # Scales
-  scale_x_date(date_breaks = "1 year", date_labels="%Y") +
+  scale_x_date(date_breaks = "1 year", date_labels="%Y", lim=c("2014-01-01", "2021-07-15") %>% ymd()) +
   scale_y_continuous(trans="log10",
                      breaks=10^c(1:-5),
                      # labels=paste0("10^", 1:-5),
-                     labels=parse(text=paste0("10^", 1:-5))) +
+                     labels=parse(text=paste0("10^", 1:-5)), lim=c(NA, 10^1*2)) +
   # Theme
   theme_bw() + my_theme
 g4
@@ -241,7 +300,7 @@ g5 <- ggplot(charm_hov %>% filter(variable=="Particulate domoic acid (pDA)"),
             aes(x=date, y=lat_dd, fill=risk_avg, alpha=season)) +
   geom_raster() +
   # Scales
-  scale_x_date(date_breaks = "1 year", date_labels="%Y") +
+  scale_x_date(date_breaks = "1 year", date_labels="%Y", lim=c("2014-01-01", "2021-07-15") %>% ymd()) +
   scale_y_continuous(breaks=seq(34,42,2)) +
   # Labels
   labs(x="", y=" \nLatitude (°N)", tag="E",
@@ -259,7 +318,7 @@ g6 <- ggplot(charm_hov %>% filter(variable=="Cellular domoic acid (cDA)"),
              aes(x=date, y=lat_dd, fill=risk_avg, alpha=season)) +
   geom_raster() +
   # Scales
-  scale_x_date(date_breaks = "1 year", date_labels="%Y") +
+  scale_x_date(date_breaks = "1 year", date_labels="%Y", lim=c("2014-01-01", "2021-07-15") %>% ymd()) +
   scale_y_continuous(breaks=seq(34,42,2)) +
   # Labels
   labs(x="", y=" \nLatitude (°N)", tag="F",
@@ -282,6 +341,6 @@ g <- gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6,
 g
 
 # Export
-ggsave(g, filename=file.path(plotdir, "FigX_midseason_risk_evidence.png"),
+ggsave(g, filename=file.path(plotdir, "Fig4_midseason_risk_evidence.png"),
        width=6.5, height=7, units="in", dpi=600)
 

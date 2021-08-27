@@ -23,7 +23,7 @@ sapply(list.files(codedir), function(x) source(file.path(codedir, x)))
 ################################################################################
 
 # Parameters
-niter <- 100
+niter <- 10
 nstations <- seq(2, 20, 2)
 key <- expand.grid(nstations=nstations,
                    iter=1:niter) %>%

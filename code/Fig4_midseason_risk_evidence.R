@@ -22,7 +22,9 @@ pda_orig <- readRDS(file.path(datadir1, "2014_2021_pda_density_by_pier_for_plott
 
 # Read pier sampling sites
 sites <- read.csv(file=file.path(datadir2, "WC_pn_pda_beach_pier_sampling_sites.csv"), as.is=T) %>%
-  mutate(public=factor(public, levels=c("Public", "Not public")))
+  mutate(public=factor(public, levels=c("Public", "Not public")),
+         system=ifelse(state=="California", "CA-HABMAP", "ORHAB"),
+         system=factor(system, levels=c("ORHAB", "CA-HABMAP")))
 
 # Read C-HARM data
 charmdir <- "/Users/cfree/Dropbox/Chris/UCSB/projects/domoic_acid/data/charm/processed/"
@@ -192,13 +194,14 @@ g1 <- ggplot() +
   geom_sf(data=foreign, fill="grey90", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey90", color="white", lwd=0.3) +
   # Plot sampling sites
-  geom_point(data=sites, mapping=aes(x=long_dd, lat_dd, fill=public), size=1.5, pch=21, stroke=0.1) +
+  geom_point(data=sites, mapping=aes(x=long_dd, lat_dd, fill=system), size=1.5, pch=21, stroke=0.1) +
   geom_text(data=sites %>% filter(site=="Monterey Wharf"), mapping=aes(x=long_dd, lat_dd, label=site), size=2, hjust=-0.1) +
   # Labels
   labs(x="", y="", title="Beach and pier monitoring", tag="A") +
   scale_y_continuous(breaks=seq(32,48,2)) +
   # Legend
-  scale_fill_manual(name="", values=c("black", "white")) +
+  # scale_fill_manual(name="", values=c("black", "white")) +
+  scale_fill_discrete(name="") +
   # Crop
   coord_sf(xlim = c(-127, -116.6), ylim = c(32, 48)) +
   # Theme

@@ -45,7 +45,8 @@ data_all_spp <- data_orig %>%
   # Compute medians
   group_by(comm_name, tissue, lat_catg, time_catg) %>%
   summarize(n=n(),
-            da_ppm_med=quantile(da_ppm, probs=0.5)) %>%
+            da_ppm_med=max(da_ppm, na.rm=T)) %>%
+            # da_ppm_med=quantile(da_ppm, probs=0.5)) %>%
   ungroup()
 
 # Extract razor clam
@@ -62,10 +63,12 @@ data_dcrab <- data_all_spp %>%
 
 # Merge data
 data <- data_rclam %>%
-  inner_join(data_dcrab, by=c("lat_catg", "time_catg"))
+  inner_join(data_dcrab, by=c("lat_catg", "time_catg")) %>%
+  # Add state
+  left_join(zones_orig %>% select(zone_id, state), by=c("lat_catg"="zone_id"))
 
 # Plot data
-g <- ggplot(data, aes(x=da_ppm_rclam, y=da_ppm_dcrab)) +
+g <- ggplot(data, aes(x=da_ppm_rclam, y=da_ppm_dcrab, color=state)) +
   geom_smooth(method="lm") +
   geom_point()
 g

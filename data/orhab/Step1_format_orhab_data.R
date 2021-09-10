@@ -139,6 +139,9 @@ data <- data_orig %>%
                      # Other
                      "RaftRiver"="Raft River",
                      "THB"="Twin Harbors",
+                     "Lone Tree Oyster LTO"="Lone Tree Oyster",
+                     "Long island green maker 13"="Long Island - Green Maker 13",
+                     "north Long Island Naselle channel"="Long Island - Naselle Channel",
                      # Westport Marina
                      "WES"="Westport Marina",
                      "Westport WES"="Westport Marina",
@@ -152,8 +155,8 @@ data <- data_orig %>%
                      "LGB"="Long Beach",
                      "LB"="Long Beach",
                      # MocRocks
-                     "MocRocks"="MocRocks Beach",
-                     "Mocrocks"="MocRocks Beach")) %>%
+                     "MocRocks"="Mocrocks Beach",
+                     "Mocrocks"="Mocrocks Beach")) %>%
   # Format temperature
   mutate(temp_c=ifelse(temp_c %in% c("not", "on mooring"), NA, temp_c),
                        temp_c=as.numeric(temp_c)) %>%
@@ -250,6 +253,38 @@ data <- data_orig %>%
          wind_knts=stringr::str_trim(wind_knts),
          wind_kts=ifelse(!is.na(wind_kts), wind_kts, wind_knts)) %>%
   select(-wind_knts) %>%
+  # Format wind
+  mutate(wind_kts=toupper(wind_kts),
+         wind_kts=gsub("  ", " ", wind_kts) %>% gsub("  ", " ", .),
+         wind_kts=gsub("KTS", "", wind_kts),
+         wind_kts=stringr::str_trim(wind_kts)) %>%
+  # Format swell
+  # You abandoned this beceause the recode wasn't working for some characters, problem with crazy non-traditional space and hyphen formats
+  mutate(swell_ft=gsub("ft.|ft .|ft,|ft|fr.|t.|f.t|FT", "", swell_ft),
+         swell_ft=gsub("chop|flat|Gui|n/a|na|calm|1hop||\\?|st|\\+", "", swell_ft),
+         swell_ft=recode(swell_ft,
+                         "< 1"="1",
+                         "<1"="1",
+                         "<10"="10",
+                         ">10"="10",
+                         "0-5"="2.5",
+                         "1  2"="1.5",
+                         "1-2"="1.5",
+                         "1-3"="2",
+                         "10 0"="10",
+                         "10 12"="11",
+                         "10-12"="11",
+                         "12-15"="13.5",
+                         "2-3"="2.5",
+                         "3-4"="3.5",
+                         "3-5"="4",
+                         "4-5"="4.5",
+                         "6-7"="6.5",
+                         "6-8"="7",
+                         "7-8"="7.5",
+                         "8-10"="9",
+                         "9-10"="9.5"),
+         swell_ft=trimws(swell_ft)) %>%
   # Remove columns
   select(-c(unknown1, unknown2, unknown3, unknown_us_cm)) %>%
   select(-c(counter_inits, chl_inits, toxin_inits, sampler_inits, tower_inits)) %>%
@@ -310,8 +345,11 @@ table(data$site)
 range(data$date)
 
 # Imperfect values
-sort(unique(data$swell_ft))
 sort(unique(data$time))
+sort(unique(data$swell_ft))
+sort(unique(data$wind_kts))
+sort(unique(data$tide_lo))
+sort(unique(data$tide_hi))
 
 
 # Export data
@@ -320,41 +358,4 @@ sort(unique(data$time))
 # Export
 saveRDS(data, file=file.path(outdir, "ORHAB_2000_2020_beach_sampling_data.Rds"))
 write.csv(data, file=file.path(outdir, "ORHAB_2000_2020_beach_sampling_data.csv"), row.names = F)
-
-
-
-# Old code
-################################################################################
-
-
-# If you ever format the swell data, this could be helpful.
-# You abandoned this beceause the recode wasn't working for some characters, problem with crazy non-traditional space and hyphen formats
-# mutate(swell_ft=gsub("ft.|ft .|ft,|ft|fr.|t.|f.t|FT", "", swell_ft),
-#        swell_ft=gsub("chop|flat|Gui|n/a|na|calm|1hop||\\?|st|\\+", "", swell_ft),
-#        swell_ft=recode(swell_ft,
-#                        "< 1"="1",
-#                        "<1"="1",
-#                        "<10"="10",
-#                        ">10"="10",
-#                        "0-5"="2.5",
-#                        "1  2"="1.5",
-#                        "1-2"="1.5",
-#                        "1-3"="2",
-#                        "10 0"="10",
-#                        "10 12"="11",
-#                        "10-12"="11",
-#                        "12-15"="13.5",
-#                        "2-3"="2.5",
-#                        "3-4"="3.5",
-#                        "3-5"="4",
-#                        "4-5"="4.5",
-#                        "6-7"="6.5",
-#                        "6-8"="7",
-#                        "7-8"="7.5",
-#                        "8-10"="9",
-#                        "9-10"="9.5"),
-#        swell_ft=trimws(swell_ft)) %>%
-
-
-
 

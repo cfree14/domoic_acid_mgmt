@@ -242,13 +242,3 @@ ggsave(g, filename=file.path(plotdir, "ORHAB_pn_density_large.png"),
        width=6.5, height=7.5, units="in", dpi=600)
 
 
-pda <- data %>%
-  filter(!is.na(pda_ng_l))
-table(pda$year)
-table(pda$site)
-
-
-orp <- data %>%
-  filter(!is.na(orp))
-table(orp$year)
-table(orp$site)

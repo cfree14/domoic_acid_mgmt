@@ -77,7 +77,7 @@ cv_breaks <- seq(0, 4.5, 0.25)
 # Modify survey results for plotting
 surveys <- surveys_orig %>%
   # Rename to match simulation reuslts
-  rename(median_ppm=ln_median, cv_ppm=ln_cv) %>%
+  rename(median_ppm=da_ppm_med_fit, cv_ppm=cv_fit) %>%
   # Add metric and ncrabs to place in one corner of plot
   mutate(ncrabs_label=factor("30 crabs", levels=levels(data$ncrabs_label)),
          metric=factor("Probability of\nopening riskily", levels=levels(data$metric))) %>%

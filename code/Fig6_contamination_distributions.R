@@ -49,21 +49,21 @@ key <- matrix(c("B", 10, 2.5,
                 "C", 25, 1.0,
                 "D", 50, 0.5,
                 "E", 25, 0.5,
-                "F", 10, 0.5), ncol=3, byrow=T, dimnames = list(NULL, c("plot", "ln_median", "ln_cv"))) %>%
+                "F", 10, 0.5), ncol=3, byrow=T, dimnames = list(NULL, c("plot", "da_ppm_med_fit", "cv_fit"))) %>%
   as.data.frame() %>%
-  mutate(ln_median=as.numeric(ln_median),
-         ln_cv=as.numeric(ln_cv))
+  mutate(da_ppm_med_fit=as.numeric(da_ppm_med_fit),
+         cv_fit=as.numeric(cv_fit))
 
 # Number of surveys
 nsurveys <- nrow(data)
 nsurveys_label <-paste(nsurveys, "surveys")
 
 # Distribution of parameters
-g_big <- ggplot(data, aes(x=ln_median, y=ln_cv, fill=pover)) +
+g_big <- ggplot(data, aes(x=da_ppm_med, y=cv_fit, fill=pover_obs)) +
   # Plot points
   geom_point(pch=21, size=3, alpha=0.8) +
   # Plot call outs
-  geom_text(data=key, mapping=aes(x=ln_median, y=ln_cv, label=plot), size=6, fontface="bold", inherit.aes = F) +
+  geom_text(data=key, mapping=aes(x=da_ppm_med_fit, y=cv_fit, label=plot), size=6, fontface="bold", inherit.aes = F) +
   # Plot unlikely
   geom_segment(x=40, xend=100, y=1.2, yend=1.2, linetype="solid", color="grey70", lwd=0.5) + # horizontal
   geom_segment(x=0, xend=40, y=6, yend=1.2, linetype="solid", color="grey70", lwd=0.5) + # diagonal (1.2-6)/40 = -0.12
@@ -87,11 +87,11 @@ g_big <- ggplot(data, aes(x=ln_median, y=ln_cv, fill=pover)) +
 g_big
 
 # Plot example
-plot_example <- function(ln_median, ln_cv, tag){
+plot_example <- function(da_ppm_med_fit, cv_fit, tag){
 
   # Derive meanlog/sdlog
-  meanlog <- log(ln_median)
-  sdlog <- sqrt(log(ln_cv^2+1))
+  meanlog <- log(da_ppm_med_fit)
+  sdlog <- sqrt(log(cv_fit^2+1))
 
   # Calculate percent over action threshold
   pover <- (1- plnorm(30, meanlog=meanlog, sdlog=sdlog))*100
@@ -120,11 +120,11 @@ plot_example <- function(ln_median, ln_cv, tag){
 }
 
 # Plot examples
-g1 <- plot_example(ln_median=key$ln_median[1], ln_cv=key$ln_cv[1], tag=key$plot[1])
-g2 <- plot_example(ln_median=key$ln_median[2], ln_cv=key$ln_cv[2], tag=key$plot[2])
-g3 <- plot_example(ln_median=key$ln_median[3], ln_cv=key$ln_cv[3], tag=key$plot[3])
-g4 <- plot_example(ln_median=key$ln_median[4], ln_cv=key$ln_cv[4], tag=key$plot[4])
-g5 <- plot_example(ln_median=key$ln_median[5], ln_cv=key$ln_cv[5], tag=key$plot[5])
+g1 <- plot_example(da_ppm_med_fit=key$da_ppm_med_fit[1], cv_fit=key$cv_fit[1], tag=key$plot[1])
+g2 <- plot_example(da_ppm_med_fit=key$da_ppm_med_fit[2], cv_fit=key$cv_fit[2], tag=key$plot[2])
+g3 <- plot_example(da_ppm_med_fit=key$da_ppm_med_fit[3], cv_fit=key$cv_fit[3], tag=key$plot[3])
+g4 <- plot_example(da_ppm_med_fit=key$da_ppm_med_fit[4], cv_fit=key$cv_fit[4], tag=key$plot[4])
+g5 <- plot_example(da_ppm_med_fit=key$da_ppm_med_fit[5], cv_fit=key$cv_fit[5], tag=key$plot[5])
 
 # Merge plots
 layout_matrix <- matrix(data=c(1,1,2,

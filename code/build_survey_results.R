@@ -37,8 +37,9 @@ survey_results <- data %>%
   group_by(year, date, location, survey_id) %>%
   summarize(nsamples=n(),
             nover=sum(da_ppm>=30),
-            pover=nover/nsamples,
-            da_ppm_avg=mean(da_ppm)) %>%
+            pover_obs=nover/nsamples,
+            da_ppm_avg=mean(da_ppm),
+            da_ppm_med=median(da_ppm)) %>%
   ungroup() %>%
   # Reduce to full surveys
   filter(nsamples>=6) %>%
@@ -65,9 +66,24 @@ for(i in 1:nrow(survey_results)){
 
 # Expand results
 results <- survey_results %>%
+  # Add fitted p(over)
+  mutate(pover_fit=1-plnorm(q=30, meanlog=meanlog, sdlog=sdlog)) %>%
   # Add distribution median/cv
-  mutate(ln_median=exp(meanlog),
-         ln_cv=sqrt(exp(sdlog^2)-1))
+  mutate(da_ppm_med_fit=exp(meanlog),
+         cv_fit=sqrt(exp(sdlog^2)-1)) %>%
+  # Filter
+  filter(!is.na(meanlog))
+
+# Number of surveys
+nrow(results)
+
+# Correlation between observed and fitted p(over)
+plot(pover_fit ~ pover_obs, results)
+abline(a=0, b=1)
+
+# Correlation between observed and fitted DA mediuan
+plot(da_ppm_med_fit ~ da_ppm_med, results)
+abline(a=0, b=1)
 
 
 # Export data

@@ -1,7 +1,7 @@
 
 # Simulate management
-# toxin_test_schedule="once"; ncrabs=6; close_thresh=1/6; nclean_tests=2; test_interval=1
-simulate_mgmt <- function(toxin_grid_df, stations, mgmt_zones,
+# toxin_test_schedule="once"; ncrabs=6; close_thresh=1/6; nclean_tests=2; test_interval=1; perfect <- F
+simulate_mgmt <- function(toxin_grid_df, stations, mgmt_zones, perfect=F,
                           test_schedule="once", ncrabs=6, close_thresh=1/6, nclean_tests=2, test_interval=1, plot=F){
 
   # Extract parameters
@@ -41,7 +41,9 @@ simulate_mgmt <- function(toxin_grid_df, stations, mgmt_zones,
     # Sample from true proportions
     rowwise() %>%
     mutate(pover_obs=conduct_sampling(prob=pover_true, nsample=ncrabs)) %>%
+    mutate(pover_obs=ifelse(perfect==T, pover_true, pover_obs)) %>%
     ungroup() %>%
+    # If perfect monitoring, overwrite
     # Make management decisions
     mutate(status_obs=ifelse(pover_obs<=close_thresh, "clean", "contaminated"))
 
@@ -56,10 +58,14 @@ simulate_mgmt <- function(toxin_grid_df, stations, mgmt_zones,
       geom_raster() +
       # Surveys
       geom_point(data=survey_results_full, mapping=aes(x=day, y=lat, shape=status_obs), inherit.aes = F) +
+      # Season opener
+      geom_vline(xintercept=7, linetype="dotted") +
       # Labels
       labs(x="Day", y="Latitude (°N)", title="All surveys (unpared)") +
       # Legend
-      scale_fill_gradientn(name="True proportion of crabs\nabove action threshold", colors=RColorBrewer::brewer.pal(9, "YlOrRd")) +
+      scale_fill_gradientn(name="True proportion of crabs\nabove action threshold",
+                           colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
+                           lim=c(0,1)) +
       scale_shape_manual(name="Estimated status", values=c(21, 16)) +
       guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
       # Theme
@@ -90,6 +96,11 @@ simulate_mgmt <- function(toxin_grid_df, stations, mgmt_zones,
     # Reduce to only weeks used
     group_by(lat) %>%
     filter(day<=day_last) %>%
+    ungroup() %>%
+    # If pre-season test is clean, remove everything after
+    group_by(lat) %>%
+    mutate(preseason_test=status_obs[day==1]) %>%
+    filter(!(preseason_test=="clean" & day>1)) %>%
     ungroup()
 
   # Plot pared surveys
@@ -100,10 +111,14 @@ simulate_mgmt <- function(toxin_grid_df, stations, mgmt_zones,
       geom_raster() +
       # Surveys
       geom_point(data=survey_results, mapping=aes(x=day, y=lat, shape=status_obs), inherit.aes = F) +
+      # Season opener
+      geom_vline(xintercept=7, linetype="dotted") +
       # Labels
       labs(x="Day", y="Latitude (°N)", title="Surveys (pared)") +
       # Legend
-      scale_fill_gradientn(name="True proportion of crabs\nabove action threshold", colors=RColorBrewer::brewer.pal(9, "YlOrRd")) +
+      scale_fill_gradientn(name="True proportion of crabs\nabove action threshold",
+                           colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
+                           lim=c(0,1)) +
       scale_shape_manual(name="Estimated status", values=c(21, 16)) +
       guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
       # Theme
@@ -150,26 +165,38 @@ simulate_mgmt <- function(toxin_grid_df, stations, mgmt_zones,
     g1 <- ggplot(toxin_grid_df, aes(x=day, y=lat, fill=prop)) +
       geom_raster() +
       # Surveys
-      geom_point(data=survey_results, mapping=aes(x=day, y=lat, shape=status_obs), inherit.aes = F) +
+      geom_point(data=survey_results, mapping=aes(x=day, y=lat, shape=status_obs),
+                 inherit.aes = F) +
+      # Season opener
+      geom_vline(xintercept=7, linetype="dotted") +
       # Labels
       labs(x="Day", y="Latitude (°N)", title="Monitoring results") +
       # Legend
-      scale_fill_gradientn(name="True proportion of crabs\nabove action threshold", colors=RColorBrewer::brewer.pal(9, "YlOrRd")) +
+      scale_fill_gradientn(name="True proportion\nabove action threshold",
+                           colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
+                           lim=c(0,1)) +
       scale_shape_manual(name="Estimated status", values=c(21, 16)) +
       guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
       # Theme
-      theme_bw()
+      theme_bw() +
+      theme(legend.position = "none")
 
     # Plot managment
     g2 <- ggplot(mgmt_grid_df, aes(x=day, y=lat, fill=status_used, alpha=correct_yn)) +
       geom_raster() +
+      # Surveys
+      geom_point(data=survey_results, mapping=aes(x=day, y=lat, shape=status_obs), inherit.aes = F, show.legend = F) +
+      # Season opener
+      geom_vline(xintercept=7, linetype="dotted") +
       # Labels
       labs(x="Day", y="Latitude (°N)", title="Management performance") +
       # Legend
       scale_fill_discrete(name="Management") +
+      scale_shape_manual(name="Estimated status", values=c(21, 16)) +
       scale_alpha_manual(name="Action correct?", values=c(0.5, 1)) +
       # Theme
-      theme_bw()
+      theme_bw()  +
+      theme(legend.position = "none")
 
     # Merge
     g <- gridExtra::grid.arrange(g1, g2, ncol=1)

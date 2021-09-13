@@ -13,7 +13,7 @@ simulate_toxin_grid_seed <- function(center_val, center_day, center_lat, span_da
   lat1 <- 42
   lat2 <- 46
   lat_by <- 0.1
-  ndays <- 256
+  ndays <- 256 + 7
   lats <- seq(lat1, lat2, lat_by)
   days <- 1:ndays
   grid_df <- expand.grid(day=days, lat=lats) %>%

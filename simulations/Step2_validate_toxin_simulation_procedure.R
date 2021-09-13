@@ -7,6 +7,7 @@ rm(list = ls())
 
 # Packages
 library(tidyverse)
+library(lubridate)
 
 # Directories
 plotdir <- "figures"
@@ -51,7 +52,8 @@ diag_orig <- purrr::map_df(scenarios, function(x){
     params <- set_sim_params(scenario=x, param_key=param_key)
 
     # Simulate grid
-    grid <- simulate_toxin_grid_diag(prop_top = params$prop_top,
+    grid <- simulate_toxin_grid_diag(span = params$span,
+                                     prop_top = params$prop_top,
                                      prop_bot = params$prop_bot,
                                      last_day_top = params$last_day_top,
                                      last_day_bot = params$last_day_bot,
@@ -83,7 +85,7 @@ diag <- diag_orig %>%
                                 "medium"="Medium bloom",
                                 "large"="Large bloom")) %>%
   # Add date
-  mutate(date=ymd("2020-12-01") + day - 1)
+  mutate(date=ymd("2020-12-01") - 7 + day - 1)
 
 # Format parameter key for plotting
 param_key_plot <- param_key %>%
@@ -119,6 +121,8 @@ g1 <- ggplot(diag, aes(x=date, y=lat, fill=prop)) +
   geom_contour(data=diag,
                mapping=aes(x=date, y=lat, z=prop),
                breaks=c(0.0001, seq(0.1,1,0.1)), color="black", alpha=0.2, lwd=0.2) +
+  # Plot season opener
+  geom_vline(xintercept=ymd("2020-12-01"), linetype="dotted", lwd=0.4) +
   # Plot parameter limits
   geom_line(data=param_key_plot, aes(x=date, y=lat, group=position), inherit.aes = F) +
   # Labels
@@ -186,7 +190,7 @@ seed <- seed_orig %>%
                                 "medium"="Medium bloom",
                                 "large"="Large bloom")) %>%
   # Add date
-  mutate(date=ymd("2020-12-01") + day - 1)
+  mutate(date=ymd("2020-12-01") - 7 + day - 1)
 
 # Format centroid bounding box
 centroid_box <- param_key %>%
@@ -245,6 +249,8 @@ g2 <- ggplot(seed, aes(x=date, y=lat, fill=prop)) +
   geom_contour(data=seed,
                mapping=aes(x=date, y=lat, z=prop),
                breaks=c(0.0001, seq(0.1,1,0.1)), color="black", alpha=0.2, lwd=0.2) +
+  # Plot season opener
+  geom_vline(xintercept=ymd("2020-12-01"), linetype="dotted", lwd=0.4) +
   # Reference
   geom_rect(data=centroid_box, mapping=aes(xmin=center_x_lo_date,
                                            xmax=center_x_hi_date,
@@ -293,6 +299,8 @@ g3 <- ggplot(data, aes(x=date, y=lat, fill=prop)) +
   geom_contour(data=data,
                mapping=aes(x=date, y=lat, z=prop),
                breaks=c(0.0001, seq(0.1,1,0.1)), color="black", alpha=0.2, lwd=0.2) +
+  # Plot season opener
+  geom_vline(xintercept=ymd("2020-12-01"), linetype="dotted", lwd=0.4) +
   # Labels
   labs(x="", y="Latitude (°N)") +
   scale_x_date(breaks=seq("2020-01-01" %>% ymd(), "2021-08-01" %>% ymd(), by="1 month"), date_labels = "%b") +

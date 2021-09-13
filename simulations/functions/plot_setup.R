@@ -15,6 +15,8 @@ plot_setup <- function(toxin_grid_df, stations, mgmt_zones){
     geom_contour(data=toxin_grid_df,
                  mapping=aes(x=day, y=lat, z=prop),
                  breaks=c(0.0001, seq(0.1,1,0.1)), color="black", alpha=0.2, lwd=0.2) +
+    # Plot season opener
+    geom_vline(xintercept=7, linetype="dashed") +
     # Labels
     labs(x="Day", y="Latitude (°N)") +
     # Stations/zones

@@ -5,33 +5,43 @@
 # out1c <- simulate_toxin_grid_diag(prop_top=0.6, prop_bot=0.2, last_day_top=90, last_day_bot=60, plot=T)
 
 # Simulate toxin grid
-simulate_toxin_grid_diag <- function(prop_top, prop_bot, last_day_top, last_day_bot, plot=T){
+simulate_toxin_grid_diag <- function(span, prop_top, prop_bot, last_day_top, last_day_bot, plot=T){
 
   # Setup grid
-  lat1 <- 42
-  lat2 <- 46
+  lat_s <- 42
+  lat_n <- 46
   lat_by <- 0.1
-  ndays <- 256
-  lats <- seq(lat1, lat2, lat_by)
+  ndays <- 256 + 7
+  lats <- seq(lat_s, lat_n, lat_by)
   nlats <- length(lats)
   days <- 1:ndays
   grid_df_xy <- expand.grid(day=days, lat=lats) %>%
     arrange(day, lat)
 
+  # Determine lat where bloom begins
+  lat1 <- lat_n - span
+  lat1_use <- lats[which.min(abs(lat1-lats))]
+  lats_bloom <- lats[lats>=lat1_use]
+  lats_no_bloom <- lats[lats<lat1_use]
+  prop_init_bloom <- seq(prop_bot, prop_top, length.out = length(lats_bloom))
+  prop_init_no_bloom <- rep(0, length(lats_no_bloom))
+  prop_inits <- c(prop_init_no_bloom, prop_init_bloom)
+
   # Calculate initial PCONTAM at each latitudinal band
   props_init_df <- tibble(lat=lats,
-                          prop_init=seq(prop_bot, prop_top, length.out = nlats))
+                          prop_init=prop_inits)
 
   # Calculate day with 0 at each latitudinal band
-  slope <- (lat2-lat1) / (last_day_top-last_day_bot)
-  intercept <- lat2 - slope * last_day_top
+  slope <- (lat_n-lat1_use) / (last_day_top-last_day_bot)
+  intercept <- lat_n - slope * last_day_top
   days <- (lats - intercept) /slope
   day_when0_df <- tibble(lat=lats,
                          #prop=0,
-                         day_zero=ceiling(days))
+                         day_zero=days %>% ceiling()) %>%
+    mutate(day_zero=ifelse(lat<lat1_use, 1, day_zero))
 
   # Quick plot check
-  # plot(lat~day, data=day_when0_df, xlim=c(0,ndays), ylim=c(lat1, lat2))
+  # plot(lat~day_zero, data=day_when0_df, xlim=c(0,ndays), ylim=c(lat_s, lat_n))
 
   # Build data
   grid_df <- grid_df_xy %>%
@@ -46,7 +56,7 @@ simulate_toxin_grid_diag <- function(prop_top, prop_bot, last_day_top, last_day_
     mutate(slope = (0-prop_init)/(day_zero-1),
            intercept=prop_init-slope,
            prop=slope*day+intercept,
-           prop=ifelse(prop<0, 0, prop)) %>%
+           prop=ifelse(prop<0 | is.na(prop), 0, prop)) %>%
     ungroup() %>%
     # Simplify
     select(day, lat, prop)
@@ -56,7 +66,7 @@ simulate_toxin_grid_diag <- function(prop_top, prop_bot, last_day_top, last_day_
 
     # Reference points
     ref_pts <- tibble(day=c(last_day_bot, last_day_top),
-                      lat=c(min(lats), max(lats)))
+                      lat=c(min(lat1_use), max(lat_n)))
 
     # Plot grid
     g <- ggplot(grid_df, aes(x=day, y=lat, fill=prop)) +

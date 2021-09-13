@@ -36,7 +36,8 @@ data_diag <- purrr::map_df(scenarios, function(x){
     params <- set_sim_params(scenario=x, param_key=param_key)
 
     # Simulate grid
-    grid <- simulate_toxin_grid_diag(prop_top = params$prop_top,
+    grid <- simulate_toxin_grid_diag(span = params$span,
+                                     prop_top = params$prop_top,
                                      prop_bot = params$prop_bot,
                                      last_day_top = params$last_day_top,
                                      last_day_bot = params$last_day_bot,

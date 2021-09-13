@@ -114,6 +114,75 @@ data <- data_orig %>%
   # Check against file year
   mutate(year_file=gsub(".xls|.xlsx|ORHAB", "", filename) %>% as.numeric()) %>%
   select(-year_file) %>%
+  # Format time
+  rename(time_orig=time) %>%
+  # a) Recome some
+  mutate(time1=recode(time_orig,
+                      "13:40 Pm"="13:40",
+                      "8:55"="08:55",
+                      "11;30"="11:30",
+                      "13;55"="13:55",
+                      "15;30"="15:30",
+                      "10.3"="10:30",
+                      "10.57"="10:57",
+                      "13.4"="13:40",
+                      "9.34"="09:34",
+                      "900am"="09:00",
+                      "230 PM"="14:30",
+                      "1:30PM"="13:30",
+                      "1:25: PM"="13:25",
+                      "14:46 PM"="14:46",
+                      "13:30 PM"="13:30",
+                      "14:20 PM"="14:20",
+                      "13:00 PM"="13:00",
+                      "13:25 PM"="13:25",
+                      "14:00 PM"="14:00",
+                      "16:22 PM"="16:22",
+                      "13:20 PM"="13:20",
+                      "13:50 PM"="13:50",
+                      "14:35 PM"="14:35",
+                      "13:00 PM"="13:00",
+                      "13:45 PM"="13:45",
+                      "14:00 PM"="14:00",
+                      "13:20 PM"="13:20",
+                      "14:10 PM"="14:10",
+                      "13:10 PM"="13:10",
+                      "13:00 PM"="13:00",
+                      "13:40 PM"="13:40",
+                      "2:00PM"="14:00",
+                      "1:30PM"="13:30",
+                      "7:45pm"="19:45",
+                      "4:45pm"="16:45",
+                      "5:40pm"="17:40",
+                      "6:20pm"="18:20",
+                      "1:40pm"="13:40",
+                      "2:15pm"="14:15",
+                      "11:40AM"="11:40",
+                      "8:15AM"="08:15",
+                      "10:40AM"="10:40",
+                      "6:30 AM"="06:30",
+                      "10:00am"="10:00",
+                      "10:00am"="10:00",
+                      "10:05am"="10:05",
+                      "10:40am"="10:40",
+                      "9:37am"="09:37",
+                      "6:00am"="06:00",
+                      "9:35am"="09:35",
+                      "5.00am"="05:00",
+                      "7:48am"="07:48",
+                      "9:15am"="09:15",
+                      "8:05am"="08:05",
+                      "9:10am"="09:10")) %>%
+  # a) Pad to four letters
+  mutate(time1=ifelse(nchar(time1)==3 & !grepl("\\.", time1), paste0("0", time1), time1)) %>%
+  # b) Add colons
+  mutate(time1=ifelse(nchar(time1)==4 & !grepl("\\.", time1),
+                     paste0(substr(time1, 1, 2), ":", substr(time1, 3, 4)),
+                     time1)) %>%
+  # c) Erase long ones
+  # mutate(time1=ifelse(nchar(time1)>5, NA, time1)) %>%
+  # c) Convert to time
+  # mutate(time2=hm(time1)) %>%
   # Format site
   mutate(site=recode(site,
                      # La Push 1st beach
@@ -294,7 +363,7 @@ data <- data_orig %>%
   select(filename, sheet, site,
          # Date/time
          year, month, week, date,
-         time,
+         time_orig, time1,
          # Lat/long/depth
          lat_dd, long_dd, depth_m,
          # Ids
@@ -345,11 +414,17 @@ table(data$site)
 range(data$date)
 
 # Imperfect values
-sort(unique(data$time))
+sort(unique(data$time1))
 sort(unique(data$swell_ft))
 sort(unique(data$wind_kts))
 sort(unique(data$tide_lo))
 sort(unique(data$tide_hi))
+
+# Inspect imperfect times
+sort(unique(data$time1[nchar(data$time1)>5]))
+sort(unique(data$time1[nchar(data$time1)<5]))
+sort(unique(data$time1[nchar(data$time1)==5]))
+
 
 
 # Export data

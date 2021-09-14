@@ -119,6 +119,24 @@ g2 <- ggplot(data, aes(x=date, y=pn_tot_cells_l+1, color=site)) +
   theme_bw()
 g2
 
+# PN large
+g2 <- ggplot(data, aes(x=date, y=pn_lg_cells_l+1, color=site)) +
+  geom_line() +
+  # Labels
+  labs(x="Sample date", y="Large Pseudo-nitzschia density (cells/L)") +
+  # Theme
+  theme_bw()
+g2
+
+# PN small
+g2 <- ggplot(data, aes(x=date, y=pn_sm_cells_l+1, color=site)) +
+  geom_line() +
+  # Labels
+  labs(x="Sample date", y="Small Pseudo-nitzschia density (cells/L)") +
+  # Theme
+  theme_bw()
+g2
+
 # pDA
 g2 <- ggplot(data, aes(x=date, y=pda_ng_l, color=site)) +
   geom_line() +

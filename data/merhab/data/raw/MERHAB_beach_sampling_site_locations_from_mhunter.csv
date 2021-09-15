@@ -1,0 +1,15 @@
+region,county,site,site_code,n,lat_dd,long_dd
+North,Clatsop,Clatsop South Jetty,CSJ,202,46.202409,123.997836
+North,Clatsop,Clatsop Sunset,SUN,202,46.098293,123.943344
+North,Clatsop,Clatsop Seaside,SEA,202,45.977043,123.938785
+North,Clatsop,Cannon Beach Tolovana,CBT,202,45.872561,123.964743
+North,Tillamook,Rockaway Beach,ROC,1,45.64005,123.943077
+North,Tillamook,Cape Meares,CAP,194,45.502542,123.961307
+Central,Lincoln,Lincoln City Salishan,SAL,9,44.901818,124.032529
+Central,Lincoln,Newport Agate Beach,NAB,2,44.659835,124.062702
+Central,Lincoln,Newport South Beach,NSB,78,44.601148,124.067885
+South,Coos,Charleston Bastendorff,CBB,55,43.347383,124.346342
+South,Coos,Bandon Whiskey Run,BWR,4,43.210793,124.394349
+South,Curry,Port Orford,PTO,1,42.741578,124.490961
+South,Curry,Gold Beach Bailey Beach,GBB,36,42.448294,124.4302
+South,Curry,Brookings,BRO,45,42.043891,124.267956

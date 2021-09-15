@@ -19,14 +19,7 @@ plotdir <- "data/orhab/figures"
 ################################################################################
 
 # Read data
-sites_orig <- readxl::read_excel(file.path(indir, "Beach_Site_Coordinates.xls"))
-
-# Format data
-sites <- sites_orig %>%
-  # Simplify
-  select(Station, Lat_DD, Lon_DD) %>%
-  # Rename
-  setNames(c("station", "lat_dd", "long_dd"))
+site_key <- readxl::read_excel(file.path(outdir, "ORHAB_beach_sampling_sites.xlsx"))
 
 # Plot sites
 usa <- rnaturalearth::ne_states(country="United States of America", returnclass = "sf")
@@ -35,10 +28,11 @@ g <- ggplot() +
   geom_sf(data=usa, color="white", fill="grey80") +
   geom_sf(data=canada, color="white", fill="grey80") +
   # Stations
-  geom_point(data=sites, mapping=aes(x=long_dd, y=lat_dd)) +
-  geom_text(data=sites, mapping=aes(x=long_dd, y=lat_dd, label=station), hjust=0, nudge_x = 0.05) +
+  geom_point(data=site_key, mapping=aes(x=long_dd, y=lat_dd, color=coord_type)) +
+  ggrepel::geom_text_repel(data=site_key, mapping=aes(x=long_dd, y=lat_dd, label=site), size=2) +
   # Labels
   labs(x="", y="") +
+  scale_color_discrete(name="") +
   # Crop
   coord_sf(xlim=c(-125, -123), ylim=c(46.25, 48.5)) +
   # Theme
@@ -48,11 +42,12 @@ g <- ggplot() +
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
-        axis.line = element_line(colour = "black"))
+        axis.line = element_line(colour = "black"),
+        # Legend
+        legend.position = c(0.2,0.1),
+        legend.background = element_rect(fill=alpha('blue', 0)))
 g
 
-# Export data
-write.csv(sites, file=file.path(outdir, "ORHAB_beach_sampling_sites.csv"), row.names = F)
 
 
 # Merge data
@@ -183,7 +178,7 @@ data <- data_orig %>%
   # mutate(time1=ifelse(nchar(time1)>5, NA, time1)) %>%
   # c) Convert to time
   # mutate(time2=hm(time1)) %>%
-  # Format site
+  # Format site to match site key
   mutate(site=recode(site,
                      # La Push 1st beach
                      "La Push - First Beach"="La Push - First Beach",
@@ -205,12 +200,6 @@ data <- data_orig %>%
                      # Neah Bay
                      "Nemah"="Neah Bay",
                      "Neah Bay Marina"="Neah Bay",
-                     # Other
-                     "RaftRiver"="Raft River",
-                     "THB"="Twin Harbors",
-                     "Lone Tree Oyster LTO"="Lone Tree Oyster",
-                     "Long island green maker 13"="Long Island - Green Maker 13",
-                     "north Long Island Naselle channel"="Long Island - Naselle Channel",
                      # Westport Marina
                      "WES"="Westport Marina",
                      "Westport WES"="Westport Marina",
@@ -225,7 +214,22 @@ data <- data_orig %>%
                      "LB"="Long Beach",
                      # MocRocks
                      "MocRocks"="Mocrocks Beach",
-                     "Mocrocks"="Mocrocks Beach")) %>%
+                     "Mocrocks"="Mocrocks Beach",
+                     # Others
+                     "RaftRiver"="Raft River",
+                     "THB"="Twin Harbors",
+                     "Lone Tree Oyster LTO"="Lone Tree Oyster",
+                     "Long island green maker 13"="Long Island 13",
+                     "north Long Island Naselle channel"="North Long Island",
+                     "Copalis"="Copalis Beach",
+                     "Kalaloch"="Kalaloch Beach",
+                     "Elk River"="Elk River Bridge")) %>%
+  # Add lat/long
+  select(-c(lat_dd, long_dd)) %>%
+  left_join(site_key, by="site") %>%
+  # Format depth
+  mutate(depth_m=recode(depth_m, "surface"="0"),
+         depth_m=as.numeric(depth_m)) %>%
   # Format temperature
   mutate(temp_c=ifelse(temp_c %in% c("not", "on mooring"), NA, temp_c),
                        temp_c=as.numeric(temp_c)) %>%
@@ -239,7 +243,10 @@ data <- data_orig %>%
   # Format chlorophyll
   mutate(chl_a_ug_l=as.numeric(chl_a_ug_l)) %>%
   # Format conductivity
-  mutate(conductivity=as.numeric(conductivity)) %>%
+  mutate(unknown_us_cm=as.numeric(unknown_us_cm),
+         conductivity=as.numeric(conductivity),
+         conductivity=ifelse(!is.na(conductivity), conductivity, unknown_us_cm)) %>%
+  select(-unknown_us_cm) %>%
   # Format pH
   mutate(ph=as.numeric(ph)) %>%
   # Format DO
@@ -263,7 +270,7 @@ data <- data_orig %>%
   rename(pn_perc_pdc=pn_perc_pdd) %>%
   mutate(pn_perc_pm=as.numeric(pn_perc_pm),
          pn_perc_afh=as.numeric(pn_perc_afh),
-         pn_perc_pds=as.numeric(pn_perc_pdc)) %>%
+         pn_perc_pdc=as.numeric(pn_perc_pdc)) %>%
   # Formtat PN percentages (hard ones): pn_perc, pn_perc_sm, pn_perc_lg
   mutate(pn_perc_lg=recode(pn_perc_lg, "<1"="1"),
          pn_perc_lg=as.numeric(pn_perc_lg),
@@ -308,15 +315,6 @@ data <- data_orig %>%
                          "-"="",
                          "12ng/L"="12", ),
          pda_ng_l=as.numeric(pda_ng_l)) %>%
-  # Format lat/long/depth
-  mutate(lat_dd=recode(lat_dd,
-                       "47 53.1"=47+53.1/60),
-         lat_dd=as.numeric(lat_dd),
-         long_dd=recode(long_dd,
-                       "124 38.88"=124+38.88/60),
-         long_dd=as.numeric(long_dd),
-         depth_m=recode(depth_m, "surface"="0"),
-         depth_m=as.numeric(depth_m)) %>%
   # Fix wind
   mutate(wind_kts=stringr::str_trim(wind_kts),
          wind_knts=stringr::str_trim(wind_knts),
@@ -355,17 +353,17 @@ data <- data_orig %>%
                          "9-10"="9.5"),
          swell_ft=trimws(swell_ft)) %>%
   # Remove columns
-  select(-c(unknown1, unknown2, unknown3, unknown_us_cm)) %>%
+  select(-c(unknown1, unknown2, unknown3)) %>%
   select(-c(counter_inits, chl_inits, toxin_inits, sampler_inits, tower_inits)) %>%
   # Remove empty columns
   select(-c(pda_ng_l...30,  ...29)) %>%
   # Arrange
-  select(filename, sheet, site,
+  select(filename, sheet, site, site_id,
          # Date/time
          year, month, week, date,
          time_orig, time1,
          # Lat/long/depth
-         lat_dd, long_dd, depth_m,
+         coord_type, lat_dd, long_dd, depth_m,
          # Ids
          bottle_id,
          tow_id,
@@ -424,6 +422,16 @@ sort(unique(data$tide_hi))
 sort(unique(data$time1[nchar(data$time1)>5]))
 sort(unique(data$time1[nchar(data$time1)<5]))
 sort(unique(data$time1[nchar(data$time1)==5]))
+
+# Build site key
+site_key1 <- data %>%
+  group_by(site, site_id, coord_type, lat_dd, long_dd) %>%
+  summarize(n=n()) %>%
+  ungroup() %>%
+  arrange(site_id, coord_type)
+
+# Export
+write.csv(site_key1, file=file.path(outdir, "ORHAB_beach_sampling_sites_work.csv"), row.names = F)
 
 
 

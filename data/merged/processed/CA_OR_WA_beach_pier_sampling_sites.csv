@@ -1,0 +1,59 @@
+"source","state","site","lat_dd","long_dd","nyrs","nobs"
+"HABMAP","California","CalPoly Pier",35.17,-120.741,14,748
+"HABMAP","California","Goleta Pier",34.416107,-119.82875,4,117
+"HABMAP","California","Monterey Wharf",36.603687,-121.889275,14,414
+"HABMAP","California","Newport Pier",33.6061,-117.9311,16,648
+"HABMAP","California","Santa Cruz Wharf",36.958,-122.017,12,484
+"HABMAP","California","Santa Monica Pier",34.008,-118.499,16,681
+"HABMAP","California","Scripps Pier",32.867,-117.257,13,870
+"HABMAP","California","Stearns Wharf",34.408,-119.685,17,653
+"HABMAP","California","Trinidad Pier",41.05486,-124.146966,3,28
+"MERHAB","Oregon","Bandon Whiskey Run",43.210793,-124.394349,3,4
+"MERHAB","Oregon","Brookings",42.043891,-124.267956,3,45
+"MERHAB","Oregon","Cannon Beach Tolovana",45.872561,-123.964743,5,202
+"MERHAB","Oregon","Cape Meares",45.502542,-123.961307,5,194
+"MERHAB","Oregon","Charleston Bastendorff",43.347383,-124.346342,3,55
+"MERHAB","Oregon","Clatsop Seaside",45.977043,-123.938785,5,202
+"MERHAB","Oregon","Clatsop South Jetty",46.202409,-123.997836,5,202
+"MERHAB","Oregon","Clatsop Sunset",46.098293,-123.943344,5,202
+"MERHAB","Oregon","Gold Beach Bailey Beach",42.448294,-124.4302,4,36
+"MERHAB","Oregon","Lincoln City Salishan",44.901818,-124.032529,2,9
+"MERHAB","Oregon","Newport Agate Beach",44.659835,-124.062702,2,2
+"MERHAB","Oregon","Newport South Beach",44.601148,-124.067885,5,78
+"MERHAB","Oregon","Port Orford",42.741578,-124.490961,1,1
+"MERHAB","Oregon","Rockaway Beach",45.64005,-123.943077,1,1
+"ORHAB","Washington","Bay Center",46.636433,-123.960584,2,20
+"ORHAB","Washington","Bay Center Mooring",NA,NA,1,88
+"ORHAB","Washington","BeachSt-OS",NA,NA,1,66
+"ORHAB","Washington","Brady's ERB",NA,NA,1,17
+"ORHAB","Washington","Cape Alava",48.1581611111111,-124.733822222222,2,3
+"ORHAB","Washington","Copalis Beach",47.044175,-124.177425,20,1490
+"ORHAB","Washington","Elk River Bridge",46.86275,-124.067184,1,5
+"ORHAB","Washington","Hawks Point",46.726618,-123.913318,1,1
+"ORHAB","Washington","Ho Beach",NA,NA,1,6
+"ORHAB","Washington","Hobuck Beach",48.3332027777778,-124.662797222222,16,556
+"ORHAB","Washington","Johns River",46.899933,-123.999222,1,1
+"ORHAB","Washington","Kalaloch Beach",47.5906388888889,-124.368758333333,20,1450
+"ORHAB","Washington","Kalaloch North",NA,NA,4,62
+"ORHAB","Washington","Kalaloch South",NA,NA,4,62
+"ORHAB","Washington","La Push - First Beach",NA,NA,9,143
+"ORHAB","Washington","La Push - Second Beach",47.8903138888889,-124.627269444444,12,199
+"ORHAB","Washington","Lone Tree Oyster",NA,NA,1,10
+"ORHAB","Washington","Long Beach",46.5644972222222,-124.063847222222,20,1781
+"ORHAB","Washington","Long Island 13",46.506406,-124.010878,1,1
+"ORHAB","Washington","LP-1",47.885,-124.648,1,3
+"ORHAB","Washington","Mocrocks Beach",47.174,-124.199280555556,14,994
+"ORHAB","Washington","Nahcotta",46.500672,-124.024767,1,5
+"ORHAB","Washington","Neah Bay",48.3685861111111,-124.611180555556,8,272
+"ORHAB","Washington","North Long Island",46.497812,-123.979085,1,1
+"ORHAB","Washington","Quinault Beach",47.2706333333333,-124.235475,17,1177
+"ORHAB","Washington","Raft River",47.4875722222222,-124.344383333333,9,427
+"ORHAB","Washington","Rialto Beach",47.9198916666667,-124.638525,5,51
+"ORHAB","Washington","Ruby Beach",47.7108583333333,-124.415866666667,6,108
+"ORHAB","Washington","Sand Point",48.1244638888889,-124.710688888889,3,10
+"ORHAB","Washington","Tokeland Marina",46.7074138888889,-123.966263888889,10,624
+"ORHAB","Washington","Twin Harbors",46.8091305555556,-124.105241666667,20,1764
+"ORHAB","Washington","Westport Marina",46.9057527777778,-124.104444444444,10,628
+"ORHAB","Washington","Willapa Bay",NA,NA,2,148
+"ORHAB","Washington","Willapa Bay mooring",NA,NA,1,62
+"ORHAB","Washington","Willapa Bay-Bay Center",NA,NA,2,131

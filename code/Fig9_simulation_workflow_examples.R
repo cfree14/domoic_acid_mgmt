@@ -49,6 +49,28 @@ toxin_grid_lg <- toxin_grids %>%
 # Format simulation parameters
 ################################################################################
 
+# Extract lat span
+lat_span_grad <- param_key %>%
+  # Simplify
+  select(size, span_lo, span_hi) %>%
+  # Format
+  rename(scenario=size) %>%
+  mutate(scenario=recode_factor(scenario,
+                                "small"="Small bloom",
+                                "medium"="Medium bloom",
+                                "large"="Large bloom")) %>%
+  # Gather
+  gather(key="end", value="lat", 2:ncol(.)) %>%
+  # Format lat
+  mutate(lat=46-lat)
+
+# Extract lat span used
+lat_span_used <- toxin_grids %>%
+  filter(day==1) %>%
+  arrange(scenario, desc(lat)) %>%
+  group_by(scenario) %>%
+  summarize(lat=max(lat[prop==0]))
+
 # Extract last days (for gradient)
 last_days_grad <- toxin_grids %>%
   # Unique
@@ -230,8 +252,12 @@ g1 <- ggplot(toxin_grids, mapping=aes(x=date, y=lat, fill=prop)) +
   # Plot season opener
   geom_vline(xintercept=ymd("2020-12-01"), linetype="dotted", lwd=0.4) +
   # Plot early-season parameter limits and selection
-  geom_line(data=param_key_plot, aes(x=date, y=lat, group=position), inherit.aes = F) +
-  geom_point(data=last_days_grad, aes(x=date, y=lat), inherit.aes = F) +
+  geom_line(data=param_key_plot, aes(x=date, y=lat, group=position),
+            color="grey40", inherit.aes = F) +
+  geom_point(data=last_days_grad, aes(x=date, y=lat), inherit.aes = F, size=0.8) +
+  geom_line(data=lat_span_grad, aes(x=ymd("2020-12-01")-7, y=lat),
+            color="grey40", inherit.aes = F) +
+  geom_point(data=lat_span_used, aes(x=ymd("2020-12-01")-7, y=lat), inherit.aes = F, size=0.8) +
   # Plot mid-season bloom centroid box
   geom_rect(data=centroid_box, mapping=aes(xmin=center_x_lo_date,
                                            xmax=center_x_hi_date,

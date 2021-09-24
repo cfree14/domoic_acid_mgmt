@@ -1,12 +1,25 @@
 
 # Simulate management
-# toxin_test_schedule="once"; ncrabs=6; close_thresh=1/6; nclean_tests=2; test_interval=1; perfect <- F
-simulate_mgmt <- function(toxin_grid_df, stations, mgmt_zones, perfect=F,
-                          test_schedule="once", ncrabs=6, close_thresh=1/6, nclean_tests=2, test_interval=1, plot=F){
+# toxin_grid_df <- toxin_grid_sm; ncrabs=6; close_thresh=1/6; test_interval=1; repeat_interval <- 0; perfect <- T
+simulate_mgmt <- function(toxin_grid_df, nstations,
+                          ncrabs=6, close_thresh=1/6, test_interval=1,
+                          repeat_interval=0, perfect=F, plot=F){
 
-  # Extract parameters
-  ndays <- toxin_grid_df$day %>% max()
+  # Extract grid parameters
+  ndays <- max(toxin_grid_df$day)
+  ymin <- min(toxin_grid_df$lat)
+  ymax <- max(toxin_grid_df$lat)
   grid_lats <- sort(unique(toxin_grid_df$lat))
+
+  # Setup management
+  mgmt_info <- set_mgmt_even(nstations=nstations, ymin=ymin, ymax=ymax, ndays=ndays, plot=F)
+  stations <- mgmt_info$stations
+  mgmt_zones <- mgmt_info$zones
+
+  # Plot stations
+  if(F){
+    plot_setup(toxin_grid_df, stations, mgmt_zones)
+  }
 
   # Sample schedule
   sample_dates <- seq(1, ndays, test_interval*7)
@@ -23,14 +36,6 @@ simulate_mgmt <- function(toxin_grid_df, stations, mgmt_zones, perfect=F,
     # Arrange
     select(station_id, lat, lat_grid, day) %>%
     arrange(station_id, lat, lat_grid, day)
-
-  # Function to conduct sampling
-  conduct_sampling <- function(prob, nsample){
-    x <- runif(n=nsample, min=0, max=1)
-    nover <- sum(x <= prob)
-    pover <- nover / nsample
-    return(pover)
-  }
 
   # Expand container
   survey_results_full <- survey_results_mat %>%
@@ -52,156 +57,31 @@ simulate_mgmt <- function(toxin_grid_df, stations, mgmt_zones, perfect=F,
 
   # Plot full surveys
   if(F){
-
-    # Plot grid and sampling
-    g <- ggplot(toxin_grid_df, aes(x=day, y=lat, fill=prop)) +
-      geom_raster() +
-      # Surveys
-      geom_point(data=survey_results_full, mapping=aes(x=day, y=lat, shape=status_obs), inherit.aes = F) +
-      # Season opener
-      geom_vline(xintercept=7, linetype="dotted") +
-      # Labels
-      labs(x="Day", y="Latitude (°N)", title="All surveys (unpared)") +
-      # Legend
-      scale_fill_gradientn(name="True proportion of crabs\nabove action threshold",
-                           colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
-                           lim=c(0,1)) +
-      scale_shape_manual(name="Estimated status", values=c(21, 16)) +
-      guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
-      # Theme
-      theme_bw()
-    g
-
+    plot_surveys_all(toxin_grid_df, survey_results_full)
   }
 
-  # Pare back sampling based on management and record management
-  survey_results <-  survey_results_full %>%
-    # Arrange
-    select(lat, day, everything()) %>%
-    arrange(lat, day) %>%
-    # Add sample number
-    group_by(lat) %>%
-    mutate(sample_id=1:n()) %>%
-    ungroup() %>%
-    select(lat, sample_id, everything()) %>%
-    # Count number of consecutive days
-    group_by(lat) %>%
-    mutate(rle=sequence(rle(x=status_obs)$lengths)) %>%
-    ungroup() %>%
-    # Find last week
-    group_by(lat) %>%
-    mutate(day_last=ifelse(length(day[status_obs=="clean" & rle==2]) > 0,
-                           day[status_obs=="clean" & rle==2] %>% min(), max(day))) %>%
-    ungroup() %>%
-    # Reduce to only weeks used
-    group_by(lat) %>%
-    filter(day<=day_last) %>%
-    ungroup() %>%
-    # If pre-season test is clean, remove everything after
-    group_by(lat) %>%
-    mutate(preseason_test=status_obs[day==1]) %>%
-    filter(!(preseason_test=="clean" & day>1)) %>%
-    ungroup()
+  # Conduct surveys
+  survey_results1 <- conduct_surveys(survey_results_full=survey_results_full,
+                                     repeat_interval=repeat_interval)
+
+  # Format survey results
+  survey_results <- survey_results1 %>%
+    # Add station id
+    left_join(survey_results_full %>% select(lat, day, station_id), by=c("lat", "day"))
 
   # Plot pared surveys
   if(F){
-
-    # Plot grid and sampling
-    g <- ggplot(toxin_grid_df, aes(x=day, y=lat, fill=prop)) +
-      geom_raster() +
-      # Surveys
-      geom_point(data=survey_results, mapping=aes(x=day, y=lat, shape=status_obs), inherit.aes = F) +
-      # Season opener
-      geom_vline(xintercept=7, linetype="dotted") +
-      # Labels
-      labs(x="Day", y="Latitude (°N)", title="Surveys (pared)") +
-      # Legend
-      scale_fill_gradientn(name="True proportion of crabs\nabove action threshold",
-                           colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
-                           lim=c(0,1)) +
-      scale_shape_manual(name="Estimated status", values=c(21, 16)) +
-      guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
-      # Theme
-      theme_bw()
-    g
-
+    plot_surveys_pared(toxin_grid_df, survey_results)
   }
 
-  # Opening dates
-  open_dates <- survey_results %>%
-    group_by(station_id, lat) %>%
-    summarize(open_date=max(day)) %>%
-    ungroup()
-
-  # Build management grid
-  mgmt_zones_padded <- c(mgmt_zones[1]-1, mgmt_zones[2:length(mgmt_zones)])
-  mgmt_grid_df <- toxin_grid_df %>%
-    # Add management zone
-    mutate(mgmt_zone=cut(lat, breaks=mgmt_zones_padded, labels=1:length(stations)) %>% as.numeric()) %>%
-    # Add true status
-    mutate(status_true=ifelse(prop<=close_thresh, "Open", "Closed")) %>%
-    # Arrange
-    select(mgmt_zone, lat, day, prop, status_true) %>%
-    # Add open date
-    left_join(open_dates %>% select(-lat), by=c("mgmt_zone"="station_id")) %>%
-    # Add actual status
-    group_by(mgmt_zone) %>%
-    mutate(status_used=ifelse(day<open_date, "Closed", "Open")) %>%
-    ungroup() %>%
-    # Classify performance
-    mutate(correct_yn=status_true==status_used,
-           status_diff=paste(status_true, status_used, sep="-"),
-           status_diff=recode_factor(status_diff,
-                                     "Open-Open"="Open correctly",
-                                     "Closed-Closed"="Closed correctly",
-                                     "Open-Closed"="Closed unnecessarily",
-                                     "Closed-Open"="Open riskily"))
-
+  # Make management decisions
+  mgmt_grid_df <- make_mgmt_decisions(toxin_grid_df,
+                                      survey_results, stations, mgmt_zones,
+                                      test_interval, close_thresh)
 
   # Plot management grid
   if(plot==T){
-
-    # Plot monitoring
-    g1 <- ggplot(toxin_grid_df, aes(x=day, y=lat, fill=prop)) +
-      geom_raster() +
-      # Surveys
-      geom_point(data=survey_results, mapping=aes(x=day, y=lat, shape=status_obs),
-                 inherit.aes = F) +
-      # Season opener
-      geom_vline(xintercept=7, linetype="dotted") +
-      # Labels
-      labs(x="Day", y="Latitude (°N)", title="Monitoring results") +
-      # Legend
-      scale_fill_gradientn(name="True proportion\nabove action threshold",
-                           colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
-                           lim=c(0,1)) +
-      scale_shape_manual(name="Estimated status", values=c(21, 16)) +
-      guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
-      # Theme
-      theme_bw() +
-      theme(legend.position = "none")
-
-    # Plot managment
-    g2 <- ggplot(mgmt_grid_df, aes(x=day, y=lat, fill=status_used, alpha=correct_yn)) +
-      geom_raster() +
-      # Surveys
-      geom_point(data=survey_results, mapping=aes(x=day, y=lat, shape=status_obs), inherit.aes = F, show.legend = F) +
-      # Season opener
-      geom_vline(xintercept=7, linetype="dotted") +
-      # Labels
-      labs(x="Day", y="Latitude (°N)", title="Management performance") +
-      # Legend
-      scale_fill_discrete(name="Management") +
-      scale_shape_manual(name="Estimated status", values=c(21, 16)) +
-      scale_alpha_manual(name="Action correct?", values=c(0.5, 1)) +
-      # Theme
-      theme_bw()  +
-      theme(legend.position = "none")
-
-    # Merge
-    g <- gridExtra::grid.arrange(g1, g2, ncol=1)
-    print(g)
-
+    plot_surveys_mgmt(toxin_grid_df, survey_results, mgmt_grid_df)
   }
 
   # Return

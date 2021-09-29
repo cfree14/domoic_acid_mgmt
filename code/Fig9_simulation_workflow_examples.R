@@ -216,7 +216,13 @@ mgmt_grid <- bind_rows(mgmt_grid_sm, mgmt_grid_md, mgmt_grid_lg) %>%
   mutate(scenario=factor(scenario,
                          levels=c("Small bloom", "Medium bloom", "Large bloom"))) %>%
   # Add date
-  mutate(date=ymd("2020-12-01") - 7 + day - 1)
+  mutate(date=ymd("2020-12-01") - 7 + day - 1) %>%
+  # Factor status
+  mutate(status_diff=factor(status_diff,
+                           levels=c("Closed correctly",
+                                    "Closed unnecessarily",
+                                    "Open correctly",
+                                    "Open riskily")))
 
 
 # Plot data
@@ -312,7 +318,7 @@ g2 <- ggplot(toxin_grids, mapping=aes(x=date, y=lat, fill=prop)) +
 g2
 
 # Plot mangament
-g3 <- ggplot(mgmt_grid, aes(x=date, y=lat, fill=status_used, alpha=correct_yn)) +
+g3 <- ggplot(mgmt_grid, aes(x=date, y=lat, fill=status_diff)) +
   facet_wrap(~scenario) +
   # Raster
   geom_raster() +
@@ -334,8 +340,8 @@ g3 <- ggplot(mgmt_grid, aes(x=date, y=lat, fill=status_used, alpha=correct_yn)) 
   scale_shape_manual(name="Survey result", values=c(21, 16),  guide="none") +
   scale_size_manual(name="Survey result", values=c(0.9, 1.2), guide="none") +
   # Fill legend
-  scale_fill_discrete(name="Management", drop=F) +
-  scale_alpha_manual(name="Action correct?", values=c(0.5, 1), drop=F) +
+  scale_fill_manual(name="Management\nperformance", drop=F,
+                    values=c("red", "coral", "blue", "lightblue")) +
   # Theme
   theme_bw() + base_theme
 g3

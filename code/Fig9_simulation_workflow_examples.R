@@ -341,9 +341,13 @@ g3 <- ggplot(mgmt_grid, aes(x=date, y=lat, fill=status_diff)) +
   scale_size_manual(name="Survey result", values=c(0.9, 1.2), guide="none") +
   # Fill legend
   scale_fill_manual(name="Management\nperformance", drop=F,
-                    values=c("red", "coral", "blue", "lightblue")) +
+                    values=c("#F8766D",
+                             alpha("#F8766D", 0.5),
+                             "#00BFC4",
+                             alpha("#00BFC4", 0.5))) +
   # Theme
-  theme_bw() + base_theme
+  theme_bw() + base_theme +
+  theme(legend.key.size = unit(0.3, "cm"))
 g3
 
 # Merge

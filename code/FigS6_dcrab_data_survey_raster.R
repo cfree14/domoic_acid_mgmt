@@ -120,6 +120,7 @@ seasons_ca_c <- tibble(year=paste(seasons_do, seasons_do+1, sep="-"),
 # Theme
 my_theme <-  theme(axis.text=element_text(size=7),
                    axis.title=element_text(size=8),
+                   axis.line.x = element_blank(),
                    legend.text=element_text(size=7),
                    legend.title=element_text(size=8),
                    strip.text=element_text(size=8),
@@ -138,12 +139,11 @@ date_min_do <- ymd("2014-01-01")
 date_max_do <- ymd("2021-01-01")
 
 # Build call outs
-stars <- matrix(data=c(3,"2016-05-01", 41.6, # large bloom
-                       2, "2019-04-01", 41.6, # medium bloom
-                       1, "2018-03-15", 41.6), ncol=3, byrow=T, dimnames = list(NULL, c("id", "date", "lat_dd"))) %>%
+stars <- matrix(data=c("C","2016-05-01", 41.6, # large bloom
+                       "B", "2019-04-01", 41.6, # medium bloom
+                       "A", "2018-03-15", 41.6), ncol=3, byrow=T, dimnames = list(NULL, c("id", "date", "lat_dd"))) %>%
   as.data.frame() %>%
-  mutate(id=as.numeric(id),
-         date=ymd(date),
+  mutate(date=ymd(date),
          lat_dd=as.numeric(lat_dd))
 
 # Plot data
@@ -167,7 +167,7 @@ g <- ggplot(stats, aes(x=date_zone, y=lat_zone, fill=pover_max)) +
   geom_point(stars, mapping=aes(x=date, y=lat_dd), pch=21, fill="white", inherit.aes = F, size=3.5) +
   geom_text(stars, mapping=aes(x=date, y=lat_dd, label=id), inherit.aes = F, size=2.2) +
   # Labels
-  labs(x="Sample date", y="Latitude (°N)") +
+  labs(x="", y="Latitude (°N)") +
   # Limits
   scale_y_continuous(limits=c(35, 48.5), breaks=seq(34, 48, 2)) +
   scale_x_date(breaks=seq(date_min_do, date_max_do, by="1 year"), labels=year(date_min_do):year(date_max_do)) +

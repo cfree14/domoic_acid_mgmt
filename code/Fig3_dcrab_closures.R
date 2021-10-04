@@ -47,15 +47,14 @@ data <- data_orig %>%
                                         "Evisceration order", "Marine life entanglement closure")))
 
 # Build call outs
-stars <- matrix(data=c(1,"2016-03-01", 42.4,
-                       2, "2015-06-01", 46.9,
-                       3, "2017-03-20", 44.45,
-                       4, "2018-03-10", 43.21,
-                       4, "2019-04-10", 43.21,
-                       5, "2021-04-15", 46.95), ncol=3, byrow=T, dimnames = list(NULL, c("id", "date", "lat_dd"))) %>%
+stars <- matrix(data=c("A", "2016-03-01", 42.4,
+                       "B", "2015-06-01", 46.9,
+                       "C", "2017-03-20", 44.45,
+                       "D", "2018-03-10", 43.21,
+                       "D", "2019-04-10", 43.21,
+                       "E", "2021-04-15", 46.95), ncol=3, byrow=T, dimnames = list(NULL, c("id", "date", "lat_dd"))) %>%
   as.data.frame() %>%
-  mutate(id=as.numeric(id),
-         date=ymd(date),
+  mutate(date=ymd(date),
          lat_dd=as.numeric(lat_dd))
 
 # Plot data

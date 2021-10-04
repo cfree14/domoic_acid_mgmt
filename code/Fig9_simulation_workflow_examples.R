@@ -218,11 +218,11 @@ mgmt_grid <- bind_rows(mgmt_grid_sm, mgmt_grid_md, mgmt_grid_lg) %>%
   # Add date
   mutate(date=ymd("2020-12-01") - 7 + day - 1) %>%
   # Factor status
-  mutate(status_diff=factor(status_diff,
-                           levels=c("Closed correctly",
-                                    "Closed unnecessarily",
-                                    "Open correctly",
-                                    "Open riskily")))
+  mutate(status_diff=recode_factor(status_diff,
+                                   "Closed correctly"="Closed\ncorrectly",
+                                   "Closed unnecessarily"="Closed\nunnecessarily",
+                                   "Open correctly"="Open\ncorrectly",
+                                   "Open riskily"="Open\nriskily"))
 
 
 # Plot data
@@ -347,7 +347,7 @@ g3 <- ggplot(mgmt_grid, aes(x=date, y=lat, fill=status_diff)) +
                              alpha("#00BFC4", 0.5))) +
   # Theme
   theme_bw() + base_theme +
-  theme(legend.key.size = unit(0.3, "cm"))
+  theme(legend.key.size = unit(0.5, "cm"))
 g3
 
 # Merge

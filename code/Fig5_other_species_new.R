@@ -136,6 +136,16 @@ other_labels <- data_other %>%
   # filter(n>100)
   mutate(lat_dd=ifelse(n<100, NA, lat_dd))
 
+# Build stars
+stars <- matrix(data=c("Razor clam", "2019-03-15", 39.85,
+                       "California mussel", "2017-04-25", 36.0,
+                       "Other species", "2015-03-10", 37.0,
+                       "Other species", "2016-03-01", 37.6),
+                ncol=3, byrow=T, dimnames = list(NULL, c("comm_name", "date", "lat_dd"))) %>%
+  as.data.frame() %>%
+  mutate(date=ymd(date),
+         lat_dd=as.numeric(lat_dd))
+
 # Plot data
 ################################################################################
 
@@ -183,6 +193,8 @@ g1 <- ggplot(data %>% filter(comm_name=="Razor clam"),
   annotate(geom="text", x=date_min_do, y=46.25, hjust=0, vjust=1.5, label="Oregon", color="grey30", size=2.5) +
   annotate(geom="text", x=date_min_do, y=42, hjust=0, vjust=1.5, label="N. California", color="grey30", size=2.5) +
   annotate(geom="text", x=date_min_do, y=son_mend_county, hjust=0, vjust=1.5, label="C. California", color="grey30", size=2.5) +
+  # Plot stars
+  ggstar::geom_star(data=stars %>% filter(comm_name=="Razor clam"), mapping=aes(x=date, y=lat_dd), inherit.aes = F, size=3, fill="black", color=NA) +
   # Limits
   scale_y_continuous(limits=c(35, 48.5), breaks=seq(34, 48, 2)) +
   scale_x_date(breaks=seq(date_min_do, date_max_do, by="1 year"), labels=year(date_min_do):year(date_max_do)) +
@@ -220,6 +232,8 @@ g2 <- ggplot(data %>% filter(comm_name=="California mussel"),
   annotate(geom="text", x=date_min_do, y=46.25, hjust=0, vjust=1.5, label="Oregon", color="grey30", size=2.5) +
   annotate(geom="text", x=date_min_do, y=42, hjust=0, vjust=1.5, label="N. California", color="grey30", size=2.5) +
   annotate(geom="text", x=date_min_do, y=son_mend_county, hjust=0, vjust=1.5, label="C. California", color="grey30", size=2.5) +
+  # Plot stars
+  ggstar::geom_star(data=stars %>% filter(comm_name=="California mussel"), mapping=aes(x=date, y=lat_dd), inherit.aes = F, size=3, fill="black", color=NA) +
   # Limits
   scale_y_continuous(limits=c(35, 48.5), breaks=seq(34, 48, 2)) +
   scale_x_date(breaks=seq(date_min_do, date_max_do, by="1 year"), labels=year(date_min_do):year(date_max_do)) +
@@ -259,6 +273,8 @@ g3 <- ggplot(data_other,
   annotate(geom="text", x=date_min_do, y=46.25, hjust=0, vjust=1.5, label="Oregon", color="grey30", size=2.5) +
   annotate(geom="text", x=date_min_do, y=42, hjust=0, vjust=1.5, label="N. California", color="grey30", size=2.5) +
   annotate(geom="text", x=date_min_do, y=son_mend_county, hjust=0, vjust=1.5, label="C. California", color="grey30", size=2.5) +
+  # Plot stars
+  ggstar::geom_star(data=stars %>% filter(comm_name=="Other species"), mapping=aes(x=date, y=lat_dd), inherit.aes = F, size=3, fill="black", color=NA) +
   # Limits
   scale_y_continuous(limits=c(35, 48.5), breaks=seq(34, 48, 2)) +
   scale_x_date(breaks=seq(date_min_do, date_max_do, by="1 year"), labels=year(date_min_do):year(date_max_do)) +

@@ -125,15 +125,14 @@ data %>%
 ################################################################################
 
 # Build call outs
-stars <- matrix(data=c(1,"2016-04-15", 41.6,
-                       2, "2015-05-15", 47.65,
-                       3, "2017-03-20", 44.2,
-                       4, "2018-03-10", 43.18,
-                       4, "2019-04-22", 43.18,
-                       5, "2021-03-15", 46.95), ncol=3, byrow=T, dimnames = list(NULL, c("id", "date", "lat_dd"))) %>%
+stars <- matrix(data=c("A", "2016-04-15", 41.6,
+                       "B", "2015-05-15", 47.65,
+                       "C", "2017-03-20", 44.2,
+                       "D", "2018-03-10", 43.18,
+                       "D", "2019-04-22", 43.18,
+                       "E", "2021-03-15", 46.95), ncol=3, byrow=T, dimnames = list(NULL, c("id", "date", "lat_dd"))) %>%
   as.data.frame() %>%
-  mutate(id=as.numeric(id),
-         date=ymd(date),
+  mutate(date=ymd(date),
          lat_dd=as.numeric(lat_dd))
 
 # Theme

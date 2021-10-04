@@ -59,7 +59,7 @@ nsurveys <- nrow(data)
 nsurveys_label <-paste(nsurveys, "surveys")
 
 # Distribution of parameters
-g_big <- ggplot(data, aes(x=da_ppm_med, y=cv_fit, fill=pover_obs)) +
+g_big <- ggplot(data, aes(x=da_ppm_med_fit, y=cv_fit, fill=pover_obs)) +
   # Plot points
   geom_point(pch=21, size=3, alpha=0.8) +
   # Plot call outs
@@ -76,8 +76,9 @@ g_big <- ggplot(data, aes(x=da_ppm_med, y=cv_fit, fill=pover_obs)) +
   labs(x="Median contamination (ppm)", y='Coefficient of variation (CV)', tag="A") +
   scale_x_continuous(breaks=seq(0, 90, 15)) +
   # Legends
-  scale_fill_gradientn(name="Proportion above\nthe action threshold", lim=c(0,1),
-                       colors=RColorBrewer::brewer.pal(9, "YlOrRd")) +
+  scale_fill_gradientn(name="Percent above\naction threshold", lim=c(0,1),
+                       colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
+                       labels = scales::percent_format(accuracy = 1)) +
   guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
   # Theme
   theme_bw() + big_theme +

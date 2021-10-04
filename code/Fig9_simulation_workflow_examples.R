@@ -281,9 +281,10 @@ g1 <- ggplot(toxin_grids, mapping=aes(x=date, y=lat, fill=prop)) +
   # Legend
   scale_size_manual(name="Bloom size", values=c(0.5, 1)) +
   scale_color_manual(name="Bloom size", values=c("red", "black")) +
-  scale_fill_gradientn(name="Proportion above\naction threshhold",
+  scale_fill_gradientn(name="Percent above\naction threshhold",
                        na.value = "white",
-                       colors=RColorBrewer::brewer.pal(9, "YlOrRd"), lim=c(0,1)) +
+                       colors=RColorBrewer::brewer.pal(9, "YlOrRd"), lim=c(0,1),
+                       labels = scales::percent_format(accuracy = 1)) +
   guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
   # Theme
   theme_bw() + base_theme

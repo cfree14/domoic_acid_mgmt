@@ -237,6 +237,7 @@ base_theme <- theme(axis.text=element_text(size=6),
                     strip.text=element_text(size=7),
                     plot.title=element_text(size=9),
                     plot.tag=element_text(size=9),
+                    plot.tag.position = c(0.01, 0.97),
                     # Gridlines
                     panel.grid.major = element_blank(),
                     panel.grid.minor = element_blank(),
@@ -273,7 +274,7 @@ g1 <- ggplot(toxin_grids, mapping=aes(x=date, y=lat, fill=prop)) +
   geom_line(data=ellipse_span, mapping=aes(x=date, y=center_y_avg, color=size, size=size), inherit.aes=F, show.legend = F) +
   geom_line(data=ellipse_span, mapping=aes(x=center_x_avg_date, y=latitude, color=size, size=size), inherit.aes=F, show.legend = F) +
   # Label
-  labs(x="", y="Latitude (°N)",
+  labs(x="", y="Latitude (°N)", tag="A",
        title="Toxin contamination") +
   # Axes
   scale_x_date(breaks=seq("2020-01-01" %>% ymd(), "2021-08-01" %>% ymd(), by="1 month"), date_labels = "%b") +
@@ -302,7 +303,7 @@ g2 <- ggplot(toxin_grids, mapping=aes(x=date, y=lat, fill=prop)) +
   # Plot survey results
   geom_point(data=survey_results, aes(x=date, y=lat, shape=status_obs, size=status_obs), inherit.aes = F) +
   # Label
-  labs(x="", y="Latitude (°N)",
+  labs(x="", y="Latitude (°N)", tag="B",
        title="Toxin monitoring results") +
   # Axes
   scale_x_date(breaks=seq("2020-01-01" %>% ymd(), "2021-08-01" %>% ymd(), by="1 month"), date_labels = "%b") +
@@ -332,7 +333,7 @@ g3 <- ggplot(mgmt_grid, aes(x=date, y=lat, fill=status_diff)) +
   # Plot survey results
   geom_point(data=survey_results, aes(x=date, y=lat, shape=status_obs, size=status_obs), inherit.aes = F) +
   # Label
-  labs(x="", y="Latitude (°N)",
+  labs(x="", y="Latitude (°N)", tag="C",
        title="Toxin management performance") +
   # Axes
   scale_x_date(breaks=seq("2020-01-01" %>% ymd(), "2021-08-01" %>% ymd(), by="1 month"), date_labels = "%b") +

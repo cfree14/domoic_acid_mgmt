@@ -61,13 +61,8 @@ simulate_mgmt <- function(toxin_grid_df, nstations,
   }
 
   # Conduct surveys
-  survey_results1 <- conduct_surveys(survey_results_full=survey_results_full,
+  survey_results <- conduct_surveys(survey_results_full=survey_results_full,
                                      repeat_interval=repeat_interval)
-
-  # Format survey results
-  survey_results <- survey_results1 %>%
-    # Add station id
-    left_join(survey_results_full %>% select(lat, day, station_id), by=c("lat", "day"))
 
   # Plot pared surveys
   if(F){

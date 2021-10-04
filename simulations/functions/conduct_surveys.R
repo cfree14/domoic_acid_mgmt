@@ -6,23 +6,27 @@ conduct_surveys <- function(survey_results_full, repeat_interval){
   days <- sort(unique(survey_results_full$day))
   for(i in 1:length(lats)){
 
-    # Get lat results
+    # Lat do
     lat_do <- lats[i]
-    lat_results <- survey_results_full %>%
-      filter(lat==lat_do) %>% pull(status_obs)
+
+    # Extract/format results
+    ldata <- survey_results_full %>%
+      # Lat to do
+      filter(lat==lat_do) %>%
+      # Simplify
+      select(station_id, lat, day, status_obs) %>%
+      # Add USE column
+      mutate(next_survey_day=NA,
+             use=ifelse(day==1, T, NA))
 
     # Establish day stats and determine whether it gets used
     j <- 1
     day_next <- days[j]
+    # for(j in 1:6){
     for(j in 1:length(days)){
 
       # Day info
       day_do <- days[j]
-      day_result <- lat_results[j]
-
-      # Were the last two clean?
-      last_two_results <- lat_results[c(j-1,j)]
-      last_two_clean <- sum(last_two_results== "clean") == 2
 
       # Are we sampling today?
       # If yes, record results and schedule next sample
@@ -30,9 +34,32 @@ conduct_surveys <- function(survey_results_full, repeat_interval){
 
         # Sample
         use <- T
+        ldata$use[j] <- use
 
-        # If the 1st sample is clean or the last two sample were clean, schedule for future
-        if( (day_do==1 & day_result=="clean") | (day_do>1 & last_two_clean==T) ){
+        # Parameters
+        day_result <- ldata %>% filter(day==day_do) %>% pull(status_obs)
+
+        # Day 1 and clean?
+        day1_clean_yn <- (day_do==1 & day_result=="clean")
+
+        # Last two (used) samples 1 week apart and clean?
+        last_two_results <- ldata %>%
+          # Used surveys
+          filter(use==T) %>%
+          # Last two surveys
+          arrange((desc(day))) %>%
+          slice(1:2)
+        last_two_days_apart <- ifelse(nrow(last_two_results)==2, diff(last_two_results$day) %>% abs(), 0)
+        last_two_1wk_apart <- last_two_days_apart == 7 & nrow(last_two_results) == 2
+        last_two_clean <- sum(last_two_results$status_obs=="clean") == 2
+        last2_1wk_apart_and_clean_yn <- last_two_1wk_apart & last_two_clean
+
+        # Last sample was a clean follow up sample?
+        follow_up_yn <- last_two_days_apart == repeat_interval * 7
+        clean_follow_up_yn <- follow_up_yn & day_result == "clean"
+
+        # Schedule for for the future if: (1) 1st sample is clean; (2) last two samples were 1 week apart and clean; or (3) last sample was a clean follow up sample
+        if( day1_clean_yn | last2_1wk_apart_and_clean_yn |  clean_follow_up_yn){
           day_next <- day_do + repeat_interval*7
         # Otherwise, schedule for next week
         }else{
@@ -42,17 +69,11 @@ conduct_surveys <- function(survey_results_full, repeat_interval){
       # If not sampling today
       }else{
         use <- F
+        ldata$use[j] <- use
       }
 
-      # Assemble results
-      df <- tibble(lat=lat_do,
-                   day=day_do,
-                   status_obs=day_result,
-                   next_survey_day=day_next,
-                   use=use)
-
-      # Merge data
-      if(j==1){ldata <- df}else{ldata <- bind_rows(ldata, df)}
+      # Record results
+      ldata$next_survey_day[j] <- day_next
 
     }
 
@@ -61,7 +82,7 @@ conduct_surveys <- function(survey_results_full, repeat_interval){
 
   }
 
-  # Filter
+  # Return data
   data_use <- data_out %>%
     filter(use==T)
 

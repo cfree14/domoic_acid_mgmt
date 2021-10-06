@@ -26,10 +26,10 @@ sapply(list.files(codedir, pattern=".R"), function(x) source(file.path(codedir, 
 ################################################################################
 
 # Parameters
-nstations <- c(2, 5, 8, 12)
+nstations <- c(2, 4, 5, 6, 8, 10, 12)
 toxin_scenarios <- sort(unique(data$scenario))
 intervals_wk <- c(0, 1, 2, 3, 4, 6)
-toxin_scenarios_niter <- 20 # max(data$iter)
+toxin_scenarios_niter <- max(data$iter)
 
 # Build scenario gird
 scenario_key <- expand.grid(nstations=nstations,

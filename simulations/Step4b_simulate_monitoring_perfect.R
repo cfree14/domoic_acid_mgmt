@@ -27,7 +27,7 @@ sapply(list.files(codedir, pattern=".R"), function(x) source(file.path(codedir, 
 ################################################################################
 
 # Parameters
-nstations <- seq(2, 12, 2)
+nstations <- c(2, 4, 5, 6, 8, 10, 12)
 toxin_scenarios <- sort(unique(data1$scenario))
 toxin_scenarios_niter <- max(data1$iter)
 
@@ -37,7 +37,7 @@ scenario_key <- expand.grid(nstations=nstations,
                             toxin_scenario_iter=1:toxin_scenarios_niter)
 
 # Loop through scenarios
-x <- 3
+x <- 2
 results <- purrr::map_df(1:nrow(scenario_key), function(x){
 
   # Extract parameters
@@ -49,21 +49,13 @@ results <- purrr::map_df(1:nrow(scenario_key), function(x){
   toxin_grid_df <- data1 %>%
     filter(scenario==toxin_scenario & iter==toxin_scenario_iter)
 
-  # Extract grid parameters
-  ymin <- min(toxin_grid_df$lat)
-  ymax <- max(toxin_grid_df$lat)
-  ndays <- max(toxin_grid_df$day)
-
-  # Setup management
-  mgmt_info <- set_mgmt_even(nstations=nstations_do, ymin=ymin, ymax=ymax, ndays=ndays, plot=F)
-  stations <- mgmt_info$stations
-  mgmt_zones <- mgmt_info$zones
-
   # Plot check
   # plot_setup(toxin_grid_df, stations, mgmt_zones)
 
   # Run scenario
-  output <- simulate_mgmt(toxin_grid_df, stations, mgmt_zones, perfect=T, plot=F)
+  output <- simulate_mgmt(toxin_grid_df,
+                          nstations=nstations_do,
+                          perfect=T, plot=T)
 
   # Quantify performance
   perf_stats <- quantify_performance(output)

@@ -161,7 +161,7 @@ ellipse_span <- param_key %>%
 
 # Small scenario
 output_sm <- simulate_mgmt(toxin_grid_df = toxin_grid_sm,
-                           nstations=4,
+                           nstations=5,
                            repeat_interval = 0,
                            perfect = T,
                            plot = T)

@@ -60,8 +60,39 @@ stats <- data %>%
          interval_wk=factor(interval_wk,
                             levels=c("1 week", paste(c(2,3,4,6), "weeks"), "No repeat"))) %>%
   # Arrange
-  arrange(toxin_scenario, nstations, interval_wk)
+  arrange(toxin_scenario, nstations, interval_wk) %>%
+  # Reduce to scenarios of interest
+  filter(nstations %in% c(2, 5, 8, 12))
 
+# OR 5 to 12 line segments
+or_lines <- stats %>%
+  # Classify
+  mutate(season=ifelse(nstations==5 & interval_wk=="No repeat", "2015-16", NA),
+         season=ifelse(nstations==12 & interval_wk=='4 weeks', "2017-18", season)) %>%
+  # Filter
+  filter(!is.na(season))
+
+
+# Stats for MS
+################################################################################
+
+# Large bloom, 12 station
+stats %>%
+  filter(toxin_scenario=="Large bloom" & nstations==12)
+
+
+# Small bloom, 12 station
+stats %>%
+  filter(toxin_scenario=="Small bloom" & nstations==12)
+
+# OR stats
+or_stats <- or_lines %>%
+  select(toxin_scenario, season, p_risk_missed_avg, p_close_unneeded_avg) %>%
+  group_by(toxin_scenario) %>%
+  summarize(risk_prevented=(p_risk_missed_avg[season=="2017-18"] - p_risk_missed_avg[season=="2015-16"]) *100,
+            closures_prevented=(p_close_unneeded_avg[season=="2017-18"]-p_close_unneeded_avg[season=="2015-16"])*100)
+mean(or_stats$risk_prevented)
+mean(or_stats$closures_prevented)
 
 # Plot data
 ################################################################################
@@ -96,28 +127,35 @@ g <- ggplot(stats, aes(x=p_risk_missed_avg,
                                        y=p_close_unneeded_avg,
                                        yend=p_close_unneeded_avg,
                                        color=nstations),
-               inherit.aes = F, show.legend = F, lwd=0.5, alpha=0.5) +
+               inherit.aes = F, show.legend = F, lwd=0.3, alpha=0.5) +
   geom_segment(data=stats, mapping=aes(x=p_risk_missed_avg,
                                        xend=p_risk_missed_avg,
                                        y=p_close_unneeded_min,
                                        yend=p_close_unneeded_max,
                                        color=nstations),
-               inherit.aes = F, show.legend = F, lwd=0.5, alpha=0.5) +
+               inherit.aes = F, show.legend = F, lwd=0.3, alpha=0.5) +
   # Lines
   geom_path(data=stats, mapping=aes(x=p_risk_missed_avg, y=p_close_unneeded_avg,
                                     color=nstations, group=nstations), inherit.aes = F) +
   # Points
-  geom_point(pch=21, stroke=0.5) +
+  geom_point(pch=21, stroke=0.1, color="black") +
+  # OR lines
+  geom_line(data=or_lines, mapping=aes(x=p_risk_missed_avg, y=p_close_unneeded_avg),
+            inherit.aes = F, color="black", lwd=0.8) +
+  geom_point(data=or_lines, mapping=aes(x=p_risk_missed_avg, y=p_close_unneeded_avg),
+             inherit.aes = F, color="black", fill="white", pch=21) +
+  geom_text(data=or_lines, mapping=aes(x=p_risk_missed_avg, y=p_close_unneeded_avg, label=season),
+            inherit.aes = F, color="black", hjust=0, nudge_x = 0.05,  size=2.5) +
   # Axes
   scale_x_continuous(labels = scales::percent_format(accuracy = 1), lim=c(0,NA)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1), lim=c(0,NA)) +
   # Labels
-  labs(x="Proportion of public health risk\nmissed by closures",
+  labs(x="Proportion of public health risk\noverlooked by closures",
        y="Proportion of fishing season\nclosed unnecessarily") +
   # Legend
   scale_size_ordinal(name="Resample\ninterval", range=c(0.5, 3)) +
-  scale_color_gradientn(name="Number of\nsites", colors=RColorBrewer::brewer.pal(9, "Purples")[4:9], guide="none") +
-  scale_fill_gradientn(name="Number of\nsites", colors=RColorBrewer::brewer.pal(9, "Purples")[4:9]) +
+  scale_color_gradientn(name="Number of\nsites", colors=RColorBrewer::brewer.pal(9, "Greens")[4:9], guide="none") +
+  scale_fill_gradientn(name="Number of\nsites", colors=RColorBrewer::brewer.pal(9, "Greens")[2:7]) +
   guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
   # Theme
   theme_bw() + my_theme

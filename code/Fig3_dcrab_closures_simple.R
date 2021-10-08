@@ -17,17 +17,17 @@ plotdir <- "figures"
 data_orig <- readRDS(file.path(closuredir, "2015_2020_WC_dcrab_closures.Rds"))
 
 # Read zones
-zones <- readxl::read_excel("data/merged/processed/WC_dcrab_da_mgmt_zones.xlsx")
+zones_orig <- readxl::read_excel("data/merged/processed/WC_dcrab_da_mgmt_zones.xlsx")
 
 
-# Format data
+# Build zones data
 ################################################################################
 
 # Sonoma-Mendocino county line
 son_mend_county <- 38+46.125/60
 
 # Build zones dataframe
-zones_df <- zones %>%
+zones_df <- zones_orig %>%
   filter(!is.na(lat_dd_north)) %>%
   select(state, lat_dd_north) %>%
   rename(y=lat_dd_north) %>%
@@ -35,7 +35,29 @@ zones_df <- zones %>%
                    "Washington"="2014-10-01",
                    "Oregon"="2017-11-01",
                    "California"="2020-11-01") %>% ymd(),
-         x2=ymd("2021-08-14"))
+         x2=recode(state,
+                   "Washington"="2021-09-15",
+                   "Oregon"="2021-08-14",
+                   "California"="2021-07-15"),
+         x2=ifelse(y<38.3, "2021-06-30", x2),
+         x2=ymd(x2))
+
+# Build zones
+zones1 <- zones_orig %>%
+  filter(state=="Washington") %>%
+  mutate(season="2015-16 season") %>%
+  select(season, everything())
+zones2 <- zones_orig %>%
+  mutate(season="2020-21 season") %>%
+  select(season, everything())
+zones <- bind_rows(zones1, zones2) %>%
+  mutate(lat_dd_avg=(lat_dd_north+lat_dd_south)/2) %>%
+  # Alter Zone I lat
+  mutate(lat_dd_avg=ifelse(zone_id=="H", 35.3, lat_dd_avg))
+
+
+# Format data
+################################################################################
 
 # Fix data
 data <- data_orig %>%
@@ -56,6 +78,7 @@ stars <- matrix(data=c("A", "2016-03-01", 42.4,
   as.data.frame() %>%
   mutate(date=ymd(date),
          lat_dd=as.numeric(lat_dd))
+
 
 # Plot data
 ################################################################################
@@ -78,6 +101,7 @@ my_theme <-  theme(axis.text=element_text(size=7),
 
 # Date parameters
 date_min_do <- ymd("2014-01-01")
+date_max_do <- ymd("2021-01-01")
 
 # Plot data
 g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
@@ -99,7 +123,7 @@ g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
   # geom_text(stars, mapping=aes(x=date, y=lat_dd, label=id), inherit.aes = F, size=2.2) +
   # Limits
   scale_y_continuous(limits=c(35, 48.5), breaks=seq(34, 48, 2)) +
-  scale_x_date(date_breaks = "1 year", date_labels="%Y") +
+  scale_x_date(breaks=seq(date_min_do, date_max_do, by="1 year"), labels=year(date_min_do):year(date_max_do)) +
   # Labels
   labs(x="Date", y="Latitude (°N)") +
   # Legends

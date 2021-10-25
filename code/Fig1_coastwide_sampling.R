@@ -21,7 +21,8 @@ sites1 <- readxl::read_excel("data/merged/processed/WC_dcrab_sampling_sites.xlsx
 sites2 <- readxl::read_excel("data/merged/processed/WC_dcrab_sampling_sites.xlsx", sheet=2)
 sample_sites <- bind_rows(sites1, sites2) %>%
   rename(season=year) %>%
-  mutate(season=paste(season, "season"))
+  mutate(season=recode(season, "2020-21"="2021-22"),
+         season=paste(season, "season"))
 
 # Read SMA polygons
 sma_polys <- sf::st_read("data/washington/gis_data/processed/sma_polygons.shp")
@@ -99,7 +100,7 @@ zones1 <- zones_orig %>%
   mutate(season="2015-16 season") %>%
   select(season, everything())
 zones2 <- zones_orig %>%
-  mutate(season="2020-21 season") %>%
+  mutate(season="2021-22 season") %>%
   select(season, everything())
 zones <- bind_rows(zones1, zones2) %>%
   mutate(lat_dd_avg=(lat_dd_north+lat_dd_south)/2) %>%

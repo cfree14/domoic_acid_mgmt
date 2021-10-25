@@ -47,11 +47,11 @@ stats <- data %>%
   mutate(dist=sqrt(p_risk_missed_avg^2 + p_close_unneeded_avg^2),
          dist_rank=rank(dist)) %>%
   ungroup() %>%
-  # Format bloom names
+  # Format event names
   mutate(toxin_scenario=recode_factor(toxin_scenario,
-                                      "small"="Small bloom",
-                                      "medium"="Medium bloom",
-                                      "large"="Large bloom")) %>%
+                                      "small"="Small event",
+                                      "medium"="Medium event",
+                                      "large"="Large event")) %>%
   # Format interval
   mutate(interval_wk=interval_wk %>% as.character() %>%  paste(., "weeks"),
          interval_wk=recode(interval_wk,
@@ -76,14 +76,14 @@ or_lines <- stats %>%
 # Stats for MS
 ################################################################################
 
-# Large bloom, 12 station
+# Large event, 12 station
 stats %>%
-  filter(toxin_scenario=="Large bloom" & nstations==12)
+  filter(toxin_scenario=="Large event" & nstations==12)
 
 
-# Small bloom, 12 station
+# Small event, 12 station
 stats %>%
-  filter(toxin_scenario=="Small bloom" & nstations==12)
+  filter(toxin_scenario=="Small event" & nstations==12)
 
 # OR stats
 or_stats <- or_lines %>%

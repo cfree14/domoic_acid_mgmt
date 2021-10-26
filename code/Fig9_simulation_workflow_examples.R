@@ -31,19 +31,19 @@ toxin_grids <- data %>%
   filter(iter==14) %>%
   # Format scenario
   mutate(scenario=recode_factor(scenario,
-                                "small"="Small bloom",
-                                "medium"="Medium bloom",
-                                "large"="Large bloom")) %>%
+                                "small"="Small event",
+                                "medium"="Medium event",
+                                "large"="Large event")) %>%
   # Add date
   mutate(date=ymd("2020-12-01") - 7 + day - 1)
 
 # Extract toxin grids
 toxin_grid_sm <- toxin_grids %>%
-  filter(scenario=="Small bloom")
+  filter(scenario=="Small event")
 toxin_grid_md <- toxin_grids %>%
-  filter(scenario=="Medium bloom")
+  filter(scenario=="Medium event")
 toxin_grid_lg <- toxin_grids %>%
-  filter(scenario=="Large bloom")
+  filter(scenario=="Large event")
 
 
 # Format simulation parameters
@@ -56,9 +56,9 @@ lat_span_grad <- param_key %>%
   # Format
   rename(scenario=size) %>%
   mutate(scenario=recode_factor(scenario,
-                                "small"="Small bloom",
-                                "medium"="Medium bloom",
-                                "large"="Large bloom")) %>%
+                                "small"="Small event",
+                                "medium"="Medium event",
+                                "large"="Large event")) %>%
   # Gather
   gather(key="end", value="lat", 2:ncol(.)) %>%
   # Format lat
@@ -100,9 +100,9 @@ param_key_plot <- param_key %>%
   # Format scenario
   rename(scenario=size, day=value) %>%
   mutate(scenario=recode_factor(scenario,
-                                "small"="Small bloom",
-                                "medium"="Medium bloom",
-                                "large"="Large bloom")) %>%
+                                "small"="Small event",
+                                "medium"="Medium event",
+                                "large"="Large event")) %>%
   # Add date
   mutate(date=ymd("2020-12-01") + day - 1) %>%
   # Arrange
@@ -115,9 +115,9 @@ centroid_box <- param_key %>%
   # Format scenario
   rename(scenario=size) %>%
   mutate(scenario=recode_factor(scenario,
-                                "small"="Small bloom",
-                                "medium"="Medium bloom",
-                                "large"="Large bloom")) %>%
+                                "small"="Small event",
+                                "medium"="Medium event",
+                                "large"="Large event")) %>%
   # Add date
   mutate(center_x_lo_date=ymd("2020-12-01") + center_x_lo - 1,
          center_x_hi_date=ymd("2020-12-01") + center_x_hi - 1)
@@ -146,9 +146,9 @@ ellipse_span <- param_key %>%
          limit=ifelse(grepl("lo", metric), "low", "high")) %>%
   # Format scenario
   mutate(scenario=recode_factor(scenario,
-                                "small"="Small bloom",
-                                "medium"="Medium bloom",
-                                "large"="Large bloom")) %>%
+                                "small"="Small event",
+                                "medium"="Medium event",
+                                "large"="Large event")) %>%
   # Spread
   select(-metric) %>%
   spread(key="axis", value="value") %>%
@@ -182,11 +182,11 @@ output_lg <- simulate_mgmt(toxin_grid_df = toxin_grid_lg,
 
 # Extract survey results
 survey_results_sm <- output_sm$survey_results %>%
-  mutate(scenario="Small bloom")
+  mutate(scenario="Small event")
 survey_results_md <- output_md$survey_results %>%
-  mutate(scenario="Medium bloom")
+  mutate(scenario="Medium event")
 survey_results_lg <- output_lg$survey_results %>%
-  mutate(scenario="Large bloom")
+  mutate(scenario="Large event")
 
 # Merge and format survey results
 survey_results <- bind_rows(survey_results_sm, survey_results_md, survey_results_lg) %>%
@@ -196,17 +196,17 @@ survey_results <- bind_rows(survey_results_sm, survey_results_md, survey_results
   mutate(status_obs=stringr::str_to_sentence(status_obs)) %>%
   # Format scenario
   mutate(scenario=factor(scenario,
-                         levels=c("Small bloom", "Medium bloom", "Large bloom"))) %>%
+                         levels=c("Small event", "Medium event", "Large event"))) %>%
   # Add date
   mutate(date=ymd("2020-12-01") - 7 + day - 1)
 
 # Extract management results
 mgmt_grid_sm <- output_sm$mgmt_grid %>%
-  mutate(scenario="Small bloom")
+  mutate(scenario="Small event")
 mgmt_grid_md <- output_md$mgmt_grid %>%
-  mutate(scenario="Medium bloom")
+  mutate(scenario="Medium event")
 mgmt_grid_lg <- output_lg$mgmt_grid %>%
-  mutate(scenario="Large bloom")
+  mutate(scenario="Large event")
 
 # Merge and format management grid
 mgmt_grid <- bind_rows(mgmt_grid_sm, mgmt_grid_md, mgmt_grid_lg) %>%
@@ -214,7 +214,7 @@ mgmt_grid <- bind_rows(mgmt_grid_sm, mgmt_grid_md, mgmt_grid_lg) %>%
   select(scenario, everything()) %>%
   # Format scenario
   mutate(scenario=factor(scenario,
-                         levels=c("Small bloom", "Medium bloom", "Large bloom"))) %>%
+                         levels=c("Small event", "Medium event", "Large event"))) %>%
   # Add date
   mutate(date=ymd("2020-12-01") - 7 + day - 1) %>%
   # Factor status
@@ -265,12 +265,12 @@ g1 <- ggplot(toxin_grids, mapping=aes(x=date, y=lat, fill=prop)) +
   geom_line(data=lat_span_grad, aes(x=ymd("2020-12-01")-7, y=lat),
             color="grey40", inherit.aes = F) +
   geom_point(data=lat_span_used, aes(x=ymd("2020-12-01")-7, y=lat), inherit.aes = F, size=0.8) +
-  # Plot mid-season bloom centroid box
+  # Plot mid-season event centroid box
   geom_rect(data=centroid_box, mapping=aes(xmin=center_x_lo_date,
                                            xmax=center_x_hi_date,
                                            ymin=center_y_lo,
                                            ymax=center_y_hi), inherit.aes = F, color="grey50", fill=NA, linetype="dotted") +
-  # Plot mid-season bloom span
+  # Plot mid-season event span
   geom_line(data=ellipse_span, mapping=aes(x=date, y=center_y_avg, color=size, size=size), inherit.aes=F, show.legend = F) +
   geom_line(data=ellipse_span, mapping=aes(x=center_x_avg_date, y=latitude, color=size, size=size), inherit.aes=F, show.legend = F) +
   # Label
@@ -279,8 +279,8 @@ g1 <- ggplot(toxin_grids, mapping=aes(x=date, y=lat, fill=prop)) +
   # Axes
   scale_x_date(breaks=seq("2020-01-01" %>% ymd(), "2021-08-01" %>% ymd(), by="1 month"), date_labels = "%b") +
   # Legend
-  scale_size_manual(name="Bloom size", values=c(0.5, 1)) +
-  scale_color_manual(name="Bloom size", values=c("red", "black")) +
+  scale_size_manual(name="event size", values=c(0.5, 1)) +
+  scale_color_manual(name="event size", values=c("red", "black")) +
   scale_fill_gradientn(name="Percent above\naction threshhold",
                        na.value = "white",
                        colors=RColorBrewer::brewer.pal(9, "YlOrRd"), lim=c(0,1),

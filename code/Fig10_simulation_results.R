@@ -53,11 +53,11 @@ stats <- data %>%
   mutate(dist=sqrt(p_risk_missed_avg^2 + p_close_unneeded_avg^2),
          dist_rank=rank(dist)) %>%
   ungroup() %>%
-  # Format bloom names
+  # Format event names
   mutate(toxin_scenario=recode_factor(toxin_scenario,
-                                      "small"="Small bloom",
-                                      "medium"="Medium bloom",
-                                      "large"="Large bloom")) %>%
+                                      "small"="Small event",
+                                      "medium"="Medium event",
+                                      "large"="Large event")) %>%
   # Filter for simplicity
   # filter(nstations %in% c(4, 5, 6, 8, 10, 12)) %>%
   # Format if using log-scale

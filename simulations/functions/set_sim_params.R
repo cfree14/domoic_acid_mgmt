@@ -1,6 +1,6 @@
 
 # Read parameter key
-param_key <- readxl::read_excel(path="tables/TableS7_simulated_bloom_design.xlsx", sheet="Raw")
+param_key <- readxl::read_excel(path="tables/TableS6_simulated_bloom_design.xlsx", sheet="Raw")
 
 # Setup simulation parameters
 # scenario <- "large"

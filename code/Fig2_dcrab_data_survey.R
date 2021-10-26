@@ -202,6 +202,8 @@ g <- ggplot(data %>% filter(date>=date_min_do),
   # Plot call outs
   geom_point(stars, mapping=aes(x=date, y=lat_dd), pch=21, fill="white", inherit.aes = F, size=3.5) +
   geom_text(stars, mapping=aes(x=date, y=lat_dd, label=id), inherit.aes = F, size=2.2) +
+  # Plot California N/As
+  annotate(geom="text", x=ymd("2015-03-15"), y=c(40.38437, 36.88437), label="N/A", color="grey30", size=2) +
   # Limits
   scale_y_continuous(limits=c(35, 48.5), breaks=seq(34, 48, 2)) +
   scale_x_date(breaks=seq(date_min_do, date_max_do, by="1 year"), labels=year(date_min_do):year(date_max_do)) +

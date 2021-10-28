@@ -143,7 +143,7 @@ g <- ggplot(stats, aes(x=p_risk_missed_avg, y=p_close_unneeded_avg, fill=nstatio
   scale_fill_gradientn(name="Number of\nsites", colors=RColorBrewer::brewer.pal(9, "Greens")[1:7]) +
   guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
   # Labels
-  labs(x="Proportion of public health risk\noverlooked by closures",
+  labs(x="Proportion of public health risk\nundetected by monitoring",
        y="Proportion of fishing season\nclosed unnecessarily") +
   # Theme
   theme_bw() + my_theme +

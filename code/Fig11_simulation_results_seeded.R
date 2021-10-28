@@ -150,7 +150,7 @@ g <- ggplot(stats, aes(x=p_risk_missed_avg,
   scale_x_continuous(labels = scales::percent_format(accuracy = 1), lim=c(0,NA)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1), lim=c(0,NA)) +
   # Labels
-  labs(x="Proportion of public health risk\noverlooked by closures",
+  labs(x="Proportion of public health risk\nundetected by monitoring",
        y="Proportion of fishing season\nclosed unnecessarily") +
   # Legend
   scale_size_ordinal(name="Resample\ninterval", range=c(0.5, 3)) +

@@ -70,7 +70,8 @@ borders <- c(border_n, borders_s) %>% unique()
 # Data to plot
 data_plot <- data %>%
   filter(nyrs>1) %>%
-  mutate(source=factor(source, levels=c("HABMAP", "MERHAB", "ORHAB") %>% rev()))
+  mutate(source=recode(source, "MERHAB"="ODFW")) %>%
+  mutate(source=factor(source, levels=c("HABMAP", "ODFW", "ORHAB") %>% rev()))
 
 # Theme
 base_theme <- theme(axis.text=element_text(size=7),

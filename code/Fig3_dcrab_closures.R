@@ -20,6 +20,36 @@ data_orig <- readRDS(file.path(closuredir, "2015_2020_WC_dcrab_closures.Rds"))
 zones_orig <- readxl::read_excel("data/merged/processed/WC_dcrab_da_mgmt_zones.xlsx")
 
 
+# Stats for MS
+################################################################################
+
+# Length of OR eviseration orders
+or_evis_dates <- data_orig %>%
+  # Reduce to OR evisceration orders
+  filter(date>=ymd("2018-01-01") & lat_dd < 46 & lat_dd > 42 & status=="Evisceration order") %>%
+  # Pull dates
+  pull(date) %>% unique() %>% sort()
+
+# 1) 2018-02-16 to 2018-03-04
+# 2) 2019-02-14 to 2019-03-27
+# 3) 2019-05-10 to 2019-05-23
+
+length(seq(ymd("2018-02-16"), ymd("2018-03-04"), by="1 day"))
+length(seq(ymd("2019-02-14"), ymd("2019-03-27"), by="1 day"))
+length(seq(ymd("2019-05-10"), ymd("2019-05-23"), by="1 day"))
+
+
+# OR short closure'
+or_close_dates <- data_orig %>%
+  # Reduce to OR evisceration orders
+  filter(date>=ymd("2017-01-01") & lat_dd < 46 & lat_dd > 42 & status=="Domoic acid delay") %>%
+  # Pull dates
+  pull(date) %>% unique() %>% sort()
+
+# 1) 2017-02-02 to 2017-02-09
+length(seq(ymd("2017-02-02"), ymd("2017-02-09"), by="1 day"))
+
+
 # Build zones data
 ################################################################################
 

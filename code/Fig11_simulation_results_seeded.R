@@ -122,18 +122,18 @@ g <- ggplot(stats, aes(x=p_risk_missed_avg,
   # Facet
   facet_wrap(~toxin_scenario, nrow=1) +
   # Ranges
-  geom_segment(data=stats, mapping=aes(x=p_risk_missed_min,
-                                       xend=p_risk_missed_max,
-                                       y=p_close_unneeded_avg,
-                                       yend=p_close_unneeded_avg,
-                                       color=nstations),
-               inherit.aes = F, show.legend = F, lwd=0.3, alpha=0.5) +
-  geom_segment(data=stats, mapping=aes(x=p_risk_missed_avg,
-                                       xend=p_risk_missed_avg,
-                                       y=p_close_unneeded_min,
-                                       yend=p_close_unneeded_max,
-                                       color=nstations),
-               inherit.aes = F, show.legend = F, lwd=0.3, alpha=0.5) +
+  # geom_segment(data=stats, mapping=aes(x=p_risk_missed_min,
+  #                                      xend=p_risk_missed_max,
+  #                                      y=p_close_unneeded_avg,
+  #                                      yend=p_close_unneeded_avg,
+  #                                      color=nstations),
+  #              inherit.aes = F, show.legend = F, lwd=0.3, alpha=0.5) +
+  # geom_segment(data=stats, mapping=aes(x=p_risk_missed_avg,
+  #                                      xend=p_risk_missed_avg,
+  #                                      y=p_close_unneeded_min,
+  #                                      yend=p_close_unneeded_max,
+  #                                      color=nstations),
+  #              inherit.aes = F, show.legend = F, lwd=0.3, alpha=0.5) +
   # Lines
   geom_path(data=stats, mapping=aes(x=p_risk_missed_avg, y=p_close_unneeded_avg,
                                     color=nstations, group=nstations), inherit.aes = F) +

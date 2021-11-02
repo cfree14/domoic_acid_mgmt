@@ -21,10 +21,14 @@ pn_orig <- readRDS(file.path(datadir1, "2014_2021_pn_density_by_pier_for_plottin
 pda_orig <- readRDS(file.path(datadir1, "2014_2021_pda_density_by_pier_for_plotting.Rds"))
 
 # Read pier sampling sites
-sites <- read.csv(file=file.path(datadir2, "WC_pn_pda_beach_pier_sampling_sites.csv"), as.is=T) %>%
-  mutate(public=factor(public, levels=c("Public", "Not public")),
-         system=ifelse(state=="California", "CA-HABMAP", "ORHAB"),
-         system=factor(system, levels=c("ORHAB", "CA-HABMAP")))
+sites <- read.csv(file=file.path(datadir2, "CA_OR_WA_beach_pier_sampling_sites.csv"), as.is=T) %>%
+  # Recode
+  mutate(source=recode_factor(source,
+                              "ORHAB"="ORHAB",
+                              "MERHAB"="ODFW (MOCHA)",
+                              "HABMAP"="CA-HABMAP")) %>%
+  # More than 1-yr of data
+  filter(nyrs > 1)
 
 # Read C-HARM data
 charmdir <- "/Users/cfree/Dropbox/Chris/UCSB/projects/domoic_acid/data/charm/processed/"
@@ -32,6 +36,10 @@ charm_hov_orig <- readRDS(file.path(charmdir, "CHARM_20140305_to_present_imputed
 
 # Read C-HARM time series
 charm_pda <- raster::brick(file.path(charmdir, "CHARM_DAP_20140305_to_present_imputed.grd"))
+
+# Read 100 fathoms
+fishing_grounds <- readRDS("data/depth/100fathoms_depth.Rds")
+
 
 # Format observation data
 ################################################################################
@@ -190,11 +198,13 @@ foreign <- rnaturalearth::ne_countries(country=c("Canada", "Mexico"), returnclas
 
 # Plot pier sampling sites
 g1 <- ggplot() +
+  # Plot fishing grounds
+  geom_tile(data=fishing_grounds, mapping=aes(x=long_dd, y=lat_dd), fill="grey65") +
   # Plot land
   geom_sf(data=foreign, fill="grey90", color="white", lwd=0.3) +
   geom_sf(data=usa, fill="grey90", color="white", lwd=0.3) +
   # Plot sampling sites
-  geom_point(data=sites, mapping=aes(x=long_dd, lat_dd, fill=system), size=1.5, pch=21, stroke=0.1) +
+  geom_point(data=sites, mapping=aes(x=long_dd, lat_dd, fill=source), size=1.5, pch=21, stroke=0.1) +
   geom_text(data=sites %>% filter(site=="Monterey Wharf"), mapping=aes(x=long_dd, lat_dd, label=site), size=2, hjust=-0.1) +
   # Labels
   labs(x="", y="", title="Beach and pier monitoring", tag="A") +
@@ -207,7 +217,7 @@ g1 <- ggplot() +
   # Theme
   theme_bw() + my_theme +
   theme(axis.title=element_blank(),
-        legend.position = c(0.2,0.1),
+        legend.position = c(0.3,0.1),
         legend.key.size = unit(0.3, "cm"),
         legend.key = element_rect(fill=alpha('blue', 0)),
         legend.background = element_rect(fill=alpha('blue', 0)))

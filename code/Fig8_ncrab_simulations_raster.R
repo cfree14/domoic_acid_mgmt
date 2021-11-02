@@ -152,7 +152,11 @@ my_theme <- theme(axis.text=element_text(size=6),
 # Plot data
 g <- ggplot(data, aes(x=median_ppm, y=cv_ppm, fill=probability)) +
   facet_grid(metric~ncrabs_label) +
-  geom_raster() +
+  geom_tile(color="grey30", lwd=0.05) +
+  # Plot unlikely
+  geom_segment(x=40, xend=100, y=1.2, yend=1.2, linetype="solid", color="grey70", lwd=0.2) + # horizontal
+  geom_segment(x=0, xend=40, y=6, yend=1.2, linetype="solid", color="grey70", lwd=0.2) + # diagonal (1.2-6)/40 = -0.12
+  # annotate(geom="text", x=95, y=1.2, hjust=1, vjust=-0.8, label="Values above this line are unlikely", color="grey70", size=2.5) +
   # Plot survey points
   geom_point(data=surveys, mapping=aes(x=median_ppm, y=cv_ppm), color="grey40",
              inherit.aes = F, pch=1, alpha=0.6, size=0.8, stroke=0.2) +

@@ -41,8 +41,8 @@ stats <- data %>%
   group_by(nstations, toxin_scenario) %>%
   summarize(p_risk_missed_avg=mean(p_risk_missed),
             p_risk_missed_med=median(p_risk_missed),
-            p_risk_missed_min=min(p_risk_missed),
-            p_risk_missed_max=max(p_risk_missed),
+            p_risk_missed_min=quantile(p_risk_missed, probs=0.05), #min(p_risk_missed),
+            p_risk_missed_max=quantile(p_risk_missed, probs=0.95), #max(p_risk_missed),
             p_close_unneeded_avg=mean(p_close_unneeded),
             p_close_unneeded_med=median(p_close_unneeded),
             p_close_unneeded_min=min(p_close_unneeded),
@@ -106,16 +106,16 @@ my_theme <-  theme(axis.text=element_text(size=6),
 g <- ggplot(stats, aes(x=p_risk_missed_avg, y=p_close_unneeded_avg, fill=nstations)) +
   facet_wrap(~toxin_scenario, nrow=1) +
   # Ranges
-  geom_segment(data=stats, mapping=aes(x=p_risk_missed_min,
-                                       xend=p_risk_missed_max,
-                                       y=p_close_unneeded_avg,
-                                       yend=p_close_unneeded_avg,
-                                       color=nstations), alpha=0.5) +
-  geom_segment(data=stats, mapping=aes(x=p_risk_missed_avg,
-                                       xend=p_risk_missed_avg,
-                                       y=p_close_unneeded_min,
-                                       yend=p_close_unneeded_max,
-                                       color=nstations), alpha=0.5) +
+  # geom_segment(data=stats, mapping=aes(x=p_risk_missed_min,
+  #                                      xend=p_risk_missed_max,
+  #                                      y=p_close_unneeded_avg,
+  #                                      yend=p_close_unneeded_avg,
+  #                                      color=nstations), alpha=0.5) +
+  # geom_segment(data=stats, mapping=aes(x=p_risk_missed_avg,
+  #                                      xend=p_risk_missed_avg,
+  #                                      y=p_close_unneeded_min,
+  #                                      yend=p_close_unneeded_max,
+  #                                      color=nstations), alpha=0.5) +
   # OR lines
   geom_line(data=or_lines, mapping=aes(x=p_risk_missed_avg, y=p_close_unneeded_avg),
             inherit.aes = F, color="black", lwd=0.5) +

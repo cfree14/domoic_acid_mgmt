@@ -60,6 +60,8 @@ g <- ggplot() +
   theme_bw()
 g
 
+# Export
+saveRDS(data_df, file=file.path(datadir, "100fathoms_depth.Rds"))
 
 
 

@@ -33,7 +33,9 @@ site_key_orig <- read.csv(file=file.path(indir, "MERHAB_beach_sampling_site_loca
 data <- data_orig %>%
   # Clean names
   janitor::clean_names("snake") %>%
-  rename(region=region_north_central_south, time=time_24hr, temp_c=temp_o_c,
+  rename(region=region_north_central_south,
+         time=time_24hr,
+         temp_c=temp_o_c,
          pn_tot_cells_l=pseudo_nitzschia_total_cells_l,
          pn_lg_cells_l=pseudo_nitzschia_count_lg_cells_l,
          pn_sm_cells_l=pseudo_nitzschia_count_sm_cells_l,

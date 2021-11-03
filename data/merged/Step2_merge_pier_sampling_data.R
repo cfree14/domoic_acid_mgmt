@@ -34,6 +34,7 @@ colnames(wa_orig)
 colnames(ca_orig)
 
 # Format WA data
+# In Washington, either TOT is reported or LG and SM are reported
 wa <- wa_orig %>%
   # Add columns
   mutate(state="Washington",
@@ -50,9 +51,17 @@ wa <- wa_orig %>%
   rename(salinity_psu=salinity,
          pn_lg_cells_l=pn_cells_l_lg,
          pn_sm_cells_l=pn_cells_l_sm,
-         pn_tot_cells_l=pn_cells_l)
+         pn_tot_rep_cells_l=pn_cells_l) %>%
+  # Derive SM+LG
+  # Use reported total if SM+LG can't be derived
+  mutate(pn_lg_sm_cells_l=pn_lg_cells_l+pn_sm_cells_l,
+         pn_lg_sm_cells_l=ifelse(is.na(pn_lg_sm_cells_l), pn_tot_rep_cells_l, pn_lg_sm_cells_l))
+
+# Confirm that TOT and SM+LG are mutually exclusive
+sum(!is.na(wa$pn_tot_rep_cells_l) & !is.na(wa$pn_lg_cells_l))
 
 # Format OR data
+# In Oregon, PN TOT = SM + LG + Americana
 or <- or_orig %>%
   # Add columns
   mutate(state="Oregon",
@@ -67,9 +76,16 @@ or <- or_orig %>%
          comments) %>%
   # Rename
   rename(salinity_psu=salinity_ppt,
-         notes=comments)
+         notes=comments,
+         pn_tot_rep_cells_l=pn_tot_cells_l) %>%
+  # Derive SM+LG
+  mutate(pn_lg_sm_cells_l_v1=pn_lg_cells_l+pn_sm_cells_l,
+         pn_lg_sm_cells_l_v2=pn_tot_rep_cells_l - pn_americana_cells_l,
+         pn_lg_sm_cells_l=ifelse(!is.na(pn_lg_sm_cells_l_v1), pn_lg_sm_cells_l_v1, pn_lg_sm_cells_l_v2)) %>%
+  select(-c(pn_lg_sm_cells_l_v1, pn_lg_sm_cells_l_v2))
 
 # Format CA data
+# In California, there is no PN Americana data
 ca <- ca_orig %>%
   # Add columns
   mutate(state="California",
@@ -97,8 +113,8 @@ ca <- ca_orig %>%
          pn_lg_cells_l=pseudo_nitzschia_seriata_group_cells_l,
          alexandrium_cells_l=alexandrium_spp_cells_l,
          dinophysis_cells_l=dinophysis_spp_cells_l) %>%
-  # Add a total PN column
-  mutate(pn_tot_cells_l=pn_sm_cells_l+pn_lg_cells_l)
+  # Derive SM+LG
+  mutate(pn_lg_sm_cells_l=pn_lg_cells_l+pn_sm_cells_l)
 
 
 # Merge data
@@ -110,8 +126,10 @@ data <- bind_rows(ca, or, wa) %>%
   select(source, state, site, lat_dd, long_dd,
          year, month, week, date,
          temp_c, salinity_psu,
-         pda_ng_l, tda_ng_l, dda_ng_l,
-         pn_tot_cells_l, pn_lg_cells_l, pn_sm_cells_l, pn_americana_cells_l,
+         pda_ng_l, dda_ng_l, tda_ng_l, # particulate, dissolved, total domoic acid
+         pn_tot_rep_cells_l, # reported total PN - definition varies by state
+         pn_lg_sm_cells_l, # standardized total PN - lg + sm (no americana)
+         pn_lg_cells_l, pn_sm_cells_l, pn_americana_cells_l,
          alexandrium_cells_l, dinophysis_cells_l,
          pn_perc, pn_perc_lg, pn_perc_sm, pn_perc_pm, pn_perc_afh, pn_perc_pdc,
          notes,

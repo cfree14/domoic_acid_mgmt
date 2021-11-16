@@ -20,36 +20,6 @@ data_orig <- readRDS(file.path(closuredir, "2015_2020_WC_dcrab_closures.Rds"))
 zones_orig <- readxl::read_excel("data/merged/processed/WC_dcrab_da_mgmt_zones.xlsx")
 
 
-# Stats for MS
-################################################################################
-
-# Length of OR eviseration orders
-or_evis_dates <- data_orig %>%
-  # Reduce to OR evisceration orders
-  filter(date>=ymd("2018-01-01") & lat_dd < 46 & lat_dd > 42 & status=="Evisceration order") %>%
-  # Pull dates
-  pull(date) %>% unique() %>% sort()
-
-# 1) 2018-02-16 to 2018-03-04
-# 2) 2019-02-14 to 2019-03-27
-# 3) 2019-05-10 to 2019-05-23
-
-length(seq(ymd("2018-02-16"), ymd("2018-03-04"), by="1 day"))
-length(seq(ymd("2019-02-14"), ymd("2019-03-27"), by="1 day"))
-length(seq(ymd("2019-05-10"), ymd("2019-05-23"), by="1 day"))
-
-
-# OR short closure'
-or_close_dates <- data_orig %>%
-  # Reduce to OR evisceration orders
-  filter(date>=ymd("2017-01-01") & lat_dd < 46 & lat_dd > 42 & status=="Domoic acid delay") %>%
-  # Pull dates
-  pull(date) %>% unique() %>% sort()
-
-# 1) 2017-02-02 to 2017-02-09
-length(seq(ymd("2017-02-02"), ymd("2017-02-09"), by="1 day"))
-
-
 # Build zones data
 ################################################################################
 
@@ -92,14 +62,8 @@ zones <- bind_rows(zones1, zones2) %>%
 # Fix data
 data <- data_orig %>%
   mutate(status=as.character(status),
-         # Rename whale closures
          status=recode(status, "Whale entanglement closure"="Marine life entanglement closure"),
-         # Fix out of season
          status=ifelse(status=="Out-of-season", NA, status),
-         status=ifelse(date>ymd("2021-08-14") & lat_dd<46.25000 & lat_dd>42.00000, "Out-of-season", status),
-         status=ifelse(date>ymd("2021-07-15") & lat_dd<42.00000 & lat_dd>son_mend_county, "Out-of-season", status),
-         status=ifelse(date>ymd("2021-06-30") & lat_dd<son_mend_county, "Out-of-season", status),
-         # Factor
          status=factor(status, levels=c("Season open", "Body condition delay",
                                         "Body condition/domoic acid delay", "Domoic acid delay",
                                         "Evisceration order", "Marine life entanglement closure")))
@@ -144,9 +108,8 @@ g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
   # Plot raster
   geom_raster() +
   # Management zone lines
-  geom_segment(data=zones_df, mapping=aes(x=x1, xend=x2, y=y, yend=y),
-               inherit.aes = F, color="grey50", size=0.2) +
-  geom_text(data=zones, mapping=aes(y=lat_dd_avg, label=zone_id), x=ymd("2021-10-01"), hjust=0, size=1.4, inherit.aes = F, color="grey50") +
+  # geom_segment(data=zones_df, mapping=aes(x=x1, xend=x2, y=y, yend=y),
+  #              inherit.aes = F, color="grey50", size=0.2) +
   # State/region lines
   geom_hline(yintercept=c(48.43333, 46.25000, 42.00000), size=0.5) +
   geom_hline(yintercept = son_mend_county, linetype="dashed", size=0.5) + # Sonoma/Mendocino
@@ -156,8 +119,8 @@ g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
   annotate(geom="text", x=date_min_do, y=42, hjust=0, vjust=1.5, label="N. California", color="grey30", size=2.5) +
   annotate(geom="text", x=date_min_do, y=son_mend_county, hjust=0, vjust=1.5, label="C. California", color="grey30", size=2.5) +
   # Plot call outs
-  geom_point(stars, mapping=aes(x=date, y=lat_dd), pch=21, fill="white", inherit.aes = F, size=3.5) +
-  geom_text(stars, mapping=aes(x=date, y=lat_dd, label=id), inherit.aes = F, size=2.2) +
+  # geom_point(stars, mapping=aes(x=date, y=lat_dd), pch=21, fill="white", inherit.aes = F, size=3.5) +
+  # geom_text(stars, mapping=aes(x=date, y=lat_dd, label=id), inherit.aes = F, size=2.2) +
   # Limits
   scale_y_continuous(limits=c(35, 48.5), breaks=seq(34, 48, 2)) +
   scale_x_date(breaks=seq(date_min_do, date_max_do, by="1 year"), labels=year(date_min_do):year(date_max_do)) +
@@ -170,7 +133,7 @@ g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
 g
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "Fig3_dcrab_closures.png"),
+ggsave(g, filename=file.path(plotdir, "FigX_dcrab_closures_simple.png"),
        width=6.5, height=4, units="in", dpi=600)
 
 

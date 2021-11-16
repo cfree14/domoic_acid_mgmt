@@ -137,12 +137,12 @@ data_indiv <- data_orig %>%
   filter(!surveyid %in% data$surveyid)
 
 # Build call outs
-stars_surveys <- matrix(data=c("A", "2016-04-15", 41.6,
-                               "B", "2015-05-15", 47.65,
-                               "C", "2017-03-20", 44.2,
-                               "D", "2018-03-10", 43.18,
-                               "D", "2019-04-22", 43.18,
-                               "E", "2021-03-15", 46.95), ncol=3, byrow=T, dimnames = list(NULL, c("id", "date", "lat_dd"))) %>%
+stars_surveys <- matrix(data=c("1", "2016-04-15", 41.6,
+                               "2", "2015-05-15", 47.65,
+                               "3", "2017-03-20", 44.2,
+                               "4", "2018-03-10", 43.18,
+                               "4", "2019-04-22", 43.18,
+                               "5", "2021-03-15", 46.95), ncol=3, byrow=T, dimnames = list(NULL, c("id", "date", "lat_dd"))) %>%
   as.data.frame() %>%
   mutate(date=ymd(date),
          lat_dd=as.numeric(lat_dd))
@@ -167,12 +167,12 @@ closures <- closures_orig %>%
                                         "Evisceration order", "Marine life entanglement closure")))
 
 # Build call outs
-stars_closures <- matrix(data=c("A", "2016-03-01", 42.4,
-                       "B", "2015-06-01", 46.9,
-                       "C", "2017-03-20", 44.45,
-                       "D", "2018-03-10", 43.21,
-                       "D", "2019-04-10", 43.21,
-                       "E", "2021-04-15", 46.95), ncol=3, byrow=T, dimnames = list(NULL, c("id", "date", "lat_dd"))) %>%
+stars_closures <- matrix(data=c("1", "2016-03-01", 42.4,
+                       "2", "2015-06-01", 46.9,
+                       "3", "2017-03-20", 44.45,
+                       "4", "2018-03-10", 43.21,
+                       "4", "2019-04-10", 43.21,
+                       "5", "2021-04-15", 46.95), ncol=3, byrow=T, dimnames = list(NULL, c("id", "date", "lat_dd"))) %>%
   as.data.frame() %>%
   mutate(date=ymd(date),
          lat_dd=as.numeric(lat_dd))
@@ -259,8 +259,8 @@ g1 <- ggplot(data %>% filter(date>=date_min_do),
   # Survey points
   geom_point(alpha=0.8, pch=21, stroke=0.3) +
   # Plot call outs
-  geom_point(stars, mapping=aes(x=date, y=lat_dd), pch=21, fill="white", inherit.aes = F, size=3.5) +
-  geom_text(stars, mapping=aes(x=date, y=lat_dd, label=id), inherit.aes = F, size=2.2) +
+  geom_point(stars_surveys, mapping=aes(x=date, y=lat_dd), pch=21, fill="white", inherit.aes = F, size=3.5) +
+  geom_text(stars_surveys, mapping=aes(x=date, y=lat_dd, label=id), inherit.aes = F, size=2.2) +
   # Plot California N/As
   annotate(geom="text", x=ymd("2015-03-15"), y=c(40.38437, 36.88437), label="N/A", color="grey30", size=2) +
   # Limits
@@ -297,8 +297,8 @@ g2 <- ggplot(closures, aes(x=date, y=lat_dd, fill=status)) +
   annotate(geom="text", x=date_min_do, y=42, hjust=0, vjust=1.5, label="N. California", color="grey30", size=2.5) +
   annotate(geom="text", x=date_min_do, y=son_mend_county, hjust=0, vjust=1.5, label="C. California", color="grey30", size=2.5) +
   # Plot call outs
-  geom_point(stars, mapping=aes(x=date, y=lat_dd), pch=21, fill="white", inherit.aes = F, size=3.5) +
-  geom_text(stars, mapping=aes(x=date, y=lat_dd, label=id), inherit.aes = F, size=2.2) +
+  geom_point(stars_closures, mapping=aes(x=date, y=lat_dd), pch=21, fill="white", inherit.aes = F, size=3.5) +
+  geom_text(stars_closures, mapping=aes(x=date, y=lat_dd, label=id), inherit.aes = F, size=2.2) +
   # Limits
   scale_y_continuous(limits=c(35, 48.5), breaks=seq(34, 48, 2)) +
   scale_x_date(breaks=seq(date_min_do, date_max_do, by="1 year"), labels=year(date_min_do):year(date_max_do)) +

@@ -157,7 +157,7 @@ g <- ggplot(stats, aes(x=ncrabs, y=prob_avg_wt, color=metric)) +
 g
 
 # Export figure
-ggsave(g, filename=file.path(plotdir, "Fig7_ncrab_simulations_boxplots.png"),
+ggsave(g, filename=file.path(plotdir, "Fig6_ncrab_simulations_boxplots.png"),
        width=6.5, height=2.75, units="in", dpi=600)
 
 

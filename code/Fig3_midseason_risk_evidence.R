@@ -129,12 +129,12 @@ sites_use_df <- sites %>%
 # Setup theme
 my_theme <-  theme(axis.text=element_text(size=5),
                    axis.title=element_blank(),
-                   legend.text=element_text(size=6),
-                   legend.title=element_text(size=7),
+                   legend.text=element_text(size=5.5),
+                   legend.title=element_text(size=6.6),
                    strip.text=element_text(size=7),
-                   plot.title=element_text(size=7),
+                   plot.title=element_blank(),
                    plot.tag = element_text(size=8),
-                   plot.tag.position = c(0.007, 0.98),
+                   plot.tag.position = c(0, 0.995),
                    # Gridlines
                    panel.grid.major = element_blank(),
                    panel.grid.minor = element_blank(),
@@ -158,11 +158,11 @@ g1 <- ggplot() +
   geom_point(data=sites_use_df, mapping=aes(x=long_dd, lat_dd, fill=source), size=1.5, pch=21, stroke=0.1) +
   # geom_text(data=sites %>% filter(site=="Monterey Wharf"), mapping=aes(x=long_dd, lat_dd, label=site), size=2, hjust=-0.1) +
   # Labels
-  labs(x="", y="", title="Beach and pier monitoring", tag="A") +
+  labs(x="", y="", tag="A") +
   scale_y_continuous(breaks=seq(32,48,2)) +
   # Legend
   # scale_fill_manual(name="", values=c("black", "white")) +
-  scale_fill_discrete(name="") +
+  scale_fill_discrete(name="Monitoring sites") +
   # Crop
   coord_sf(xlim = c(-127, -116.6), ylim = c(32, 48)) +
   # Theme
@@ -185,7 +185,7 @@ g2 <- ggplot(data_pn_lg_use, aes(x=date_bin, y=site, fill=pn_lg_cells_l+1)) +
   labs(x="", y="", tag="B", title=expression(italic("Pseudo-nitzschia")*" seriata density")) +
   scale_x_date(date_breaks = "1 year", date_labels="%Y", lim=c(ymd("2014-01-01"), ymd("2021-09-15"))) +
   # Legend
-  scale_fill_gradientn(name="Density\n(cells/L)         ",
+  scale_fill_gradientn(name="Pseudo-nitzschia seriata\ndensity (cells/L)         ",
                        colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
                        trans="log10",
                        breaks=10^c(0:6),
@@ -196,7 +196,7 @@ g2 <- ggplot(data_pn_lg_use, aes(x=date_bin, y=site, fill=pn_lg_cells_l+1)) +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.key = element_rect(fill=alpha('blue', 0)),
         legend.background = element_rect(fill=alpha('blue', 0)),
-        axis.text.y=element_text(size=4))
+        axis.text.y=element_text(size=4.5))
 g2
 
 # Plot data
@@ -209,7 +209,7 @@ g3 <- ggplot(data_pda_use, aes(x=date_bin, y=site, fill=pda_ng_l+1)) +
   labs(x="", y="", tag="C", title="Particulate domoic acid concentration") +
   scale_x_date(date_breaks = "1 year", date_labels="%Y", lim=c(ymd("2014-01-01"), ymd("2021-09-15"))) +
   # Legend
-  scale_fill_gradientn(name="Concentration\n(ng/L)",
+  scale_fill_gradientn(name="Particulate domoic acid\nconcentration (ng/L)",
                        colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
                        trans="log10",
                        breaks=10^c(0:4),
@@ -220,7 +220,7 @@ g3 <- ggplot(data_pda_use, aes(x=date_bin, y=site, fill=pda_ng_l+1)) +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.key = element_rect(fill=alpha('blue', 0)),
         legend.background = element_rect(fill=alpha('blue', 0)),
-        axis.text.y=element_text(size=4))
+        axis.text.y=element_text(size=4.5))
 g3
 
 # Merge plots

@@ -19,7 +19,7 @@ tabledir <- "tables"
 data_orig <- readRDS(file=file.path(outdir, "CA_OR_WA_da_sampling_data.Rds"))
 
 # Species groups
-spp_group_key <- readxl::read_excel(file.path(tabledir, "TableS2_species_sample_size.xlsx")) %>%
+spp_group_key <- readxl::read_excel(file.path(tabledir, "TableS3_species_sample_sizes.xlsx")) %>%
   setNames(c("full_name", "states", "nsamples", "species_group")) %>%
   # Extract common name
   mutate(comm_name=sub(" \\(.*", "", full_name)) %>%
@@ -292,6 +292,6 @@ g3
 g <- gridExtra::grid.arrange(g1, g2, g3, ncol=1)
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "Fig5_other_species.png"),
+ggsave(g, filename=file.path(plotdir, "Fig4_other_species.png"),
        width=6.5, height=6.5, units="in", dpi=600)
 

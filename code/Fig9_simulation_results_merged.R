@@ -157,8 +157,8 @@ mean(or_stats$closures_prevented)
 # Theme
 my_theme <-  theme(axis.text=element_text(size=6),
                    axis.title=element_text(size=8),
-                   legend.text=element_text(size=5),
-                   legend.title=element_text(size=7),
+                   legend.text=element_text(size=6),
+                   legend.title=element_text(size=8),
                    strip.text=element_text(size=7),
                    axis.text.y = element_text(angle = 90, hjust = 0.5),
                    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),

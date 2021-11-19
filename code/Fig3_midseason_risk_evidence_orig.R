@@ -354,6 +354,6 @@ g <- gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6,
 g
 
 # Export
-ggsave(g, filename=file.path(plotdir, "Fig4_midseason_risk_evidence.png"),
+ggsave(g, filename=file.path(plotdir, "Fig3_midseason_risk_evidence_orig.png"),
        width=6.5, height=7, units="in", dpi=600)
 

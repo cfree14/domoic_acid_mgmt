@@ -181,7 +181,7 @@ g <- ggplot(stats, aes(x=date_zone, y=lat_zone, fill=pover_max)) +
 g
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "FigS6_dcrab_data_survey_raster.png"),
+ggsave(g, filename=file.path(plotdir, "FigS1_dcrab_data_survey_raster.png"),
        width=6.5, height=4, units="in", dpi=600)
 
 

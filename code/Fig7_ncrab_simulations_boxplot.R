@@ -81,7 +81,7 @@ cv_breaks <- seq(0, 4.5, 0.25)
 # Modify survey results for plotting
 surveys <- surveys_orig %>%
   # Rename to match simulation reuslts
-  rename(median_ppm=ln_median, cv_ppm=ln_cv) %>%
+  rename(median_ppm=da_ppm_med_fit, cv_ppm=cv_fit) %>%
   # Classify within bins
   mutate(mu_bin=cut(median_ppm, breaks=mu_breaks),
          cv_bin=cut(cv_ppm, breaks=cv_breaks))
@@ -157,7 +157,7 @@ g <- ggplot(stats, aes(x=ncrabs, y=prob_avg_wt, color=metric)) +
 g
 
 # Export figure
-ggsave(g, filename=file.path(plotdir, "Fig6_ncrab_simulations_boxplots.png"),
+ggsave(g, filename=file.path(plotdir, "Fig7_ncrab_simulations_boxplots.png"),
        width=6.5, height=2.75, units="in", dpi=600)
 
 

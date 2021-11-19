@@ -48,6 +48,9 @@ g <- ggplot() +
         legend.background = element_rect(fill=alpha('blue', 0)))
 g
 
+# Export
+ggsave(g, filename=file.path(plotdir, "ORHAB_sampling_site_map.png"),
+       width=8.5, height=11, units="in", dpi=600)
 
 
 # Merge data
@@ -179,46 +182,64 @@ data <- data_orig %>%
   # c) Convert to time
   # mutate(time2=hm(time1)) %>%
   # Format site to match site key
-  mutate(site=recode(site,
+  rename(site_orig=site) %>%
+  mutate(site_orig=stringr::str_trim(site_orig)) %>%
+  mutate(site=recode(site_orig,
                      # La Push 1st beach
-                     "La Push - First Beach"="La Push - First Beach",
-                     "La Push First Beach"="La Push - First Beach",
-                     "First Beach, La Push"="La Push - First Beach",
-                     "La Push, First Beach"="La Push - First Beach",
-                     "La Push, Beach 1" = "La Push - First Beach",
+                     "La Push - First Beach"="La Push, First Beach",
+                     "La Push First Beach"="La Push, First Beach",
+                     "First Beach, La Push"="La Push, First Beach",
+                     "La Push, First Beach"="La Push, First Beach",
+                     "La Push, Beach 1" = "La Push, First Beach",
+
                      # La Push 2nd beach
-                     "La Push Second Beach"="La Push - Second Beach",
-                     "La Push, Second Beach"="La Push - Second Beach",
-                     "Second Beach, La Push"="La Push - Second Beach",
+                     "La Push - Second Beach"="La Push, Second Beach",
+                     "La Push Second Beach"="La Push, Second Beach",
+                     "La Push, Second Beach"="La Push, Second Beach",
+                     "Second Beach, La Push"="La Push, Second Beach",
+
                      # Hobuck Beach
                      "Hobuck"="Hobuck Beach",
                      "Hobuck Beach, Makah Bay"="Hobuck Beach", # check
                      "Holbuck"="Hobuck Beach",
+                     "Ho Beach"="Hobuck Beach",
+
                      # Quinault Beach
                      "Quilault Beach"="Quinault Beach",
                      "Quinault"="Quinault Beach",
-                     # Neah Bay
-                     "Nemah"="Neah Bay",
-                     "Neah Bay Marina"="Neah Bay",
+
                      # Westport Marina
-                     "WES"="Westport Marina",
-                     "Westport WES"="Westport Marina",
-                     "Westport"="Westport Marina",
+                     "WES"="Westport",
+                     "Westport WES"="Westport",
+                     "Westport"="Westport",
+                     "Westport Marina"="Westport",
+
+
                      # Tokeland
-                     "TOK"="Tokeland Marina",
-                     "Toke Point"="Tokeland Marina",
-                     "Toke Point TOK"="Tokeland Marina",
-                     "Tokeland"="Tokeland Marina",
+                     "TOK"="Tokeland",
+                     "Toke Point"="Tokeland",
+                     "Toke Point TOK"="Tokeland",
+                     "Tokeland"="Tokeland",
+                     "Tokeland Marina"="Tokeland",
+
                      # Long Beach
                      "LGB"="Long Beach",
                      "LB"="Long Beach",
+
                      # MocRocks
                      "MocRocks"="Mocrocks Beach",
                      "Mocrocks"="Mocrocks Beach",
+
+                     # Willipa Bay
+                     "Bay Center Mooring"="Willapa Bay mooring",
+                     "Willapa Bay-Bay Center"="Bay Center",
+                     "Willapa Bay"="Willapa Bay mooring",
+
                      # Others
+                     "Neah Bay Marina"="Neah Bay",
                      "RaftRiver"="Raft River",
                      "THB"="Twin Harbors",
-                     "Lone Tree Oyster LTO"="Lone Tree Oyster",
+                     "Lone Tree Oyster LTO"="Lone Tree Oyster Company",
                      "Long island green maker 13"="Long Island 13",
                      "north Long Island Naselle channel"="North Long Island",
                      "Copalis"="Copalis Beach",
@@ -358,7 +379,7 @@ data <- data_orig %>%
   # Remove empty columns
   select(-c(pda_ng_l...30,  ...29)) %>%
   # Arrange
-  select(filename, sheet, site, site_id,
+  select(filename, sheet, site, site_orig, site_id,
          # Date/time
          year, month, week, date,
          time_orig, time1,
@@ -425,13 +446,17 @@ sort(unique(data$time1[nchar(data$time1)==5]))
 
 # Build site key
 site_key1 <- data %>%
+  # Stats
   group_by(site, site_id, coord_type, lat_dd, long_dd) %>%
-  summarize(n=n()) %>%
+  summarize(n_obs=n(),
+            sites=paste(sort(unique(site_orig)), collapse = "; ")) %>%
   ungroup() %>%
-  arrange(site_id, coord_type)
+  # Arrange
+  select(site, site_id, sites, coord_type, lat_dd, long_dd, n_obs) %>%
+  arrange(coord_type, site_id)
 
 # Export
-write.csv(site_key1, file=file.path(outdir, "ORHAB_beach_sampling_sites_work.csv"), row.names = F)
+write.csv(site_key1, file=file.path(outdir, "ORHAB_beach_sampling_sites_for_review.csv"), row.names = F)
 
 
 

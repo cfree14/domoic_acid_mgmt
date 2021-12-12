@@ -138,6 +138,6 @@ g <- ggplot() +
 g
 
 # Export
-ggsave(g, filename=file.path(plotdir, "FigS3_pseudo_nitzchia_by_ca_pier.png"),
+ggsave(g, filename=file.path(plotdir, "FigSX_pseudo_nitzchia_by_ca_pier.png"),
        width=5, height=7, units="in", dpi=600)
 

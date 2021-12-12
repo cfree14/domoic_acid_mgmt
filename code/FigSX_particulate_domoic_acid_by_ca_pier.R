@@ -123,6 +123,6 @@ g <- ggplot() +
 g
 
 # Export
-ggsave(g, filename=file.path(plotdir, "FigS4_particulate_domoic_acid_by_ca_pier.png"),
+ggsave(g, filename=file.path(plotdir, "FigSX_particulate_domoic_acid_by_ca_pier.png"),
        width=5, height=7, units="in", dpi=600)
 

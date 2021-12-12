@@ -322,7 +322,7 @@ g <- gridExtra::grid.arrange(g1, g2, nrow=2)
 
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "Fig2_survey_closures_merge.png"),
+ggsave(g, filename=file.path(plotdir, "FigX_survey_closures_merge.png"),
        width=6.5, height=6.5, units="in", dpi=600)
 
 

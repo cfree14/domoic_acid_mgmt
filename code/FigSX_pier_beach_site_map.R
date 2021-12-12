@@ -123,7 +123,7 @@ g
 
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "FigS2_pier_beach_site_map.png"),
+ggsave(g, filename=file.path(plotdir, "FigSX_pier_beach_site_map.png"),
        width=2.5, height=4.5, units="in", dpi=600)
 
 

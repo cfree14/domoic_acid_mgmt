@@ -162,7 +162,7 @@ g <- ggplot(stats, aes(x=p_risk_missed_avg,
 g
 
 # Export data
-ggsave(g, filename=file.path(plotdir, "Fig10_simulation_results_seeded.png"),
+ggsave(g, filename=file.path(plotdir, "FigX_simulation_results_seeded.png"),
        width=6.5, height=2.5, units="in", dpi=600)
 
 

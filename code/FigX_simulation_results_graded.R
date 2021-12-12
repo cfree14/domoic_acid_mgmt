@@ -152,7 +152,7 @@ g <- ggplot(stats, aes(x=p_risk_missed_avg, y=p_close_unneeded_avg, fill=nstatio
 g
 
 # Export data
-ggsave(g, filename=file.path(plotdir, "Fig9_simulation_results_gradient_only.png"),
+ggsave(g, filename=file.path(plotdir, "FigX_simulation_results_graded.png"),
        width=6.5, height=2.75, units="in", dpi=600)
 
 

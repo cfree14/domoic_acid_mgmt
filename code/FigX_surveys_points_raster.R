@@ -371,7 +371,7 @@ layout_matrix <- matrix(data=c(1,2,
 g <- gridExtra::grid.arrange(g1, g2, g3, layout_matrix=layout_matrix, widths=c(0.3,0.7))
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "Fig1_simulation_paper.png"),
+ggsave(g, filename=file.path(plotdir, "FigX_surveys_points_raster.png"),
        width=6.5, height=4, units="in", dpi=600)
 
 

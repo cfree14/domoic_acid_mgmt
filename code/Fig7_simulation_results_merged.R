@@ -275,7 +275,7 @@ g2
 g <- gridExtra::grid.arrange(g1, g2, nrow=2)
 
 # Export data
-ggsave(g, filename=file.path(plotdir, "Fig9_simulation_results_merged.png"),
+ggsave(g, filename=file.path(plotdir, "Fig7_simulation_results_merged.png"),
        width=6.5, height=5, units="in", dpi=600)
 
 

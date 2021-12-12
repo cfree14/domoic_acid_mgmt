@@ -180,6 +180,6 @@ g <- ggplot(data, aes(x=median_ppm, y=cv_ppm, fill=probability)) +
 g
 
 # Export figure
-ggsave(g, filename=file.path(plotdir, "Fig8_ncrab_simulations_raster.png"),
+ggsave(g, filename=file.path(plotdir, "FigX_power_analysis_detailed.png"),
        width=6.5, height=2.75, units="in", dpi=600)
 

@@ -148,7 +148,7 @@ g3
 g <- gridExtra::grid.arrange(g1, g2, g3, ncol=3)
 
 # Export
-ggsave(g, filename=file.path(plotdir, "FigS5_charm_maps.png"), width=6.5, height=4, units="in", dpi=600)
+ggsave(g, filename=file.path(plotdir, "FigSX_charm_maps.png"), width=6.5, height=4, units="in", dpi=600)
 
 
 

@@ -220,7 +220,7 @@ g <- ggplot(data %>% filter(date>=date_min_do),
 g
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "FigX_dcrab_data_survey.png"),
+ggsave(g, filename=file.path(plotdir, "FigX_dcrab_surveys.png"),
        width=6.5, height=4, units="in", dpi=600)
 
 

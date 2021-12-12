@@ -235,25 +235,3 @@ g
 ggsave(g, filename=file.path(plotdir, "Fig3_midseason_risk_evidence.png"),
        width=6.5, height=3.5, units="in", dpi=600)
 
-
-# Old stuff
-################################################################################
-
-# # Plot data
-# g1 <- ggplot(data_pn, aes(x=date_bin, y=site, fill=pn_lg_sm_cells_l+1)) +
-#   facet_grid(state~., scale="free_y", space="free_y") +
-#   geom_tile() +
-#   # Labels
-#   labs(x="", y="", tag="A") +
-#   scale_x_date(date_breaks = "1 year", date_labels="%Y") +
-#   # Legend
-#   scale_fill_gradientn(name="Pseudo-nitzschia\ndensity (cells/L)",
-#                        colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
-#                        trans="log10",
-#                        breaks=10^c(0:6),
-#                        labels=parse(text=paste0("10^", 0:6))) +
-#   guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
-#   # Theme
-#   theme_bw() + my_theme
-# g1
-

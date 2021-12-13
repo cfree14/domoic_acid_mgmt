@@ -1,3 +1,7 @@
-# Value of information in U.S. West Coast domoic acid monitoring and management
+# Domoic acid monitoring and management in the U.S. West Coast Dungeness crab fishery
 
-This project is in very early stages and seeks to understand that value of domoic acid monitoring in making efficient management decisions in U.S. West Coast fisheries.
+This is the GitHub repository for the following paper in preparation:
+
+* Free CM, Moore SK, Trainer VL. The value of monitoring in efficiently and adaptively managing biotoxin contamination in marine fisheries. Near submission to _Harmful Algae_.
+
+Please contact Chris Free (cfree14@gmail.com) with any questions about the paper or repository.

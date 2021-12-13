@@ -53,6 +53,9 @@ surveys <- surveys_orig %>%
   mutate(cv=as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", cv_bin)),
          mu=as.numeric( sub("[^,]*,([^]]*)\\]", "\\1", mu_bin)))
 
+# Inspect percent frequency
+hist(surveys$perc, breaks=seq(0, 0.15, 0.01))
+
 
 # Format simulation results
 ################################################################################
@@ -89,8 +92,8 @@ data <- data_orig %>%
   gather(key="metric", value="probability", 6:ncol(.)) %>%
   mutate(metric=recode_factor(metric,
                               "pcorrect"="Probability of\nclosing/opening correctly",
-                              "p_closed_incorr"="Risk of closing\nunnecessarily",
-                              "p_opened_incorr"="Risk of opening\nriskily")) %>%
+                              "p_closed_incorr"="Probability of closing\nunnecessarily",
+                              "p_opened_incorr"="Probability of opening\nriskily")) %>%
   # Format crabs
   mutate(ncrabs_label=paste(ncrabs, "crabs"),
          ncrabs_label=factor(ncrabs_label, levels=paste(seq(6, 36, 6), "crabs"))) %>%
@@ -107,28 +110,15 @@ data <- data_orig %>%
   # Remove 36 crab scenario
   filter(ncrabs!=36)
 
+# Inspect
 freeR::complete(data)
 sort(unique(data$perc_catg))
 
-hist(surveys$perc, breaks=seq(0, 0.15, 0.01))
-
-# Info plot
-################################################################################
-
-# Grid
-grid <- data %>%
-  select(median_ppm, cv_ppm, pover, pover_catg, perc) %>%
+# Build parameter key
+param_key <- data %>%
+  select(median_ppm, cv_ppm, pover, pover_catg) %>%
   unique()
 
-g1 <- ggplot(grid, aes(x=median_ppm, y=cv_ppm, fill=pover_catg)) +
-  geom_tile() +
-  theme_bw()
-g1
-
-g2 <- ggplot(grid, aes(x=median_ppm, y=cv_ppm, fill=perc)) +
-  geom_tile() +
-  theme_bw()
-g2
 
 # Plot data
 ################################################################################
@@ -139,17 +129,46 @@ my_theme <- theme(axis.text=element_text(size=6),
                   legend.text=element_text(size=6),
                   legend.title=element_text(size=7),
                   strip.text=element_text(size=7),
-                  plot.title=element_text(size=10),
+                  plot.tag =element_text(size=8),
                   # Gridlines
                   panel.grid.major = element_blank(),
                   panel.grid.minor = element_blank(),
                   panel.background = element_blank(),
                   axis.line = element_line(colour = "black"),
                   # Legend
-                  legend.key.size = unit(0.3, "cm"))
+                  legend.key.size = unit(0.3, "cm"),
+                  legend.position = "bottom")
 
 # Plot data
-g <- ggplot(data, aes(x=ncrabs, y=probability, group=ncrabs)) +
+g1 <- ggplot(param_key, aes(x=median_ppm, y=cv_ppm, fill=pover, z=pover)) +
+  geom_tile(color="grey30", lwd=0.05) +
+  # Plot contours
+  geom_contour(breaks=c(0.1, 0.2), color="black") +
+  # Plot unlikely
+  geom_segment(x=40, xend=100, y=1.2, yend=1.2, linetype="solid", color="grey70", lwd=0.2) + # horizontal
+  geom_segment(x=0, xend=40, y=6, yend=1.2, linetype="solid", color="grey70", lwd=0.2) + # diagonal (1.2-6)/40 = -0.12
+  # Plot survey points
+  geom_point(data=surveys_orig, mapping=aes(x=da_ppm_med_fit, y=cv_fit), color="black",
+             inherit.aes = F, pch=1, alpha=0.4, size=0.8, stroke=0.2) +
+  # Lines
+  geom_vline(xintercept = 30, linetype="dotted", lwd=0.2) +
+  # Labels
+  labs(x="Median contamination (ppm)", y="Coefficient of variation (CV)", tag="A") +
+  scale_x_continuous(breaks=seq(0,90,15)) +
+  # Legend
+  scale_fill_gradientn(name="Percent above\naction threshold",
+                       lim=c(0,1),
+                       colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
+                       labels = scales::percent_format(accuracy = 1)) +
+  guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black", title.position="top")) +
+  # Theme
+  theme_bw() + my_theme +
+  theme(legend.key.size = unit(0.5, "cm"))
+g1
+
+# Plot data
+colors <- RColorBrewer::brewer.pal(9, "YlOrRd")[c(1,5,9)]
+g2 <- ggplot(data, aes(x=ncrabs, y=probability, group=ncrabs)) +
   facet_wrap(~metric) +
   # Plot jittered points
   geom_jitter(mapping=aes(fill=pover_catg, size=perc_catg), pch=21, stroke=0.2, alpha=0.7, width=1.2) +
@@ -159,17 +178,22 @@ g <- ggplot(data, aes(x=ncrabs, y=probability, group=ncrabs)) +
   scale_x_continuous(breaks=seq(6,30, 6)) +
   scale_y_continuous(labels = scales::percent) +
   # Labels
-  labs(x="Number of crabs", y="Probability") +
+  labs(x="Number of crabs", y="Probability", tag="B") +
   # Legend
-  scale_fill_manual(name="Percent above\naction threshold", values=c("yellow", "orange", "darkred")) +
-  scale_size_manual(name="Historical\nfrequency", values=c(0.5, 1.5, 3, 5)) +
-  guides(fill = guide_legend(order = 1), size = guide_legend(order = 2)) +
+  scale_fill_manual(name="Percent above\naction threshold", values=colors) +
+  scale_size_manual(name="Historical\nfrequency", values=c(0.5, 1.5, 3, 4)) +
+  guides(fill = guide_legend(order = 1, title.position="top"), size = guide_legend(order = 2, title.position="top")) +
   # Theme
   theme_bw() + my_theme
+g2
+
+# Merge plots
+g <- gridExtra::grid.arrange(g1, g2, nrow=1, widths=c(0.3, 0.7))
 g
 
 # Export figure
-ggsave(g, filename=file.path(plotdir, "Fig6_power_analysis_boxplot.png"),
-       width=6.5, height=2.5, units="in", dpi=600)
+ggsave(g, filename=file.path(plotdir, "Fig5_power_analysis_boxplot.png"),
+       width=6.5, height=2.75, units="in", dpi=600)
+
 
 

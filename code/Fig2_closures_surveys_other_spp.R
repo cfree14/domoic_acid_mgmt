@@ -157,15 +157,17 @@ closures <- closures_orig %>%
          # Rename whale closures
          status=recode(status, "
                        Whale entanglement closure"="Marine life entanglement closure",
-                       "Domoic acid delay"="Domoic acid delay/closure"),
+                       "Domoic acid delay"="Domoic acid delay/closure",
+                       "Body condition delay"="Meat quality delay",
+                       "Body condition/domoic acid delay"="Meat quality/domoic acid delay"),
          # Fix out of season
          status=ifelse(status=="Out-of-season", NA, status),
          status=ifelse(date>ymd("2021-08-14") & lat_dd<46.25000 & lat_dd>42.00000, "Out-of-season", status),
          status=ifelse(date>ymd("2021-07-15") & lat_dd<42.00000 & lat_dd>son_mend_county, "Out-of-season", status),
          status=ifelse(date>ymd("2021-06-30") & lat_dd<son_mend_county, "Out-of-season", status),
          # Factor
-         status=factor(status, levels=c("Season open", "Body condition delay",
-                                        "Body condition/domoic acid delay", "Domoic acid delay/closure",
+         status=factor(status, levels=c("Season open", "Meat quality delay",
+                                        "Meat quality/domoic acid delay", "Domoic acid delay/closure",
                                         "Evisceration order", "Marine life entanglement closure")))
 
 # Build call outs

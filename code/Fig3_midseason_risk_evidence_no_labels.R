@@ -133,7 +133,7 @@ state_labels <- tibble(state=c("California",
 
 # Setup theme
 my_theme <-  theme(axis.text=element_text(size=5),
-                   axis.title=element_blank(),
+                   axis.title=element_text(size=7),
                    legend.text=element_text(size=5.5),
                    legend.title=element_text(size=6.6),
                    strip.text=element_text(size=7),
@@ -190,7 +190,7 @@ g2 <- ggplot(data_pn_lg_use, aes(x=date_bin, y=site, fill=pn_lg_cells_l+1)) +
   geom_text(data=state_labels, mapping=aes(label=state), color="grey30", hjust=0,
             x=ymd("2014-01-01"), y=c(8.5, 15.5, 25.5), inherit.aes = F, size=2) +
   # Labels
-  labs(x="", y="", tag="B", title=expression(italic("Pseudo-nitzschia")*" seriata density")) +
+  labs(x="", y="Sampling site", tag="B", title=expression(italic("Pseudo-nitzschia")*" seriata density")) +
   scale_x_date(date_breaks = "1 year", date_labels="%Y", lim=c(ymd("2014-01-01"), ymd("2021-09-15"))) +
   # Legend
   scale_fill_gradientn(name="Pseudo-nitzschia seriata\ndensity (cells/L)         ",
@@ -201,7 +201,8 @@ g2 <- ggplot(data_pn_lg_use, aes(x=date_bin, y=site, fill=pn_lg_cells_l+1)) +
   guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
   # Theme
   theme_bw() + my_theme +
-  theme(legend.key.size = unit(0.3, "cm"),
+  theme(axis.title.x=element_blank(),
+        legend.key.size = unit(0.3, "cm"),
         legend.key = element_rect(fill=alpha('blue', 0)),
         legend.background = element_rect(fill=alpha('blue', 0)),
         axis.text.y=element_blank())
@@ -217,7 +218,7 @@ g3 <- ggplot(data_pda_use, aes(x=date_bin, y=site, fill=pda_ng_l+1)) +
   geom_text(data=state_labels, mapping=aes(label=state), color="grey30", hjust=0,
             x=ymd("2014-01-01"), y=c(8.5, 15.5, 25.5), inherit.aes = F, size=2) +
   # Labels
-  labs(x="", y="", tag="C", title="Particulate domoic acid concentration") +
+  labs(x="", y="Sampling site", tag="C", title="Particulate domoic acid concentration") +
   scale_x_date(date_breaks = "1 year", date_labels="%Y", lim=c(ymd("2014-01-01"), ymd("2021-09-15"))) +
   # Legend
   scale_fill_gradientn(name="Particulate domoic acid\nconcentration (ng/L)",
@@ -228,7 +229,8 @@ g3 <- ggplot(data_pda_use, aes(x=date_bin, y=site, fill=pda_ng_l+1)) +
   guides(fill = guide_colorbar(ticks.colour = "black", frame.colour = "black")) +
   # Theme
   theme_bw() + my_theme +
-  theme(legend.key.size = unit(0.3, "cm"),
+  theme(axis.title.x=element_blank(),
+        legend.key.size = unit(0.3, "cm"),
         legend.key = element_rect(fill=alpha('blue', 0)),
         legend.background = element_rect(fill=alpha('blue', 0)),
         axis.text.y=element_blank())

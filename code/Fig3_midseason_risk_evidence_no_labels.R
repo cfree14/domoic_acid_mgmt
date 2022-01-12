@@ -193,7 +193,7 @@ g2 <- ggplot(data_pn_lg_use, aes(x=date_bin, y=site, fill=pn_lg_cells_l+1)) +
   labs(x="", y="Sampling site", tag="B", title=expression(italic("Pseudo-nitzschia")*" seriata density")) +
   scale_x_date(date_breaks = "1 year", date_labels="%Y", lim=c(ymd("2014-01-01"), ymd("2021-09-15"))) +
   # Legend
-  scale_fill_gradientn(name="Pseudo-nitzschia seriata\ndensity (cells/L)         ",
+  scale_fill_gradientn(name="Large Pseudo-nitzschia\ndensity (cells/L)         ",
                        colors=RColorBrewer::brewer.pal(9, "YlOrRd"),
                        trans="log10",
                        breaks=10^c(0:6),

@@ -97,6 +97,10 @@ param_key_plot <- param_key %>%
   mutate(position=ifelse(grepl("top", metric), "top", "bottom"),
          limit=ifelse(grepl("hi", metric), "high", "low"),
          lat=ifelse(position=="top", 46, 42)) %>%
+  # Overwrite bottom lats
+  mutate(lat=ifelse(position=="bottom" & size=="small", 44.5,
+                    ifelse(position=="bottom" & size=="medium", 43.5,
+                           ifelse(position=="bottom" & size=="small", 42, lat)))) %>%
   # Format scenario
   rename(scenario=size, day=value) %>%
   mutate(scenario=recode_factor(scenario,
@@ -261,10 +265,10 @@ g1 <- ggplot(toxin_grids, mapping=aes(x=date, y=lat, fill=prop)) +
   # Plot early-season parameter limits and selection
   geom_line(data=param_key_plot, aes(x=date, y=lat, group=position),
             color="grey40", inherit.aes = F) +
-  geom_point(data=last_days_grad, aes(x=date, y=lat), inherit.aes = F, size=0.8) +
+  # geom_point(data=last_days_grad, aes(x=date, y=lat), inherit.aes = F, size=0.8) +
   geom_line(data=lat_span_grad, aes(x=ymd("2020-12-01")-7, y=lat),
             color="grey40", inherit.aes = F) +
-  geom_point(data=lat_span_used, aes(x=ymd("2020-12-01")-7, y=lat), inherit.aes = F, size=0.8) +
+  # geom_point(data=lat_span_used, aes(x=ymd("2020-12-01")-7, y=lat), inherit.aes = F, size=0.8) +
   # Plot mid-season event centroid box
   geom_rect(data=centroid_box, mapping=aes(xmin=center_x_lo_date,
                                            xmax=center_x_hi_date,

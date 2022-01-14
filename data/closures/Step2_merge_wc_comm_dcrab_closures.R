@@ -35,7 +35,10 @@ data_wa_orig <- readRDS(file=file.path(outdir, "PSMFC_2005_2021_comm_dcrab_closu
 data_ca <- data_ca_orig %>%
   # Reduce to CA
   filter(lat_dd <= 42 & date>= "2015-01-01") %>%
-  mutate(status=as.character(status))
+  mutate(status=as.character(status)) %>%
+  # Fix a mistake spotted by Christy
+  mutate(status=ifelse(lat_dd>=(41+8/60) & date>="2018-12-01" & date < "2019-01-25", "Body condition/domoic acid delay", status))
+         # status=ifelse(lat_dd>=(41+8/60) & date>="2019-01-15" & date <= "2019-01-25", "Domoic acid delay", status))
 
 sort(unique(data_ca$status))
 

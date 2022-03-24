@@ -155,8 +155,8 @@ stars_surveys <- matrix(data=c("1", "2015-05-15", 47.65,
 closures <- closures_orig %>%
   mutate(status=as.character(status),
          # Rename whale closures
-         status=recode(status, "
-                       Whale entanglement closure"="Marine life entanglement closure",
+         status=recode(status,
+                       "Whale entanglement closure"="Marine life entanglement closure",
                        "Domoic acid delay"="Domoic acid delay/closure",
                        "Body condition delay"="Meat quality delay",
                        "Body condition/domoic acid delay"="Meat quality/domoic acid delay"),
@@ -447,7 +447,7 @@ g <- gridExtra::grid.arrange(g1, g2, g3, nrow=3, heights=c(0.35, 0.35, 0.3))
 
 
 # Export plot
-ggsave(g, filename=file.path(plotdir, "Fig2_closures_surveys_other_spp.png"),
+ggsave(g, filename=file.path(plotdir, "Fig2_closures_surveys_other_spp_fixed.png"),
        width=6.5, height=7.5, units="in", dpi=600)
 
 

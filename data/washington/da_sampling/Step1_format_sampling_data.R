@@ -206,6 +206,33 @@ data <- data_full %>%
   left_join(site_key_xy %>% select(county, waterbody, site, lat_dd, long_dd), by=c("county", "waterbody", "site")) %>%
   # Update Westport site name to keep site name unique
   mutate(site=ifelse(site_id=="GHPO010", "Westport 2", site)) %>%
+  # Format subsite
+  mutate(subsite=ifelse(subsite%in%c("", "."), NA, subsite),
+         subsite=gsub("No. |Number |# ", "#", subsite),
+         subsite=gsub(",24 ft| 24 feet| 24 ft", " (24 ft)", subsite),
+         subsite=gsub(" 15 Fathoms", " (15 fathoms)", subsite),
+         subsite=gsub("Fathom)", "fathoms)", subsite),
+         subsite=gsub("Fathoms", "fathoms", subsite),
+         subsite=gsub("Fathom", "fathom", subsite),
+         subsite=gsub(" 15 fathoms", " (15 fathoms)", subsite),
+         subsite=gsub(" 5 fathoms", " (5 fathoms)", subsite),
+         subsite=gsub(" 7 fathoms", " (7 fathoms)", subsite),
+         subsite=gsub(" 8 fathoms", " (8 fathoms)", subsite),
+         subsite=gsub(" 12 fathoms", " (12 fathoms)", subsite),
+         subsite=gsub(" 30 fathoms", " (30 fathoms)", subsite),
+         subsite=gsub(" 32 fathoms", " (32 fathoms)", subsite),
+         subsite=gsub(" 45 fathoms", " (45 fathoms)", subsite),
+         subsite=recode(subsite,
+                        "Sooes"="Sooes Beach",
+                        "LaPush"="La Push",
+                        "Cove"="The Cove",
+                        "cove"="The Cove",
+                        "Ocean Shores/Copalis Area"="Ocean Shores/Copalis",
+                        "Pacific Beach 5 fm"="Pacific Beach (5 fathoms)",
+                        "Copalis 20 Ft"="Copalis (20 ft)",
+                        "Copalis 20 ft"="Copalis (20 ft)",
+                        "Hogs back"="Hogsback",
+                        "Hogs Back"="Hogsback")) %>%
   # Add sample id
   # Use PSP id as overall id because it is complete and unique
   mutate(sample_id=psp_id) %>%
@@ -304,9 +331,16 @@ site_key <- data %>%
 freeR::which_duplicated(site_key$site_id)
 freeR::which_duplicated(site_key$site) # Fixed original Westport duplication
 
+# Subsite key
+subsite_key <- data %>%
+  count(county, waterbody, site, subsite) %>%
+  unique()
+
+
 
 # Export data
 ################################################################################
 
 # Export data
 saveRDS(data, file=file.path(outdir, "WA_DOH_2000_2020_biotoxin_sampling_data.Rds"))
+

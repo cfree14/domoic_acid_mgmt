@@ -134,6 +134,6 @@ g
 
 # Export plot
 ggsave(g, filename=file.path(plotdir, "FigX_dcrab_closures_simple.png"),
-       width=6.5, height=4, units="in", dpi=600)
+       width=6.5, height=3.25, units="in", dpi=600)
 
 
